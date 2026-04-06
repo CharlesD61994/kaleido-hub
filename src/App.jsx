@@ -895,21 +895,26 @@ function PdfViewerView({ project, onNavigateHub }) {
     }).catch(() => { setLoadError(true); setLoading(false); });
   }, [project?.pdfId]);
 
+  // Hauteur de la barre fixe — header + compteur + zoom
+  const BAR_HEIGHT = 160;
+
   return (
-    <div style={{ background: "#0D0D1A", height: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
-        ::-webkit-scrollbar{width:0}
+        ::-webkit-scrollbar { width: 0; }
         * { -webkit-tap-highlight-color: transparent; }
-        /* Bloquer zoom sur toute la page sauf zone PDF */
-        html, body { touch-action: pan-x pan-y; }
-        .pdf-zone { touch-action: pinch-zoom pan-x pan-y; }
-        .fixed-zone { touch-action: pan-x pan-y; }
       `}</style>
 
-      {/* ── ZONE FIXE : Header + Compteur ── */}
-      <div className="fixed-zone" style={{ flexShrink: 0, background: "#0D0D1A", zIndex: 10 }}>
-
+      {/* ── BARRE FIXE — ne zoom jamais, toujours en haut ── */}
+      <div style={{
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        zIndex: 100,
+        background: "#0D0D1A",
+        maxWidth: 430,
+        margin: "0 auto",
+      }}>
         {/* Header */}
         <div style={{ padding: "44px 20px 12px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", display: "flex", alignItems: "center", gap: 12 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#22D3EE", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
@@ -921,38 +926,43 @@ function PdfViewerView({ project, onNavigateHub }) {
           </div>
         </div>
 
-        {/* Barre compteur de rangs */}
-        <div style={{ margin: "0 16px 12px", background: "#1A1A2E", borderRadius: 16, border: `1px solid ${color.light}33`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 0 }}>
-          {/* Label */}
+        {/* Compteur de rangs */}
+        <div style={{ margin: "0 16px 10px", background: "#1A1A2E", borderRadius: 16, border: `1px solid ${color.light}33`, padding: "10px 16px", display: "flex", alignItems: "center" }}>
           <div style={{ flex: 1 }}>
             <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1 }}>Rang actuel</div>
           </div>
-          {/* Contrôles */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button
-              onClick={() => setRangCount(r => Math.max(0, r - 1))}
-              style={{ width: 38, height: 38, borderRadius: "50%", background: `${color.bg}33`, border: `1.5px solid ${color.light}55`, color: color.light, fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>−</button>
+            <button onClick={() => setRangCount(r => Math.max(0, r - 1))}
+              style={{ width: 38, height: 38, borderRadius: "50%", background: `${color.bg}33`, border: `1.5px solid ${color.light}55`, color: color.light, fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
             <span style={{ color: "#F1F0EE", fontSize: 28, fontWeight: 700, fontFamily: "'Syne', sans-serif", minWidth: 48, textAlign: "center", lineHeight: 1 }}>{rangCount}</span>
-            <button
-              onClick={() => setRangCount(r => r + 1)}
-              style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, border: "none", color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: `0 3px 12px ${color.bg}66` }}>+</button>
+            <button onClick={() => setRangCount(r => r + 1)}
+              style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, border: "none", color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 3px 12px ${color.bg}66` }}>+</button>
           </div>
-        </div>
-
-        {/* Zoom PDF */}
-        <div style={{ margin: "0 16px 10px", display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => setZoom(z => Math.max(50, z - 25))} style={{ width: 34, height: 34, borderRadius: 8, background: "#1E1E32", border: "1px solid #333", color: "#F1F0EE", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-          <div style={{ flex: 1, background: "#1E1E32", borderRadius: 8, height: 6, overflow: "hidden" }}>
-            <div style={{ width: `${((zoom - 50) / 150) * 100}%`, height: "100%", background: "linear-gradient(90deg, #0891B2, #22D3EE)", transition: "width 0.15s" }} />
-          </div>
-          <span style={{ color: "#22D3EE", fontSize: 12, fontFamily: "monospace", minWidth: 38, textAlign: "center" }}>{zoom}%</span>
-          <button onClick={() => setZoom(z => Math.min(250, z + 25))} style={{ width: 34, height: 34, borderRadius: 8, background: "#1E1E32", border: "1px solid #333", color: "#F1F0EE", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
-          <button onClick={() => setZoom(100)} style={{ padding: "0 8px", height: 34, borderRadius: 8, background: "#1E1E32", border: "1px solid #333", color: "#6B6A7A", fontSize: 11, cursor: "pointer" }}>↺</button>
         </div>
       </div>
 
-      {/* ── ZONE PDF INDÉPENDANTE — pinch-zoom maison ── */}
-      <PdfZoomZone loading={loading} loadError={loadError} pages={pages} zoom={zoom} />
+      {/* ── ZONE PDF — commence sous la barre fixe, zoom natif libre ── */}
+      <div style={{ paddingTop: BAR_HEIGHT, background: "#111", minHeight: "100vh" }}>
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
+            <div style={{ fontSize: 40 }}>⏳</div>
+            <div style={{ fontSize: 15, color: "#A78BFA" }}>Rendu du PDF en cours...</div>
+            <div style={{ fontSize: 12, color: "#6B6A7A" }}>Cela peut prendre quelques secondes</div>
+          </div>
+        ) : loadError ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12 }}>
+            <div style={{ fontSize: 48 }}>⚠️</div>
+            <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
+            <div style={{ fontSize: 12, color: "#6B6A7A", textAlign: "center", padding: "0 40px" }}>Le fichier n'a pas pu être chargé</div>
+          </div>
+        ) : (
+          pages.map((src, i) => (
+            <div key={i} style={{ borderBottom: "2px solid #222" }}>
+              <img src={src} alt={`Page ${i + 1}`} style={{ width: "100%", display: "block" }} />
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
