@@ -832,140 +832,164 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
 // ═══════════════════════════════════════════════════════════════
 
 function PdfViewerView({ project, onNavigateHub }) {
-  const [pages, setPages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [pdfData, setPdfData] = useState(null);
   const [loadError, setLoadError] = useState(false);
-  const [rangCount, setRangCount] = useState(project?.rang || 0);
-  const [zoom, setZoom] = useState(100);
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
+  const BAR_HEIGHT = 130;
 
-  // Bloquer le zoom natif du navigateur sur cette vue, restaurer en quittant
+  // Écouter les messages des iframes (retour hub, etc.)
   useEffect(() => {
-    const existing = document.querySelector('meta[name="viewport"]');
-    const original = existing ? existing.getAttribute('content') : null;
-    const setVP = (content) => {
-      let tag = document.querySelector('meta[name="viewport"]');
-      if (!tag) { tag = document.createElement('meta'); tag.name = 'viewport'; document.head.appendChild(tag); }
-      tag.setAttribute('content', content);
+    const handler = (e) => {
+      if (e.data?.type === 'NAVIGATE_HUB') onNavigateHub();
     };
-    setVP('width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-    return () => {
-      setVP(original || 'width=device-width, initial-scale=1.0');
-    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
   }, []);
 
   useEffect(() => {
-    if (!project?.pdfId) { setLoadError(true); setLoading(false); return; }
-    loadPdf(project.pdfId).then(async (data) => {
-      if (!data) { setLoadError(true); setLoading(false); return; }
-      try {
-        if (!window.pdfjsLib) {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-            s.onload = resolve; s.onerror = reject;
-            document.head.appendChild(s);
-          });
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        }
-        const base64 = data.includes(',') ? data.split(',')[1] : data;
-        const binary = atob(base64);
-        const arr = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
-        const pdf = await window.pdfjsLib.getDocument({ data: arr }).promise;
-        const rendered = [];
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const dpr = window.devicePixelRatio || 2;
-          const viewport = page.getViewport({ scale: dpr * 2.5 });
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          canvas.style.width = (viewport.width / dpr) + 'px';
-          canvas.style.height = (viewport.height / dpr) + 'px';
-          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-          rendered.push(canvas.toDataURL());
-        }
-        setPages(rendered);
-        setLoading(false);
-      } catch(e) {
-        setLoadError(true); setLoading(false);
-      }
-    }).catch(() => { setLoadError(true); setLoading(false); });
+    if (!project?.pdfId) { setLoadError(true); return; }
+    loadPdf(project.pdfId)
+      .then(data => { if (data) setPdfData(data); else setLoadError(true); })
+      .catch(() => setLoadError(true));
   }, [project?.pdfId]);
 
-  // Hauteur de la barre fixe — header + compteur + zoom
-  const BAR_HEIGHT = 160;
+  // Quand le PDF est chargé, on l'envoie à l'iframe PDF via postMessage
+  const pdfIframeRef = useRef(null);
+  useEffect(() => {
+    if (!pdfData || !pdfIframeRef.current) return;
+    const send = () => pdfIframeRef.current?.contentWindow?.postMessage({ type: 'PDF_DATA', pdfData }, '*');
+    pdfIframeRef.current.addEventListener('load', send);
+    return () => pdfIframeRef.current?.removeEventListener('load', send);
+  }, [pdfData]);
 
   return (
-    <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
-        ::-webkit-scrollbar { width: 0; }
-        * { -webkit-tap-highlight-color: transparent; }
-      `}</style>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#0D0D1A", fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); * { -webkit-tap-highlight-color: transparent; }`}</style>
 
-      {/* ── BARRE FIXE — ne zoom jamais, toujours en haut ── */}
-      <div style={{
-        position: "fixed",
-        top: 0, left: 0, right: 0,
-        zIndex: 100,
-        background: "#0D0D1A",
-        maxWidth: 430,
-        margin: "0 auto",
-      }}>
-        {/* Header */}
-        <div style={{ padding: "44px 20px 12px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", display: "flex", alignItems: "center", gap: 12 }}>
-          <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#22D3EE", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 17, fontWeight: 700, fontFamily: "'Syne', sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project?.name}</h1>
-            <div style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>
-              {!loading && pages.length > 0 ? `${pages.length} page${pages.length > 1 ? 's' : ''}` : "Patron PDF"}
-            </div>
-          </div>
+      {/* ── IFRAME BARRE — viewport bloqué, ne zoome jamais ── */}
+      <iframe
+        srcDoc={`<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'DM Sans',sans-serif; }
+    body { background:#0D0D1A; padding: 44px 16px 12px; }
+    .header { display:flex; align-items:center; gap:12px; margin-bottom:10px; background:linear-gradient(180deg,#1A0A2E 0%,#0D0D1A 100%); padding:0 4px 12px; }
+    .back { width:36px;height:36px;border-radius:10px;background:#1E1E32;border:none;color:#22D3EE;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .title { color:#F1F0EE;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1; }
+    .counter { display:flex;align-items:center;background:#1A1A2E;border-radius:16px;border:1px solid ${color.light}33;padding:10px 16px;gap:0; }
+    .counter-label { flex:1;color:${color.light};font-size:11px;text-transform:uppercase;letter-spacing:1px;font-family:monospace; }
+    .counter-controls { display:flex;align-items:center;gap:16px; }
+    .btn-minus { width:38px;height:38px;border-radius:50%;background:${color.bg}33;border:1.5px solid ${color.light}55;color:${color.light};font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+    .btn-plus { width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,${color.bg},${color.light});border:none;color:#fff;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px ${color.bg}66; }
+    .count { color:#F1F0EE;font-size:28px;font-weight:700;min-width:48px;text-align:center;line-height:1; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="back" onclick="window.parent.postMessage({type:'NAVIGATE_HUB'},'*')">←</button>
+    <div class="title">${project?.name || ''}</div>
+  </div>
+  <div class="counter">
+    <div class="counter-label">Rang actuel</div>
+    <div class="counter-controls">
+      <button class="btn-minus" onclick="update(-1)">−</button>
+      <span class="count" id="count">0</span>
+      <button class="btn-plus" onclick="update(1)">+</button>
+    </div>
+  </div>
+  <script>
+    let rang = 0;
+    function update(delta) {
+      rang = Math.max(0, rang + delta);
+      document.getElementById('count').textContent = rang;
+    }
+    window.addEventListener('message', e => {
+      if (e.data?.type === 'SET_RANG') { rang = e.data.rang; document.getElementById('count').textContent = rang; }
+    });
+  </script>
+</body>
+</html>`}
+        style={{ width: "100%", height: BAR_HEIGHT, border: "none", flexShrink: 0 }}
+        scrolling="no"
+      />
+
+      {/* ── IFRAME PDF — zoom natif libre ── */}
+      {loadError ? (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, background: "#111" }}>
+          <div style={{ fontSize: 48 }}>⚠️</div>
+          <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
         </div>
-
-        {/* Compteur de rangs */}
-        <div style={{ margin: "0 16px 10px", background: "#1A1A2E", borderRadius: 16, border: `1px solid ${color.light}33`, padding: "10px 16px", display: "flex", alignItems: "center" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1 }}>Rang actuel</div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <button onClick={() => setRangCount(r => Math.max(0, r - 1))}
-              style={{ width: 38, height: 38, borderRadius: "50%", background: `${color.bg}33`, border: `1.5px solid ${color.light}55`, color: color.light, fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-            <span style={{ color: "#F1F0EE", fontSize: 28, fontWeight: 700, fontFamily: "'Syne', sans-serif", minWidth: 48, textAlign: "center", lineHeight: 1 }}>{rangCount}</span>
-            <button onClick={() => setRangCount(r => r + 1)}
-              style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, border: "none", color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 3px 12px ${color.bg}66` }}>+</button>
-          </div>
+      ) : !pdfData ? (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, background: "#111" }}>
+          <div style={{ fontSize: 40 }}>⏳</div>
+          <div style={{ fontSize: 15, color: "#A78BFA" }}>Chargement du PDF...</div>
         </div>
-      </div>
-
-      {/* ── ZONE PDF — commence sous la barre fixe, zoom natif libre ── */}
-      <div style={{ paddingTop: BAR_HEIGHT, background: "#111", minHeight: "100vh" }}>
-        {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
-            <div style={{ fontSize: 40 }}>⏳</div>
-            <div style={{ fontSize: 15, color: "#A78BFA" }}>Rendu du PDF en cours...</div>
-            <div style={{ fontSize: 12, color: "#6B6A7A" }}>Cela peut prendre quelques secondes</div>
-          </div>
-        ) : loadError ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12 }}>
-            <div style={{ fontSize: 48 }}>⚠️</div>
-            <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
-            <div style={{ fontSize: 12, color: "#6B6A7A", textAlign: "center", padding: "0 40px" }}>Le fichier n'a pas pu être chargé</div>
-          </div>
-        ) : (
-          pages.map((src, i) => (
-            <div key={i} style={{ borderBottom: "2px solid #222" }}>
-              <img src={src} alt={`Page ${i + 1}`} style={{ width: "100%", display: "block" }} />
-            </div>
-          ))
-        )}
-      </div>
+      ) : (
+        <iframe
+          ref={pdfIframeRef}
+          srcDoc={`<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#111; }
+    img { width:100%; display:block; border-bottom:2px solid #222; }
+    .loading { display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#6B6A7A;gap:16px; }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div style="font-size:40px">⏳</div>
+    <div style="font-size:15px;color:#A78BFA">Rendu du PDF...</div>
+  </div>
+  <div id="pages"></div>
+  <script>
+    window.addEventListener('message', async (e) => {
+      if (e.data?.type !== 'PDF_DATA') return;
+      const data = e.data.pdfData;
+      if (!window.pdfjsLib) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      const base64 = data.includes(',') ? data.split(',')[1] : data;
+      const binary = atob(base64);
+      const arr = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
+      const pdf = await pdfjsLib.getDocument({ data: arr }).promise;
+      const container = document.getElementById('pages');
+      document.getElementById('loading').style.display = 'none';
+      const dpr = window.devicePixelRatio || 2;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const vp = page.getViewport({ scale: dpr * 2.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+        canvas.style.width = '100%';
+        canvas.style.display = 'block';
+        canvas.style.borderBottom = '2px solid #222';
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+        container.appendChild(canvas);
+      }
+    });
+  </script>
+</body>
+</html>`}
+          style={{ flex: 1, width: "100%", border: "none", background: "#111" }}
+        />
+      )}
     </div>
   );
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
