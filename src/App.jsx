@@ -1713,12 +1713,10 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
 // ═══════════════════════════════════════════════════════════════
 
 function EditPdfPatronModal({ patron, onClose, onSave }) {
-  console.log('OPEN modal, patron.pdfParties:', JSON.stringify(patron.pdfParties));
   const [name, setName] = useState(patron.name || "");
   const [configRangs, setConfigRangs] = useState((patron.pdfParties||[]).length > 0 || (patron.total||0) > 0);
   const [totalRangs, setTotalRangs] = useState(String(patron.total || ""));
   const [parties, setParties] = useState((patron.pdfParties || []).map(p => ({ id: p.id, nom: p.nom, rangs: String(p.totalRangs) })));
-  console.log('INIT parties state:', JSON.stringify(parties));
 
   const addPartie = () => setParties(prev => [...prev, { id: Date.now(), nom: "", rangs: "" }]);
   const updatePartie = (id, field, val) => setParties(prev => prev.map(p => p.id === id ? { ...p, [field]: val } : p));
@@ -1731,7 +1729,6 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
       .filter(p => p.nom.trim())
       .map((p, i) => ({ id: i+1, nom: p.nom.trim(), totalRangs: parseInt(p.rangs)||0, colorIdx: i % KALEIDOSCOPE_COLORS.length }));
     const updates = { name: name.trim(), total, pdfParties };
-    console.log('SAVING pdfParties:', JSON.stringify(pdfParties));
     onSave(updates);
   };
 
@@ -1850,7 +1847,6 @@ export default function KaleidoHub() {
     setDatabase(newDb); saveToDatabase(newDb);
   };
   const updatePatron = (patronId, updates) => {
-    console.log('updatePatron called, pdfParties:', JSON.stringify(updates.pdfParties));
     const newDb = {
       ...database,
       patrons: (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p),
@@ -2264,10 +2260,10 @@ export default function KaleidoHub() {
     const deletePartie = (id) => { if (confirm("Supprimer cette partie?")) setPatron(prev => ({ ...prev, parties: prev.parties.filter(p => p.id !== id) })); };
     const duplicatePartie = (id) => { const p = patron.parties.find(x => x.id === id); if (p) setPatron(prev => ({ ...prev, parties: [...prev.parties, { ...p, id: Date.now(), nom: `${p.nom} (copie)`, rangs: p.rangs.map((r, i) => ({ ...r, id: i + 1 })) }] })); };
     const movePartie = (id, dir) => setPatron(prev => { const arr = [...prev.parties], i = arr.findIndex(p => p.id === id), ni = dir === 'up' ? i - 1 : i + 1; if (i === -1 || ni < 0 || ni >= arr.length) return prev; [arr[i], arr[ni]] = [arr[ni], arr[i]]; return { ...prev, parties: arr }; });
-    const addRang = (partieId) => { const p = patron.parties.find(x => x.id === partieId); if (p) updatePartie(partieId, { rangs: [...p.rangs, { id: p.rangs.length + 1, instruction: "Nouvelle instruction", mailles: null }] }); };
+    const addRang = (partieId) => { const p = patron.parties.find(x => x.id === partieId); if (p) updatePartie(partieId, { rangs: [...p.rangs, { id: Date.now() + Math.random(), instruction: "Nouvelle instruction", mailles: null }] }); };
     const updateRang = (rangId, updates) => setPatron(prev => ({ ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.map(r => r.id === rangId ? { ...r, ...updates } : r) })) }));
     const deleteRang = (rangId) => { if (confirm("Supprimer ce rang?")) setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.filter(r => r.id !== rangId) })) }; return { ...np, parties: renumber(np.parties) }; }); };
-    const duplicateRang = (rangId) => setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.reduce((acc, r) => { acc.push(r); if (r.id === rangId) acc.push({ ...r, id: r.id + 0.5, instruction: `${r.instruction} (copie)` }); return acc; }, []) })) }; return { ...np, parties: renumber(np.parties) }; });
+    const duplicateRang = (rangId) => setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.reduce((acc, r) => { acc.push(r); if (r.id === rangId) acc.push({ ...r, id: Date.now() + Math.random(), instruction: `${r.instruction} (copie)` }); return acc; }, []) })) }; return { ...np, parties: renumber(np.parties) }; });
     const moveRang = (rangId, dir) => setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => { const arr = [...p.rangs], i = arr.findIndex(r => r.id === rangId), ni = dir === 'up' ? i - 1 : i + 1; if (i === -1 || ni < 0 || ni >= arr.length) return p; [arr[i], arr[ni]] = [arr[ni], arr[i]]; return { ...p, rangs: arr }; }) }; return { ...np, parties: renumber(np.parties) }; });
 
     return (
