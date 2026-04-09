@@ -142,8 +142,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ fontSize: "clamp(24px, 8vw, 34px)" }}>
-</span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ fontSize: "clamp(24px, 8vw, 34px)" }}>🧶</span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -175,8 +174,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "", label: "Renommer", action: onRename },
-          { icon: "", label: "Changer la photo", action: onChangePhoto },
+          { icon: "✏️", label: "Renommer", action: onRename },
+          { icon: "📷", label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -920,7 +919,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1115,8 +1114,7 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
           </div>
         ) : loadError ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12 }}>
-            <div style={{ fontSize: 48 }}>
-</div>
+            <div style={{ fontSize: 48 }}>⚠️</div>
             <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
             <div style={{ fontSize: 12, color: "#6B6A7A", textAlign: "center", padding: "0 40px" }}>Le fichier n'a pas pu être chargé</div>
           </div>
@@ -1456,8 +1454,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${color.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>
-</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
               <div style={{ color: color.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -1496,8 +1493,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${color.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>
-</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
               <div style={{ color: color.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1589,8 +1585,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px" }}>
-          <span style={{ color: "#6B6A7A" }}>
-</span>
+          <span style={{ color: "#6B6A7A" }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un patron..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 16 }} />
         </div>
@@ -1884,10 +1879,8 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer" }}>
-</button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22 }}>
-</button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer" }}>📚</button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22 }}>⚙️</button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
@@ -1901,9 +1894,9 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: "" },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "" },
-            { label: "Terminés", value: termines, icon: "" },
+            { label: "Projets", value: projects.length, icon: "📋" },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "📊" },
+            { label: "Terminés", value: termines, icon: "✅" },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 14 }}>{stat.icon}</div>
@@ -1914,8 +1907,7 @@ export default function KaleidoHub() {
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px", marginBottom: 8 }}>
-          <span style={{ color: "#6B6A7A" }}>
-</span>
+          <span style={{ color: "#6B6A7A" }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un projet..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif" }} />
         </div>
@@ -2019,8 +2011,7 @@ export default function KaleidoHub() {
         <div onClick={() => setShowSettingsModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430 }}>
             <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
-            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>
- Paramètres</h2>
+            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>⚙️ Paramètres</h2>
             {/* Export — télécharge un fichier .json */}
             <button onClick={async () => {
               try {
