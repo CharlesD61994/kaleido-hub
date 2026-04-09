@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer' };
-
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
   { bg: "#DB2777", light: "#F472B6" },
@@ -12,7 +10,6 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#C4B5FD" },
   { bg: "#BE185D", light: "#F9A8D4" },
 ];
-
 const DB_KEY = 'kaleido_database';
 const initDatabase = () => {
   try {
@@ -33,11 +30,9 @@ const initDatabase = () => {
 const saveToDatabase = (data) => {
   try { localStorage.setItem(DB_KEY, JSON.stringify(data)); } catch(e) {}
 };
-
 // ═══════════════════════════════════════════════════════════════
 // STOCKAGE PDFs — IndexedDB
 // ═══════════════════════════════════════════════════════════════
-
 const _pdfDb = (() => {
   let db = null;
   return () => new Promise((resolve, reject) => {
@@ -48,7 +43,6 @@ const _pdfDb = (() => {
     req.onerror = () => reject(req.error);
   });
 })();
-
 const savePdf = async (id, data) => {
   try {
     const db = await _pdfDb();
@@ -64,7 +58,6 @@ const savePdf = async (id, data) => {
     return false;
   }
 };
-
 const loadPdf = async (id) => {
   try {
     const db = await _pdfDb();
@@ -79,7 +72,6 @@ const loadPdf = async (id) => {
     return null;
   }
 };
-
 const deletePdf = async (id) => {
   try {
     const db = await _pdfDb();
@@ -90,11 +82,9 @@ const deletePdf = async (id) => {
     });
   } catch(e) {}
 };
-
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANTS HUB
 // ═══════════════════════════════════════════════════════════════
-
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
   const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
   const size = "min(30vw, 115px)";
@@ -103,7 +93,8 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ fontSize: "clamp(24px, 8vw, 34px)" }}>🧶</span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ fontSize: "clamp(24px, 8vw, 34px)" }}>
+</span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -123,7 +114,6 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
     </div>
   );
 }
-
 function ContextMenu({ project, position, onClose, onRename, onDelete, onChangePhoto, onChangeColor }) {
   if (!project) return null;
   const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
@@ -136,8 +126,10 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "✏️", label: "Renommer", action: onRename },
-          { icon: "📷", label: "Changer la photo", action: onChangePhoto },
+          { icon: "
+", label: "Renommer", action: onRename },
+          { icon: "
+", label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -157,13 +149,13 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           </div>
         )}
         <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
-          <span>🗑️</span><span>Supprimer</span>
+          <span>
+</span><span>Supprimer</span>
         </button>
       </div>
     </>
   );
 }
-
 function RenameModal({ project, onConfirm, onClose }) {
   const [val, setVal] = useState(project?.name || "");
   if (!project) return null;
@@ -182,7 +174,6 @@ function RenameModal({ project, onConfirm, onClose }) {
     </div>
   );
 }
-
 function DeleteModal({ project, onConfirm, onClose }) {
   if (!project) return null;
   return (
@@ -198,11 +189,9 @@ function DeleteModal({ project, onConfirm, onClose }) {
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // PHOTO CROP MODAL
 // ═══════════════════════════════════════════════════════════════
-
 function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const [imgSrc, setImgSrc] = useState(existingImage || null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -213,7 +202,6 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const lastScale = useRef(1);
   const lastPos = useRef({ x: 0, y: 0 });
   const CROP_SIZE = 260;
-
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -225,9 +213,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     };
     reader.readAsDataURL(file);
   };
-
   const getDist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-
   const onTouchStart = (e) => {
     if (e.touches.length === 1) {
       lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -238,7 +224,6 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
       lastScale.current = scale;
     }
   };
-
   const onTouchMove = (e) => {
     e.preventDefault();
     if (e.touches.length === 1 && isDragging && lastTouch.current) {
@@ -251,9 +236,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
       setScale(newScale);
     }
   };
-
   const onTouchEnd = () => { setIsDragging(false); lastTouch.current = null; };
-
   const handleConfirm = () => {
     if (!imgSrc) return;
     const img = new Image();
@@ -279,12 +262,12 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     };
     img.src = imgSrc;
   };
-
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       {!imgSrc ? (
         <div style={{ textAlign: "center", padding: 32 }}>
-          <div style={{ fontSize: 60, marginBottom: 20 }}>📷</div>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>
+</div>
           <h3 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>Ajouter une photo</h3>
           <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 28px" }}>Choisis une photo depuis ta galerie</p>
           <label style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", borderRadius: 16, padding: "14px 32px", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "inline-block" }}>
@@ -297,15 +280,12 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", height: "100vh", overflow: "hidden" }}>
-
           {/* Overlay sombre autour du cercle — ne couvre PAS les boutons */}
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 0 }} />
-
           {/* Texte */}
           <div style={{ position: "relative", zIndex: 2, marginTop: 60, marginBottom: 20 }}>
             <p style={{ color: "#fff", fontSize: 14, margin: 0, textAlign: "center" }}>Déplace et zoome pour recadrer</p>
           </div>
-
           {/* Zone de recadrage */}
           <div style={{ position: "relative", zIndex: 2, width: CROP_SIZE, height: CROP_SIZE, borderRadius: "50%", overflow: "hidden", border: "3px solid #A78BFA", cursor: "grab", touchAction: "none", flexShrink: 0 }}
             onTouchStart={onTouchStart}
@@ -323,13 +303,11 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
               draggable={false}
             />
           </div>
-
           {/* Boutons — toujours visibles, z-index élevé */}
           <div style={{ position: "relative", zIndex: 2, display: "flex", gap: 14, marginTop: 36 }}>
             <button onClick={onClose} style={{ padding: "14px 30px", borderRadius: 14, border: "2px solid #555", background: "#2A2A3E", color: "#F1F0EE", fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>Annuler</button>
             <button onClick={handleConfirm} style={{ padding: "14px 30px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Confirmer ✓</button>
           </div>
-
           <div style={{ position: "relative", zIndex: 2, marginTop: 16 }}>
             <label style={{ color: "#ccc", fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>
               Changer de photo
@@ -341,11 +319,9 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANTS PATRON EDITOR
 // ═══════════════════════════════════════════════════════════════
-
 function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, onMoveDown, isFirst, isLast }) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempInstruction, setTempInstruction] = useState(rang.instruction);
@@ -353,14 +329,11 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
   const [isSwipedOpen, setIsSwipedOpen] = useState(false);
   const [swipeStartX, setSwipeStartX] = useState(0);
   const [swipeCurrentX, setSwipeCurrentX] = useState(0);
-
   const isNote = rang.isNote === true;
-
   const handleSave = (e) => { e.preventDefault(); e.stopPropagation(); onUpdate(rang.id, { instruction: tempInstruction, mailles: tempMailles ? parseInt(tempMailles) : null }); setIsEditing(false); };
   const handleCancel = (e) => { e.preventDefault(); e.stopPropagation(); setTempInstruction(rang.instruction); setTempMailles(rang.mailles || ""); setIsEditing(false); };
   const handleEditClick = (e) => { if (isEditing || isSwipedOpen) return; e.preventDefault(); e.stopPropagation(); setIsEditing(true); };
   const handleActionClick = (e, action) => { e.preventDefault(); e.stopPropagation(); setIsSwipedOpen(false); action(); };
-
   // Carte note/texte
   if (isNote) {
     return (
@@ -371,7 +344,8 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
           <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
-            <span style={{ fontSize: 16 }}>📝</span>
+            <span style={{ fontSize: 16 }}>
+</span>
           </div>
           <div style={{ flex: 1 }}>
             {isEditing ? (
@@ -402,7 +376,6 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
       </div>
     );
   }
-
   // Carte rang normal
   return (
     <div onTouchStart={e => { if (!isEditing) { setSwipeStartX(e.touches[0].clientX); setSwipeCurrentX(e.touches[0].clientX); } }}
@@ -440,14 +413,14 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         </div>
       </div>
       <div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 72 }}>
-        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>📝</button>
+        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>
+</button>
         <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
         <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
       </div>
     </div>
   );
 }
-
 function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMoveDown, isFirst, isLast, onAddRang, onUpdateRang, onDeleteRang, onDuplicateRang, onMoveRangUp, onMoveRangDown }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isEditingNom, setIsEditingNom] = useState(false);
@@ -456,7 +429,6 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
   const color = KALEIDOSCOPE_COLORS[partie.colorIdx % KALEIDOSCOPE_COLORS.length];
   const handleSaveNom = () => { onUpdate(partie.id, { nom: tempNom }); setIsEditingNom(false); };
   const act = (e, fn) => { e.preventDefault(); e.stopPropagation(); fn(); };
-
   return (
     <div style={{ background: "#1A1A2E", border: `1px solid ${color.light}22`, borderRadius: 16, padding: 16, marginBottom: 16 }}>
       {/* Header partie */}
@@ -477,7 +449,6 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
             </>
           )}
         </div>
-
         {/* Nom centré + rangs centré — deux colonnes */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
@@ -491,7 +462,6 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
             <span style={{ color: color.light, fontSize: 10, fontFamily: "monospace" }}>rangs</span>
           </div>
         </div>
-
         <button onClick={() => setIsCollapsed(!isCollapsed)} style={{ background: "none", border: "none", color: color.light, fontSize: 14, cursor: "pointer", padding: 4, flexShrink: 0 }}>{isCollapsed ? "▼" : "▲"}</button>
         <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
           {[
@@ -517,8 +487,11 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
                 const displayIndex = isNote ? -1 : rangCounter++;
                 return (
                   <RangItem key={rang.id} rang={rang} rangIndex={displayIndex}
-                    onUpdate={onUpdateRang} onDelete={onDeleteRang} onDuplicate={onDuplicateRang}
-                    onMoveUp={onMoveRangUp} onMoveDown={onMoveRangDown}
+                    onUpdate={(rangId, updates) => onUpdateRang(partie.id, rangId, updates)}
+                    onDelete={(rangId) => onDeleteRang(partie.id, rangId)}
+                    onDuplicate={(rangId) => onDuplicateRang(partie.id, rangId)}
+                    onMoveUp={(rangId) => onMoveRangUp(partie.id, rangId)}
+                    onMoveDown={(rangId) => onMoveRangDown(partie.id, rangId)}
                     isFirst={index === 0} isLast={index === partie.rangs.length - 1} />
                 );
               });
@@ -532,11 +505,9 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // COMPTEUR WIDGET (indépendant, swipe corrigé)
 // ═══════════════════════════════════════════════════════════════
-
 function CounterWidget({ counter, onUpdate, onDelete, onAddNew, globalRangCount }) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(counter.name);
@@ -546,15 +517,12 @@ function CounterWidget({ counter, onUpdate, onDelete, onAddNew, globalRangCount 
   const [tempMax, setTempMax] = useState("");
   const col = KALEIDOSCOPE_COLORS[counter.colorIdx % KALEIDOSCOPE_COLORS.length];
   const displayValue = counter.syncWithGlobal ? ((globalRangCount - 1) % (counter.maxRepeats || 4)) + 1 : counter.value;
-
   // Swipe handlers — séparés pour éviter les conflits
   const onTS = (e) => { if (!isEditing && !isEditingMax) setSwipeStartX(e.touches[0].clientX); };
   const onTM = (e) => { if (!isEditing && !isEditingMax && swipeStartX - e.touches[0].clientX > 30) setIsSwipedOpen(true); };
   const onTE = (e) => { const t = e.changedTouches?.[0]; if (t && !isEditing && !isEditingMax && swipeStartX - t.clientX < -30) setIsSwipedOpen(false); };
-
   // Action bouton: stopPropagation pour ne pas fermer le menu
   const doAction = (e, fn) => { e.stopPropagation(); fn(); };
-
   return (
     <div onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}
       onClick={e => { if (isSwipedOpen && !isEditing && !isEditingMax) { e.stopPropagation(); setIsSwipedOpen(false); } }}
@@ -601,11 +569,9 @@ function CounterWidget({ counter, onUpdate, onDelete, onAddNew, globalRangCount 
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // COMPTEUR DE RANGS (composant indépendant — corrige le bug reset)
 // ═══════════════════════════════════════════════════════════════
-
 function ProgressionSwipeCard({ currentPartieColor, currentIndex, totalRangs, circ_r, circ_c, currentPartie, currentPartieRangIndex, currentPartieTotal, onAddCounter, currentCountIndex }) {
   const [swiped, setSwiped] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -658,7 +624,6 @@ function ProgressionSwipeCard({ currentPartieColor, currentIndex, totalRangs, ci
     </div>
   );
 }
-
 function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSaveProgress }) {
   const patron = {
     nom: project?.name || "Projet",
@@ -666,32 +631,27 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     outil: project?.outil || "",
     parties: project?.parties || [],
   };
-
   const hasParties = patron.parties.length > 0 && patron.parties.some(p => p.rangs.length > 0);
   const allRangs = patron.parties.flatMap((p, pi) => p.rangs.map((r, ri) => ({ ...r, partieId: p.id, globalId: `${pi}-${ri}` })));
   const allRangsForCount = allRangs.filter(r => !r.isNote);
   const totalRangsForCount = allRangsForCount.length;
-
   const savedIndex = Math.max(0, Math.min((project?.rang || 1) - 1, allRangs.length - 1));
   const [currentRangId, setCurrentRangId] = useState(allRangs[savedIndex]?.globalId ?? null);
   const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime || 0));
   const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
   const [isTimerRunning, setIsTimerRunning] = useState(true);
   const [counters, setCounters] = useState([]);
-
   useEffect(() => {
     if (!isTimerRunning) return;
     const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
     return () => clearInterval(interval);
   }, [isTimerRunning, startTime]);
-
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
     return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   };
   const toggleTimer = () => { if (isTimerRunning) setIsTimerRunning(false); else { setStartTime(Date.now() - elapsedTime); setIsTimerRunning(true); } };
   const resetTimer = () => { setStartTime(Date.now()); setElapsedTime(0); setIsTimerRunning(true); };
-
   const [showNextPartieModal, setShowNextPartieModal] = useState(false);
   const [showPrevPartieModal, setShowPrevPartieModal] = useState(false);
   const currentIndex = allRangs.findIndex(r => r.globalId === currentRangId);
@@ -715,7 +675,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
   const currentPartieColor = currentPartie
     ? KALEIDOSCOPE_COLORS[currentPartie.colorIdx % KALEIDOSCOPE_COLORS.length]
     : KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
-
   const isLastRangOfPartie = () => {
     if (!currentPartie) return false;
     const nextR = allRangs[currentIndex + 1];
@@ -757,11 +716,9 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     if (navigator.vibrate) navigator.vibrate(20);
   };
   const goToPartie = (partieId) => { const pi = patron.parties.findIndex(x => x.id === partieId); if (pi !== -1 && patron.parties[pi].rangs.length > 0) setCurrentRangId(`${pi}-0`); };
-
   const addCounter = () => setCounters(prev => [...prev, { id: Date.now(), name: `Compteur ${prev.length + 1}`, value: 1, maxRepeats: 4, syncWithGlobal: false, colorIdx: Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length) }]);
   const updateCounter = (id, updates) => setCounters(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
   const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id));
-
   if (!hasParties) return (
     <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#F1F0EE", maxWidth: 430, margin: "0 auto", padding: 20 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
@@ -769,16 +726,15 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
       </div>
       <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>
+</div>
         <div style={{ fontSize: 16, marginBottom: 8, color: "#F1F0EE" }}>Aucun patron créé</div>
         <div style={{ fontSize: 13, marginBottom: 24 }}>Crée d'abord tes parties et rangs dans l'éditeur de patron</div>
         <button onClick={() => onNavigateEditor(project)} style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", borderRadius: 12, padding: "12px 24px", color: "#fff", fontSize: 14, cursor: "pointer", fontWeight: 600 }}>Ouvrir l'éditeur</button>
       </div>
     </div>
   );
-
   const circ_r = 43.5, circ_c = 2 * Math.PI * circ_r;
-
   return (
     <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", position: "relative", overflow: "hidden" }}>
       <style>{`
@@ -794,7 +750,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} style={{ position: "absolute", top: `${20+i*15}%`, left: `${10+i*12}%`, width: 20, height: 20, borderRadius: "50%", background: `${currentPartieColor.light}22`, animation: `float ${3+i*0.5}s ease-in-out infinite`, animationDelay: `${i*0.3}s` }} />
       ))}
-
       {/* Header */}
       <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -823,7 +778,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           currentCountIndex={currentCountIndex}
         />
       </div>
-
       {/* Compteurs */}
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         {counters.length > 0 && (
@@ -832,7 +786,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           </div>
         )}
       </div>
-
       {/* Parties */}
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
@@ -848,7 +801,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           })}
         </div>
       </div>
-
       {/* Instruction courante */}
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 20, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
@@ -863,7 +815,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           )}
         </div>
       </div>
-
       {/* Précédent / Suivant */}
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ display: "flex", gap: 16, alignItems: "center", justifyContent: "center" }}>
@@ -881,7 +832,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           </button>
         </div>
       </div>
-
       {/* Prochain rang - seulement si on reste dans la même partie */}
       {currentIndex < allRangs.length - 1 && (
         <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
@@ -891,7 +841,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           </div>
         </div>
       )}
-
       {/* Modale passage à la partie suivante */}
       {showNextPartieModal && (() => {
         const nextPartie = patron.parties.find(p => p.id === allRangs[currentIndex + 1]?.partieId);
@@ -899,7 +848,8 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -922,7 +872,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
           </div>
         );
       })()}
-
       {/* Modale retour à la partie précédente */}
       {showPrevPartieModal && (() => {
         const prevPartie = patron.parties.find(p => p.id === allRangs[currentIndex - 1]?.partieId);
@@ -930,7 +879,8 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -956,12 +906,9 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     </div>
   );
 }
-
-
 // ═══════════════════════════════════════════════════════════════
 // IMPORT PDF MODAL
 // ═══════════════════════════════════════════════════════════════
-
 function ImportPdfModal({ onClose, onCreate }) {
   const [name, setName] = useState("");
   const [pdfData, setPdfData] = useState(null);
@@ -970,7 +917,6 @@ function ImportPdfModal({ onClose, onCreate }) {
   const [configRangs, setConfigRangs] = useState(false);
   const [totalRangs, setTotalRangs] = useState("");
   const [parties, setParties] = useState([]);
-
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file || file.type !== "application/pdf") return;
@@ -980,33 +926,31 @@ function ImportPdfModal({ onClose, onCreate }) {
     reader.onload = (ev) => { setPdfData(ev.target.result); setLoading(false); };
     reader.readAsDataURL(file);
   };
-
   const addPartie = () => setParties(prev => [...prev, { id: Date.now(), nom: "", rangs: "" }]);
   const updatePartie = (id, field, val) => setParties(prev => prev.map(p => p.id === id ? { ...p, [field]: val } : p));
   const removePartie = (id) => setParties(prev => prev.filter(p => p.id !== id));
-
   const totalFromParties = parties.reduce((s, p) => s + (parseInt(p.rangs) || 0), 0);
   const total = configRangs ? (parties.length > 0 ? totalFromParties : parseInt(totalRangs) || 0) : 0;
   const canCreate = name.trim() && pdfData && !loading;
-
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430, maxHeight: "90vh", overflowY: "auto", border: "1px solid #0891B244" }}>
         <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
         <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>Importer un patron PDF</h3>
-
         {/* Nom */}
         <div style={{ marginBottom: 14 }}>
           <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Nom du projet</label>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Tuque Noël, Écharpe hiver..."
             style={{ width: "100%", background: "#13131F", border: "1px solid #0891B244", borderRadius: 10, padding: "12px 14px", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
         </div>
-
         {/* Upload PDF */}
         <div style={{ marginBottom: 20 }}>
           <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Fichier PDF</label>
           <label style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: pdfData ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px dashed ${pdfData ? "#22D3EE" : "#0891B244"}`, borderRadius: 10, cursor: "pointer" }}>
-            <span style={{ fontSize: 22 }}>{loading ? "⏳" : pdfData ? "✅" : "📄"}</span>
+            <span style={{ fontSize: 22 }}>{loading ? "
+" : pdfData ? "
+" : "
+ "}</span>
             <div>
               <div style={{ color: pdfData ? "#22D3EE" : "#6B6A7A", fontSize: 14, fontWeight: pdfData ? 600 : 400 }}>
                 {loading ? "Chargement..." : pdfData ? pdfName : "Appuyer pour choisir un PDF"}
@@ -1016,19 +960,18 @@ function ImportPdfModal({ onClose, onCreate }) {
             <input type="file" accept="application/pdf" onChange={handleFile} style={{ display: "none" }} />
           </label>
         </div>
-
         {/* Toggle configurer rangs */}
         <div style={{ marginBottom: configRangs ? 16 : 24 }}>
           <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif" }}>
-            <span>{configRangs ? "✅" : "⬜"}</span>
+            <span>{configRangs ? "
+" : "
+ "}</span>
             <span>Configurer les rangs et parties <span style={{ color: "#6B6A7A", fontSize: 12 }}>(optionnel)</span></span>
           </button>
         </div>
-
         {/* Section rangs optionnelle */}
         {configRangs && (
           <div style={{ marginBottom: 24, padding: 16, background: "#13131F", borderRadius: 14, border: "1px solid #0891B233" }}>
-
             {/* Total rangs (seulement si pas de parties) */}
             {parties.length === 0 && (
               <div style={{ marginBottom: 14 }}>
@@ -1037,7 +980,6 @@ function ImportPdfModal({ onClose, onCreate }) {
                   style={{ width: "100%", background: "#1A1A2E", border: "1px solid #0891B244", borderRadius: 10, padding: "11px 14px", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
               </div>
             )}
-
             {/* Parties */}
             <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Parties <span style={{ color: "#6B6A7A", textTransform: "none", letterSpacing: 0 }}>(optionnel)</span></label>
             {parties.map((p, i) => (
@@ -1058,7 +1000,6 @@ function ImportPdfModal({ onClose, onCreate }) {
             )}
           </div>
         )}
-
         <div style={{ display: "flex", gap: 12 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1px solid #333", background: "none", color: "#999", fontSize: 14, cursor: "pointer" }}>Annuler</button>
           <button onClick={() => canCreate && onCreate(name.trim(), pdfData, total, parties)} disabled={!canCreate}
@@ -1070,12 +1011,9 @@ function ImportPdfModal({ onClose, onCreate }) {
     </div>
   );
 }
-
-
 // ═══════════════════════════════════════════════════════════════
 // PDF ZOOM ZONE — pinch-zoom maison, indépendant du header
 // ═══════════════════════════════════════════════════════════════
-
 function PdfZoomZone({ loading, loadError, pages, zoom }) {
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -1084,10 +1022,8 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
   const lastOffset = useRef({ x: 0, y: 0 });
   const lastMid = useRef(null);
   const containerRef = useRef(null);
-
   const getDist = (t1, t2) => Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
   const getMid = (t1, t2) => ({ x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 });
-
   const onTouchStart = (e) => {
     if (e.touches.length === 2) {
       e.preventDefault();
@@ -1097,20 +1033,17 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
       lastOffset.current = offset;
     }
   };
-
   const onTouchMove = (e) => {
     if (e.touches.length === 2) {
       e.preventDefault();
       const dist = getDist(e.touches[0], e.touches[1]);
       const mid = getMid(e.touches[0], e.touches[1]);
       const newScale = Math.min(5, Math.max(1, lastScale.current * (dist / lastDist.current)));
-
       // Ajuster l'offset pour zoomer centré sur le point de pinch
       const dx = mid.x - lastMid.current.x;
       const dy = mid.y - lastMid.current.y;
       const newX = lastOffset.current.x + dx;
       const newY = lastOffset.current.y + dy;
-
       setScale(newScale);
       // Limiter l'offset quand scale = 1
       if (newScale <= 1) {
@@ -1120,14 +1053,12 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
       }
     }
   };
-
   const onTouchEnd = (e) => {
     if (e.touches.length < 2) {
       lastDist.current = null;
       if (scale <= 1) setOffset({ x: 0, y: 0 });
     }
   };
-
   return (
     <div
       ref={containerRef}
@@ -1143,13 +1074,15 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
       }}>
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
-            <div style={{ fontSize: 40 }}>⏳</div>
+            <div style={{ fontSize: 40 }}>
+</div>
             <div style={{ fontSize: 15, color: "#A78BFA" }}>Rendu du PDF en cours...</div>
             <div style={{ fontSize: 12, color: "#6B6A7A" }}>Cela peut prendre quelques secondes</div>
           </div>
         ) : loadError ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12 }}>
-            <div style={{ fontSize: 48 }}>⚠️</div>
+            <div style={{ fontSize: 48 }}>
+</div>
             <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
             <div style={{ fontSize: 12, color: "#6B6A7A", textAlign: "center", padding: "0 40px" }}>Le fichier n'a pas pu être chargé</div>
           </div>
@@ -1164,15 +1097,12 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // LECTEUR PDF
 // ═══════════════════════════════════════════════════════════════
-
 function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPartie, rang, total, pct, decrementRang, incrementRang, addCounter, resetRang }) {
   const [swiped, setSwiped] = useState(false);
   const [startX, setStartX] = useState(0);
-
   return (
     <div
       onTouchStart={e => setStartX(e.touches[0].clientX)}
@@ -1180,7 +1110,6 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
       onTouchEnd={e => { if (startX - e.changedTouches[0].clientX < -40) setSwiped(false); }}
       onClick={() => swiped && setSwiped(false)}
       style={{ background: "#1A1A2E", borderRadius: 14, border: `1px solid ${color.light}22`, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
-
       {/* Contenu principal */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, transform: swiped ? "translateX(-100px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
         {/* Cercle — progression globale */}
@@ -1230,7 +1159,6 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
           </div>
         </div>
       </div>
-
       {/* Menu swipe */}
       <div style={{ position: "absolute", top: "50%", right: swiped ? 10 : -110, transform: "translateY(-50%)", transition: "right 0.3s ease", zIndex: 10, display: "flex", flexDirection: "column", gap: 6 }}>
         <button onClick={e => { e.stopPropagation(); addCounter(); setSwiped(false); }}
@@ -1242,12 +1170,10 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
     </div>
   );
 }
-
 function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-
   // Rangs
   const pdfParties = project?.pdfParties || [];
   const hasParties = pdfParties.length > 0;
@@ -1263,7 +1189,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const addCounter = stableAddCounter;
   const updateCounter = (id, updates) => { countersRef.current = countersRef.current.map(c => c.id === id ? { ...c, ...updates } : c); setCounters([...countersRef.current]); };
   const deleteCounter = (id) => { countersRef.current = countersRef.current.filter(c => c.id !== id); setCounters([...countersRef.current]); };
-
   const currentPartie = hasParties ? pdfParties[currentPartieIdx] : null;
   const rangDansPartie = hasParties ? (() => {
     let offset = 0;
@@ -1274,7 +1199,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const color = currentPartie
     ? KALEIDOSCOPE_COLORS[currentPartie.colorIdx % KALEIDOSCOPE_COLORS.length]
     : KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
-
   // Timer
   const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime || 0));
   const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
@@ -1290,7 +1214,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   };
   const toggleTimer = () => { if (isTimerRunning) setIsTimerRunning(false); else { setStartTime(Date.now() - elapsedTime); setIsTimerRunning(true); } };
   const resetTimer = () => { setStartTime(Date.now()); setElapsedTime(0); setIsTimerRunning(true); };
-
   // Incrémenter rang et changer de partie si nécessaire
   const incrementRang = () => {
     // Bloquer si on est au maximum global
@@ -1326,22 +1249,18 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     }
     setRang(newRang);
   };
-
   const [showNextPartieModal, setShowNextPartieModal] = useState(false);
   const [showPrevPartieModal, setShowPrevPartieModal] = useState(false);
   const [showFinModal, setShowFinModal] = useState(false);
-
   // Sauvegarde en quittant
   const handleBack = () => {
     onSaveProgress(rang, project?.total || 0, elapsedTime);
     onNavigateHub();
   };
-
   // Chargement PDF — rendu page par page progressif
   useEffect(() => {
     let cancelled = false;
     if (!project?.pdfId) { setLoadError(true); setLoading(false); return; }
-
     loadPdf(project.pdfId).then(async (data) => {
       if (!data) { setLoadError(true); setLoading(false); return; }
       try {
@@ -1356,7 +1275,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           window.pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
-
         // Décoder le base64 en chunks pour éviter le crash mémoire sur gros PDFs
         const base64 = data.includes(',') ? data.split(',')[1] : data;
         const chunkSize = 32768;
@@ -1371,12 +1289,9 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         const arr = new Uint8Array(totalLen);
         let offset = 0;
         for (const chunk of chunks) { arr.set(chunk, offset); offset += chunk.length; }
-
         const pdf = await window.pdfjsLib.getDocument({ data: arr }).promise;
         if (cancelled) return;
-
         setLoading(false); // Afficher le conteneur dès que le PDF est parsé
-
         // Scale adapté selon le nombre de pages — moins de mémoire pour les gros PDFs
         const dpr = window.devicePixelRatio || 2;
         const scale = pdf.numPages > 30 ? 1.5 : pdf.numPages > 15 ? dpr * 1.5 : dpr * 2;
@@ -1406,14 +1321,11 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         if (!cancelled) { setLoadError(true); setLoading(false); }
       }
     }).catch(() => { if (!cancelled) { setLoadError(true); setLoading(false); } });
-
     return () => { cancelled = true; }; // Cleanup si on quitte avant la fin
   }, [project?.pdfId]);
-
   const total = project?.total || 0;
   const pct = total > 0 ? Math.min(100, Math.round((rang / total) * 100)) : 0;
   const circ_r = 26, circ_c = 2 * Math.PI * circ_r;
-
   return (
     <div style={{ background: "#0D0D1A", height: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <style>{`
@@ -1421,10 +1333,8 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         ::-webkit-scrollbar{width:0} * { -webkit-tap-highlight-color: transparent; }
         @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
       `}</style>
-
       {/* ══ BARRE FIXE ══════════════════════════════════════════ */}
       <div style={{ flexShrink: 0, background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", zIndex: 10, padding: "48px 16px 12px" }}>
-
         {/* Ligne header : retour + titre + timer */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <button onClick={handleBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", color: color.light, fontSize: 15, cursor: "pointer", flexShrink: 0 }}>←</button>
@@ -1435,14 +1345,12 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
             <button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 7, padding: "4px 8px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>RESET</button>
           </div>
         </div>
-
         {/* Carte compteur avec swipe pour ajouter compteur secondaire */}
         <PdfCounterCard color={color} currentPartie={currentPartie} totalPartieCourante={totalPartieCourante}
           rangDansPartie={rangDansPartie} rang={rang} total={total} pct={pct}
           decrementRang={decrementRang} incrementRang={incrementRang} addCounter={addCounter}
           resetRang={() => setRang(0)} />
       </div>
-
       {/* ══ COMPTEURS SECONDAIRES ══════════════════════════════ */}
       {counters.length > 0 && (
         <div style={{ padding: "0px 16px 12px", background: "#0D0D1A", flexShrink: 0 }}>
@@ -1459,17 +1367,18 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           </div>
         </div>
       )}
-
       {/* ══ ZONE PDF ═════════════════════════════════════════════ */}
       <div style={{ flex: 1, overflowY: "auto", background: "#111", WebkitOverflowScrolling: "touch" }}>
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50vh", gap: 14 }}>
-            <div style={{ fontSize: 36 }}>⏳</div>
+            <div style={{ fontSize: 36 }}>
+</div>
             <div style={{ fontSize: 14, color: "#A78BFA" }}>Chargement du PDF...</div>
           </div>
         ) : loadError ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50vh", gap: 12 }}>
-            <div style={{ fontSize: 44 }}>⚠️</div>
+            <div style={{ fontSize: 44 }}>
+</div>
             <div style={{ fontSize: 14, color: "#F87171" }}>PDF introuvable</div>
           </div>
         ) : (
@@ -1480,7 +1389,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           ))
         )}
       </div>
-
       {/* Modale partie suivante */}
       {showNextPartieModal && (() => {
         const nextPartie = pdfParties[currentPartieIdx + 1];
@@ -1488,7 +1396,8 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${color.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: color.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -1520,7 +1429,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           </div>
         );
       })()}
-
       {/* Modale partie précédente */}
       {showPrevPartieModal && (() => {
         const prevPartie = pdfParties[currentPartieIdx - 1];
@@ -1528,7 +1436,8 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${color.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: color.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1560,18 +1469,19 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           </div>
         );
       })()}
-
       {/* Modale projet terminé */}
       {showFinModal && (
         <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
           <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${color.light}33` }}>
-            <div style={{ fontSize: 52, marginBottom: 12 }}>🏆</div>
+            <div style={{ fontSize: 52, marginBottom: 12 }}>
+</div>
             <div style={{ color: color.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Projet terminé !</div>
             <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{project?.name}</h2>
-            <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Félicitations, tu as complété tous les rangs ! 🎊</p>
+            <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Félicitations, tu as complété tous les rangs ! 
+</p>
             <button onClick={() => setShowFinModal(false)}
               style={{ width: "100%", padding: "14px", borderRadius: 14, border: "none", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
-              Super ! 🎉
+              Super ! 
             </button>
           </div>
         </div>
@@ -1579,13 +1489,9 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     </div>
   );
 }
-
-
-
 // ═══════════════════════════════════════════════════════════════
 // BIBLIOTHÈQUE DE PATRONS
 // ═══════════════════════════════════════════════════════════════
-
 function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron, onNewPdfPatron, onDeletePatron, onRenamePatron, onChangePatronColor, onUpdatePatron, onChangePatronPhoto, editingPdfPatron, setEditingPdfPatron }) {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tous");
@@ -1594,16 +1500,13 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
   const [renamePatron, setRenamePatron] = useState(null);
   const [deletePatron, setDeletePatron] = useState(null);
   const [showNewMenu, setShowNewMenu] = useState(false);
-
   const patrons = database.patrons || [];
   const filtered = patrons.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
-
   const handleMenuOpen = (patron, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setMenuPos({ x: rect.right, y: rect.bottom });
     setMenuPatron(patron);
   };
-
   return (
     <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -1613,31 +1516,31 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         input, textarea, select { font-size: 16px !important; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
-
       {/* Header */}
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>📚 Bibliothèque</span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+ Bibliothèque</span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
             <span style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "monospace" }}>{patrons.length} patron{patrons.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
-
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px" }}>
-          <span style={{ color: "#6B6A7A" }}>🔍</span>
+          <span style={{ color: "#6B6A7A" }}>
+</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un patron..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 16 }} />
         </div>
       </div>
-
       {/* Grille bulles */}
       <div style={{ padding: "12px 6px 100px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B6A7A", padding: "60px 20px" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📚</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>
+</div>
             <div style={{ fontSize: 16, color: "#F1F0EE", marginBottom: 8 }}>Aucun patron</div>
             <div style={{ fontSize: 13 }}>Crée ou importe un patron avec le bouton +</div>
           </div>
@@ -1663,12 +1566,10 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
           </div>
         )}
       </div>
-
       {/* Bouton + */}
       <div style={{ position: "fixed", bottom: 28, right: "calc(50% - 200px)", zIndex: 50 }}>
         <button onClick={() => setShowNewMenu(true)} style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", cursor: "pointer", fontSize: 28, color: "#fff", boxShadow: "0 4px 20px #7C3AED88", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
       </div>
-
       {/* Menu contextuel */}
       <ContextMenu project={menuPatron} position={menuPos} onClose={() => setMenuPatron(null)}
         onRename={() => { setRenamePatron(menuPatron); setMenuPatron(null); }}
@@ -1677,7 +1578,6 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         onChangeColor={(idx) => onChangePatronColor(menuPatron.id, idx)} />
       <RenameModal project={renamePatron} onConfirm={(name) => { onRenamePatron(renamePatron.id, name); setRenamePatron(null); }} onClose={() => setRenamePatron(null)} />
       <DeleteModal project={deletePatron} onConfirm={() => { onDeletePatron(deletePatron.id); setDeletePatron(null); }} onClose={() => setDeletePatron(null)} />
-
       {/* Menu nouveau patron */}
       {showNewMenu && (
         <div onClick={() => setShowNewMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -1686,14 +1586,16 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
             <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>Nouveau patron</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <button onClick={() => { setShowNewMenu(false); onNewCustomPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #DB277722)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>✏️</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
                 </div>
               </button>
               <button onClick={() => { setShowNewMenu(false); onNewPdfPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #0891B222, #22D3EE22)", border: "1px solid #0891B244", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📄</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
@@ -1703,27 +1605,22 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
           </div>
         </div>
       )}
-
     </div>
   );
 }
-
 // ═══════════════════════════════════════════════════════════════
 // EDIT PDF PATRON MODAL
 // ═══════════════════════════════════════════════════════════════
-
 function EditPdfPatronModal({ patron, onClose, onSave }) {
   const [name, setName] = useState(patron.name || "");
   const [configRangs, setConfigRangs] = useState((patron.pdfParties||[]).length > 0 || (patron.total||0) > 0);
   const [totalRangs, setTotalRangs] = useState(String(patron.total || ""));
   const [parties, setParties] = useState((patron.pdfParties || []).map(p => ({ id: p.id, nom: p.nom, rangs: String(p.totalRangs) })));
-
   const addPartie = () => setParties(prev => [...prev, { id: Date.now(), nom: "", rangs: "" }]);
   const updatePartie = (id, field, val) => setParties(prev => prev.map(p => p.id === id ? { ...p, [field]: val } : p));
   const removePartie = (id) => setParties(prev => prev.filter(p => p.id !== id));
   const totalFromParties = parties.reduce((s, p) => s + (parseInt(p.rangs) || 0), 0);
   const total = configRangs ? (parties.length > 0 ? totalFromParties : parseInt(totalRangs) || 0) : 0;
-
   const handleSave = () => {
     const pdfParties = parties
       .filter(p => p.nom.trim())
@@ -1731,24 +1628,22 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
     const updates = { name: name.trim(), total, pdfParties };
     onSave(updates);
   };
-
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430, maxHeight: "90vh", overflowY: "auto", border: "1px solid #0891B244" }}>
         <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
         <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>Modifier le patron PDF</h3>
-
         <div style={{ marginBottom: 14 }}>
           <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Nom du patron</label>
           <input value={name} onChange={e => setName(e.target.value)}
             style={{ width: "100%", background: "#13131F", border: "1px solid #0891B244", borderRadius: 10, padding: "12px 14px", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
         </div>
-
         <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: configRangs ? 16 : 24 }}>
-          <span>{configRangs ? "✅" : "⬜"}</span>
+          <span>{configRangs ? "
+" : "
+ "}</span>
           <span>Configurer les rangs et parties</span>
         </button>
-
         {configRangs && (
           <div style={{ marginBottom: 24, padding: 16, background: "#13131F", borderRadius: 14, border: "1px solid #0891B233" }}>
             {parties.length === 0 && (
@@ -1773,7 +1668,6 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
             {parties.length > 0 && <div style={{ color: "#6B6A7A", fontSize: 12, textAlign: "center", marginTop: 10 }}>Total : {totalFromParties} rangs</div>}
           </div>
         )}
-
         <div style={{ display: "flex", gap: 12 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "14px", borderRadius: 14, border: "1px solid #333", background: "none", color: "#999", fontSize: 14, cursor: "pointer" }}>Annuler</button>
           <button onClick={handleSave} disabled={!name.trim()}
@@ -1785,7 +1679,6 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
     </div>
   );
 }
-
 export default function KaleidoHub() {
   const [currentView, setCurrentView] = useState(VIEWS.HUB);
   const [currentProject, setCurrentProject] = useState(null);
@@ -1809,11 +1702,9 @@ export default function KaleidoHub() {
   const [photoTarget, setPhotoTarget] = useState(null); // { id, context: "project"|"patron" }
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
-
   // Projets selon le mode actif
   const projectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
   const projects = database[projectsKey] || [];
-
   const updateProject = (projectId, updates) => {
     const newDb = { ...database, [projectsKey]: projects.map(p => p.id === projectId ? { ...p, ...updates } : p) };
     setDatabase(newDb); saveToDatabase(newDb);
@@ -1827,7 +1718,6 @@ export default function KaleidoHub() {
     setDatabase(newDb); saveToDatabase(newDb);
     return newDb;
   };
-
   const filtered = projects.filter(p => {
     if (!p.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (activeFilter === "Tous") return true;
@@ -1840,7 +1730,6 @@ export default function KaleidoHub() {
   });
   const totalRangs = projects.reduce((s, p) => s + p.rang, 0);
   const termines = projects.filter(p => p.rang >= p.total).length;
-
   // ─── PATRONS CRUD ─────────────────────────────────────────────
   const addPatron = (patron) => {
     const newDb = { ...database, patrons: [...(database.patrons || []), patron], settings: { ...database.settings, lastPatronId: patron.id } };
@@ -1861,15 +1750,12 @@ export default function KaleidoHub() {
     const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
     setDatabase(newDb); saveToDatabase(newDb);
   };
-
   const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); };
   const navigateToLibrary = () => setCurrentView(VIEWS.LIBRARY);
   const navigateToPatronEditor = (project) => { setCurrentProject(project); setCurrentView(VIEWS.PATRON_EDITOR); };
   const navigateToRowCounter = (project) => { setCurrentProject(project); setCurrentView(VIEWS.ROW_COUNTER); };
   const navigateToPdfViewer = (project) => { setCurrentProject(project); setCurrentView(VIEWS.PDF_VIEWER); };
-
   const handleNewProject = () => setShowNewMenu(true);
-
   const handleNewCustomPatron = () => {
     const newId = (database.settings.lastPatronId || 0) + 1;
     const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
@@ -1878,11 +1764,9 @@ export default function KaleidoHub() {
     setCurrentPatron(newPatron);
     setCurrentView(VIEWS.PATRON_EDITOR);
   };
-
   const handleNewPdfPatron = () => {
     setShowLibraryImportModal(true);
   };
-
   const handleCreateCustom = () => {
     const newId = database.settings.lastProjectId + 1;
     const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
@@ -1891,14 +1775,12 @@ export default function KaleidoHub() {
     setShowNewMenu(false);
     navigateToPatronEditor(newProject);
   };
-
   const handleMenuOpen = (project, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setMenuPos({ x: rect.right, y: rect.bottom }); setMenuProject(project);
   };
   const handleRename = (newName) => { updateProject(renameProject.id, { name: newName }); setRenameProject(null); };
   const handleDelete = () => { deleteProjectFromDB(deleteProject.id); setDeleteProject(null); };
-
   // ─── VUE HUB ──────────────────────────────────────────────
   const HubView = () => (
     <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
@@ -1917,26 +1799,31 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer" }}>📚</button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22 }}>⚙️</button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer" }}>
+</button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22 }}>
+</button>
           </div>
         </div>
-
         {/* Toggle Personnel / Professionnel */}
         <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
           {["personal", "pro"].map(m => (
             <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease" }}>
-              {m === "personal" ? "🧵 Personnel" : "💼 Professionnel"}
+              {m === "personal" ? "
+ Personnel" : "
+ Professionnel"}
             </button>
           ))}
         </div>
-
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: "📋" },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "📊" },
-            { label: "Terminés", value: termines, icon: "✅" },
+            { label: "Projets", value: projects.length, icon: "
+" },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "
+" },
+            { label: "Terminés", value: termines, icon: "
+" },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 14 }}>{stat.icon}</div>
@@ -1945,14 +1832,13 @@ export default function KaleidoHub() {
             </div>
           ))}
         </div>
-
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px", marginBottom: 8 }}>
-          <span style={{ color: "#6B6A7A" }}>🔍</span>
+          <span style={{ color: "#6B6A7A" }}>
+</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un projet..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif" }} />
         </div>
-
         {/* Filtres */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
           {["Tous", "En cours", "Terminés", "PDF", "Crochet", "Tricot"].map(f => (
@@ -1993,12 +1879,12 @@ export default function KaleidoHub() {
           }}
         />
       )}
-
       {/* Modale import */}
       {showDataImportModal && (
         <div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: 20, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
-            <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>📥 Importer tes projets</h3>
+            <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
+ Importer tes projets</h3>
             <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>Colle ici le texte copié depuis l'export. <span style={{ color: "#F87171" }}>Attention : tes projets actuels seront remplacés.</span></p>
             <textarea value={importText} onChange={e => setImportText(e.target.value)}
               placeholder="Colle ton texte de sauvegarde ici..."
@@ -2013,34 +1899,42 @@ export default function KaleidoHub() {
                     setShowDataImportModal(false);
                     setShowSettingsModal(false);
                     const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-                    alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n📄 ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
+                    alert("
+ Projets restaurés !" + (pdfCount > 0 ? `\n\n
+ ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
                   } else {
-                    alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+                    alert("
+ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
                   }
-                } catch { alert("❌ Erreur — le texte ne semble pas valide."); }
-              }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>✅ Restaurer</button>
+                } catch { alert("
+ Erreur — le texte ne semble pas valide."); }
+              }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+ Restaurer</button>
               <button onClick={() => setShowDataImportModal(false)}
                 style={{ padding: "12px 20px", borderRadius: 12, background: "#333", border: "none", color: "#999", fontSize: 14, cursor: "pointer" }}>Annuler</button>
             </div>
           </div>
         </div>
       )}
-
       {/* Modale données export */}
       {showExportData && (
         <div onClick={() => setShowExportData(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: 20, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
-            <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>📤 Sauvegarde de tes projets</h3>
+            <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
+ Sauvegarde de tes projets</h3>
             <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 4px" }}>Ce texte contient <span style={{ color: "#A78BFA", fontWeight: 700 }}>tous tes projets, rangs et données</span>.</p>
-            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans ⚙️.</p>
+            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans 
+.</p>
             <textarea readOnly value={exportData} onClick={e => { e.target.select(); }}
               style={{ flex: 1, minHeight: 160, background: "#0D0D1A", border: "1px solid #7C3AED44", borderRadius: 10, padding: 12, color: "#A78BFA", fontSize: 11, fontFamily: "monospace", outline: "none", resize: "none" }} />
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
               <button onClick={() => {
                 if (navigator.clipboard?.writeText) {
-                  navigator.clipboard.writeText(exportData).then(() => alert("✅ Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
+                  navigator.clipboard.writeText(exportData).then(() => alert("
+ Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
                 } else { alert("Sélectionne le texte dans le champ et copie-le manuellement."); }
-              }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>📋 Copier</button>
+              }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+ Copier</button>
               <button onClick={() => setShowExportData(false)}
                 style={{ padding: "12px 20px", borderRadius: 12, background: "#333", border: "none", color: "#999", fontSize: 14, cursor: "pointer" }}>Fermer</button>
             </div>
@@ -2051,8 +1945,8 @@ export default function KaleidoHub() {
         <div onClick={() => setShowSettingsModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430 }}>
             <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
-            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>⚙️ Paramètres</h2>
-
+            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>
+ Paramètres</h2>
             {/* Export — télécharge un fichier .json */}
             <button onClick={async () => {
               try {
@@ -2074,16 +1968,17 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📤</div>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
               </div>
             </button>
-
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📥</div>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
@@ -2105,7 +2000,8 @@ export default function KaleidoHub() {
                   setDatabase(dbData);
                   saveToDatabase(dbData);
                   setShowSettingsModal(false);
-                  alert('✅ Données restaurées avec succès !');
+                  alert('
+ Données restaurées avec succès !');
                 } catch(e) {
                   alert('Erreur import : ' + e.message);
                 }
@@ -2114,7 +2010,6 @@ export default function KaleidoHub() {
           </div>
         </div>
       )}
-
       {/* Menu nouveau projet */}
       {showNewMenu && (
         <div onClick={() => setShowNewMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -2122,23 +2017,23 @@ export default function KaleidoHub() {
             <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 24px" }} />
             <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>Nouveau projet</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-
               {/* Choisir un patron existant */}
               {(database.patrons || []).length > 0 && (
                 <button onClick={() => { setShowNewMenu(false); setShowSelectPatronModal(true); }}
                   style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", textAlign: "left" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📚</div>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                   <div>
                     <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Choisir un patron</div>
                     <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>{(database.patrons || []).length} patron{(database.patrons||[]).length > 1 ? 's' : ''} dans ta bibliothèque</div>
                   </div>
                 </button>
               )}
-
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📚</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
@@ -2148,7 +2043,6 @@ export default function KaleidoHub() {
           </div>
         </div>
       )}
-
       {/* Sélection patron — grille de bulles */}
       {showSelectPatronModal && (
         <div onClick={() => setShowSelectPatronModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -2191,7 +2085,6 @@ export default function KaleidoHub() {
           </div>
         </div>
       )}
-
       {/* Modale import PDF */}
       {showImportModal && <ImportPdfModal onClose={() => setShowImportModal(false)} onCreate={async (name, pdfData, total, partiesConfig) => {
         const newId = database.settings.lastProjectId + 1;
@@ -2221,13 +2114,11 @@ export default function KaleidoHub() {
       }} />}
     </div>
   );
-
   // ─── VUE PATRON EDITOR ────────────────────────────────────
   const PatronEditorView = () => {
     // Source : patron de bibliothèque OU projet
     const source = currentPatron || currentProject;
     const isPatronMode = !!currentPatron;
-
     const [patron, setPatron] = useState(() => ({
       nom: source?.name || "Nouveau patron",
       laine: source?.laine || "",
@@ -2238,8 +2129,10 @@ export default function KaleidoHub() {
     }));
     const [isEditingNom, setIsEditingNom] = useState(false);
     const [tempNom, setTempNom] = useState(patron.nom);
-    const totalRangsPatron = patron.parties.reduce((s, p) => s + p.rangs.length, 0);
-
+    const totalRangsPatron = patron.parties.reduce(
+      (s, p) => s + p.rangs.filter(r => !r.isNote).length,
+      0
+    );
     const updatePatronInfo = (field, value) => setPatron(prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { setPatron(prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
@@ -2253,19 +2146,162 @@ export default function KaleidoHub() {
         navigateToHub();
       }
     };
+    const makeId = () =>
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    const renumber = (parties) => parties.map(p => ({ ...p, rangs: p.rangs.map((r, i) => ({ ...r, id: i + 1 })) }));
-    const addPartie = () => setPatron(prev => ({ ...prev, parties: [...prev.parties, { id: Date.now(), nom: "Nouvelle partie", colorIdx: Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length), rangs: [] }] }));
-    const updatePartie = (id, updates) => setPatron(prev => ({ ...prev, parties: prev.parties.map(p => p.id === id ? { ...p, ...updates } : p) }));
-    const deletePartie = (id) => { if (confirm("Supprimer cette partie?")) setPatron(prev => ({ ...prev, parties: prev.parties.filter(p => p.id !== id) })); };
-    const duplicatePartie = (id) => { const p = patron.parties.find(x => x.id === id); if (p) setPatron(prev => ({ ...prev, parties: [...prev.parties, { ...p, id: Date.now(), nom: `${p.nom} (copie)`, rangs: p.rangs.map((r, i) => ({ ...r, id: i + 1 })) }] })); };
-    const movePartie = (id, dir) => setPatron(prev => { const arr = [...prev.parties], i = arr.findIndex(p => p.id === id), ni = dir === 'up' ? i - 1 : i + 1; if (i === -1 || ni < 0 || ni >= arr.length) return prev; [arr[i], arr[ni]] = [arr[ni], arr[i]]; return { ...prev, parties: arr }; });
-    const addRang = (partieId) => { const p = patron.parties.find(x => x.id === partieId); if (p) updatePartie(partieId, { rangs: [...p.rangs, { id: Date.now() + Math.random(), instruction: "Nouvelle instruction", mailles: null }] }); };
-    const updateRang = (rangId, updates) => setPatron(prev => ({ ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.map(r => r.id === rangId ? { ...r, ...updates } : r) })) }));
-    const deleteRang = (rangId) => { if (confirm("Supprimer ce rang?")) setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.filter(r => r.id !== rangId) })) }; return { ...np, parties: renumber(np.parties) }; }); };
-    const duplicateRang = (rangId) => setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => ({ ...p, rangs: p.rangs.reduce((acc, r) => { acc.push(r); if (r.id === rangId) acc.push({ ...r, id: Date.now() + Math.random(), instruction: `${r.instruction} (copie)` }); return acc; }, []) })) }; return { ...np, parties: renumber(np.parties) }; });
-    const moveRang = (rangId, dir) => setPatron(prev => { const np = { ...prev, parties: prev.parties.map(p => { const arr = [...p.rangs], i = arr.findIndex(r => r.id === rangId), ni = dir === 'up' ? i - 1 : i + 1; if (i === -1 || ni < 0 || ni >= arr.length) return p; [arr[i], arr[ni]] = [arr[ni], arr[i]]; return { ...p, rangs: arr }; }) }; return { ...np, parties: renumber(np.parties) }; });
+    const addPartie = () =>
+      setPatron(prev => ({
+        ...prev,
+        parties: [
+          ...prev.parties,
+          {
+            id: makeId(),
+            nom: "Nouvelle partie",
+            colorIdx: Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length),
+            rangs: []
+          }
+        ]
+      }));
 
+    const updatePartie = (id, updates) =>
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p => (p.id === id ? { ...p, ...updates } : p))
+      }));
+
+    const deletePartie = (id) => {
+      if (!confirm("Supprimer cette partie?")) return;
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.filter(p => p.id !== id)
+      }));
+    };
+
+    const duplicatePartie = (id) => {
+      setPatron(prev => {
+        const p = prev.parties.find(x => x.id === id);
+        if (!p) return prev;
+
+        return {
+          ...prev,
+          parties: [
+            ...prev.parties,
+            {
+              ...p,
+              id: makeId(),
+              nom: `${p.nom} (copie)`,
+              rangs: p.rangs.map(r => ({
+                ...r,
+                id: makeId()
+              }))
+            }
+          ]
+        };
+      });
+    };
+
+    const movePartie = (id, dir) =>
+      setPatron(prev => {
+        const arr = [...prev.parties];
+        const i = arr.findIndex(p => p.id === id);
+        const ni = dir === "up" ? i - 1 : i + 1;
+        if (i === -1 || ni < 0 || ni >= arr.length) return prev;
+        [arr[i], arr[ni]] = [arr[ni], arr[i]];
+        return { ...prev, parties: arr };
+      });
+
+    const addRang = (partieId) =>
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p =>
+          p.id !== partieId
+            ? p
+            : {
+                ...p,
+                rangs: [
+                  ...p.rangs,
+                  {
+                    id: makeId(),
+                    instruction: "Nouvelle instruction",
+                    mailles: null
+                  }
+                ]
+              }
+        )
+      }));
+
+    const updateRang = (partieId, rangId, updates) =>
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p =>
+          p.id !== partieId
+            ? p
+            : {
+                ...p,
+                rangs: p.rangs.map(r =>
+                  r.id === rangId ? { ...r, ...updates } : r
+                )
+              }
+        )
+      }));
+
+    const deleteRang = (partieId, rangId) => {
+      if (!confirm("Supprimer ce rang?")) return;
+
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p =>
+          p.id !== partieId
+            ? p
+            : {
+                ...p,
+                rangs: p.rangs.filter(r => r.id !== rangId)
+              }
+        )
+      }));
+    };
+
+    const duplicateRang = (partieId, rangId) =>
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p => {
+          if (p.id !== partieId) return p;
+
+          return {
+            ...p,
+            rangs: p.rangs.reduce((acc, r) => {
+              acc.push(r);
+              if (r.id === rangId) {
+                acc.push({
+                  ...r,
+                  id: makeId(),
+                  instruction: `${r.instruction} (copie)`
+                });
+              }
+              return acc;
+            }, [])
+          };
+        })
+      }));
+
+    const moveRang = (partieId, rangId, dir) =>
+      setPatron(prev => ({
+        ...prev,
+        parties: prev.parties.map(p => {
+          if (p.id !== partieId) return p;
+
+          const arr = [...p.rangs];
+          const i = arr.findIndex(r => r.id === rangId);
+          const ni = dir === "up" ? i - 1 : i + 1;
+
+          if (i === -1 || ni < 0 || ni >= arr.length) return p;
+
+          [arr[i], arr[ni]] = [arr[ni], arr[i]];
+          return { ...p, rangs: arr };
+        })
+      }));
     return (
       <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto" }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ::-webkit-scrollbar{width:0} *{-webkit-tap-highlight-color:transparent} input,textarea,select{font-size:16px!important}`}</style>
@@ -2327,7 +2363,6 @@ export default function KaleidoHub() {
       </div>
     );
   };
-
   // ─── RENDU CONDITIONNEL ───────────────────────────────────
   if (currentView === VIEWS.LIBRARY) return (
     <>
