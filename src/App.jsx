@@ -2133,8 +2133,8 @@ export default function KaleidoHub() {
       (s, p) => s + p.rangs.filter(r => !r.isNote).length,
       0
     );
-    const updatePatronInfo = (field, value) => setPatron(prev => ({ ...prev, [field]: value }));
-    const handleSaveNom = () => { setPatron(prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
+    const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
+    const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
       if (isPatronMode) {
         // Sauvegarder dans la bibliothèque
@@ -2146,16 +2146,93 @@ export default function KaleidoHub() {
         navigateToHub();
       }
     };
+    const debug = (...args) => {
+      if (typeof window !== "undefined" && window.__KALEIDO_DEBUG__) {
+        console.log("[KALEIDO]", ...args);
+      }
+    };
+
     const makeId = () =>
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+    const safeArray = (value) => Array.isArray(value) ? value : [];
+
+    const validatePatron = (candidate) => {
+      const errors = [];
+      if (!candidate || typeof candidate !== "object") {
+        errors.push("Patron invalide: objet manquant.");
+        return errors;
+      }
+
+      const parties = safeArray(candidate.parties);
+      const partieIds = new Set();
+      const rangIds = new Set();
+
+      for (const partie of parties) {
+        if (!partie || typeof partie !== "object") {
+          errors.push("Partie invalide: entrée non valide.");
+          continue;
+        }
+
+        if (partie.id == null) {
+          errors.push("Partie invalide: id manquant.");
+        } else if (partieIds.has(partie.id)) {
+          errors.push(`Partie dupliquée: ${partie.id}`);
+        } else {
+          partieIds.add(partie.id);
+        }
+
+        const rangs = safeArray(partie.rangs);
+        if (!Array.isArray(partie.rangs)) {
+          errors.push(`Rangs invalides dans la partie ${partie.id ?? "sans-id"}.`);
+        }
+
+        for (const rang of rangs) {
+          if (!rang || typeof rang !== "object") {
+            errors.push(`Rang invalide dans la partie ${partie.id ?? "sans-id"}.`);
+            continue;
+          }
+
+          if (rang.id == null) {
+            errors.push(`Rang sans id dans la partie ${partie.id ?? "sans-id"}.`);
+          } else if (rangIds.has(rang.id)) {
+            errors.push(`Rang dupliqué: ${rang.id}`);
+          } else {
+            rangIds.add(rang.id);
+          }
+        }
+      }
+
+      return errors;
+    };
+
+    const applyPatronUpdate = (label, updater) => {
+      setPatron(prev => {
+        const next = updater(prev);
+
+        if (!next || typeof next !== "object") {
+          console.warn(`[KALEIDO] ${label}: état ignoré (valeur invalide).`);
+          return prev;
+        }
+
+        const errors = validatePatron(next);
+        if (errors.length) {
+          console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
+        } else {
+          debug(`${label}: OK`);
+        }
+
+        return next;
+      });
+    };
+
     const addPartie = () =>
-      setPatron(prev => ({
+      applyPatronUpdate("addPartie", prev => ({
         ...prev,
         parties: [
-          ...prev.parties,
+          ...safeArray(prev.parties),
           {
             id: makeId(),
             nom: "Nouvelle partie",
@@ -2166,33 +2243,34 @@ export default function KaleidoHub() {
       }));
 
     const updatePartie = (id, updates) =>
-      setPatron(prev => ({
+      applyPatronUpdate("updatePartie", prev => ({
         ...prev,
-        parties: prev.parties.map(p => (p.id === id ? { ...p, ...updates } : p))
+        parties: safeArray(prev.parties).map(p => (p.id === id ? { ...p, ...updates } : p))
       }));
 
     const deletePartie = (id) => {
       if (!confirm("Supprimer cette partie?")) return;
-      setPatron(prev => ({
+      applyPatronUpdate("deletePartie", prev => ({
         ...prev,
-        parties: prev.parties.filter(p => p.id !== id)
+        parties: safeArray(prev.parties).filter(p => p.id !== id)
       }));
     };
 
     const duplicatePartie = (id) => {
-      setPatron(prev => {
-        const p = prev.parties.find(x => x.id === id);
+      applyPatronUpdate("duplicatePartie", prev => {
+        const parties = safeArray(prev.parties);
+        const p = parties.find(x => x.id === id);
         if (!p) return prev;
 
         return {
           ...prev,
           parties: [
-            ...prev.parties,
+            ...parties,
             {
               ...p,
               id: makeId(),
               nom: `${p.nom} (copie)`,
-              rangs: p.rangs.map(r => ({
+              rangs: safeArray(p.rangs).map(r => ({
                 ...r,
                 id: makeId()
               }))
@@ -2203,8 +2281,8 @@ export default function KaleidoHub() {
     };
 
     const movePartie = (id, dir) =>
-      setPatron(prev => {
-        const arr = [...prev.parties];
+      applyPatronUpdate("movePartie", prev => {
+        const arr = [...safeArray(prev.parties)];
         const i = arr.findIndex(p => p.id === id);
         const ni = dir === "up" ? i - 1 : i + 1;
         if (i === -1 || ni < 0 || ni >= arr.length) return prev;
@@ -2213,15 +2291,15 @@ export default function KaleidoHub() {
       });
 
     const addRang = (partieId) =>
-      setPatron(prev => ({
+      applyPatronUpdate("addRang", prev => ({
         ...prev,
-        parties: prev.parties.map(p =>
+        parties: safeArray(prev.parties).map(p =>
           p.id !== partieId
             ? p
             : {
                 ...p,
                 rangs: [
-                  ...p.rangs,
+                  ...safeArray(p.rangs),
                   {
                     id: makeId(),
                     instruction: "Nouvelle instruction",
@@ -2233,14 +2311,14 @@ export default function KaleidoHub() {
       }));
 
     const updateRang = (partieId, rangId, updates) =>
-      setPatron(prev => ({
+      applyPatronUpdate("updateRang", prev => ({
         ...prev,
-        parties: prev.parties.map(p =>
+        parties: safeArray(prev.parties).map(p =>
           p.id !== partieId
             ? p
             : {
                 ...p,
-                rangs: p.rangs.map(r =>
+                rangs: safeArray(p.rangs).map(r =>
                   r.id === rangId ? { ...r, ...updates } : r
                 )
               }
@@ -2250,28 +2328,28 @@ export default function KaleidoHub() {
     const deleteRang = (partieId, rangId) => {
       if (!confirm("Supprimer ce rang?")) return;
 
-      setPatron(prev => ({
+      applyPatronUpdate("deleteRang", prev => ({
         ...prev,
-        parties: prev.parties.map(p =>
+        parties: safeArray(prev.parties).map(p =>
           p.id !== partieId
             ? p
             : {
                 ...p,
-                rangs: p.rangs.filter(r => r.id !== rangId)
+                rangs: safeArray(p.rangs).filter(r => r.id !== rangId)
               }
         )
       }));
     };
 
     const duplicateRang = (partieId, rangId) =>
-      setPatron(prev => ({
+      applyPatronUpdate("duplicateRang", prev => ({
         ...prev,
-        parties: prev.parties.map(p => {
+        parties: safeArray(prev.parties).map(p => {
           if (p.id !== partieId) return p;
 
           return {
             ...p,
-            rangs: p.rangs.reduce((acc, r) => {
+            rangs: safeArray(p.rangs).reduce((acc, r) => {
               acc.push(r);
               if (r.id === rangId) {
                 acc.push({
@@ -2287,12 +2365,12 @@ export default function KaleidoHub() {
       }));
 
     const moveRang = (partieId, rangId, dir) =>
-      setPatron(prev => ({
+      applyPatronUpdate("moveRang", prev => ({
         ...prev,
-        parties: prev.parties.map(p => {
+        parties: safeArray(prev.parties).map(p => {
           if (p.id !== partieId) return p;
 
-          const arr = [...p.rangs];
+          const arr = [...safeArray(p.rangs)];
           const i = arr.findIndex(r => r.id === rangId);
           const ni = dir === "up" ? i - 1 : i + 1;
 
