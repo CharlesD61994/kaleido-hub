@@ -175,8 +175,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "✏️", label: "Renommer", action: onRename },
-          { icon: "📷", label: "Changer la photo", action: onChangePhoto },
+          { icon: "", label: "Renommer", action: onRename },
+          { icon: "", label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -920,7 +920,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1109,8 +1109,7 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
       }}>
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
-            <div style={{ fontSize: 40 }}>
-</div>
+            <div style={{ fontSize: 40 }}>⏳</div>
             <div style={{ fontSize: 15, color: "#A78BFA" }}>Rendu du PDF en cours...</div>
             <div style={{ fontSize: 12, color: "#6B6A7A" }}>Cela peut prendre quelques secondes</div>
           </div>
@@ -1590,7 +1589,8 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px" }}>
-          <span style={{ color: "#6B6A7A" }}>🔎</span>
+          <span style={{ color: "#6B6A7A" }}>
+</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un patron..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 16 }} />
         </div>
@@ -1599,8 +1599,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "12px 6px 100px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B6A7A", padding: "60px 20px" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>
-</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
             <div style={{ fontSize: 16, color: "#F1F0EE", marginBottom: 8 }}>Aucun patron</div>
             <div style={{ fontSize: 13 }}>Crée ou importe un patron avec le bouton +</div>
           </div>
@@ -1980,13 +1979,11 @@ export default function KaleidoHub() {
                     setShowDataImportModal(false);
                     setShowSettingsModal(false);
                     const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-                    alert("
- Projets restaurés !" + (pdfCount > 0 ? `\n\n
- ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
+                    alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
                   } else {
-                    alert("Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+                    alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
                   }
-                } catch { alert("Erreur — le texte ne semble pas valide."); }
+                } catch { alert("❌ Erreur — le texte ne semble pas valide."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Restaurer</button>
               <button onClick={() => setShowDataImportModal(false)}
@@ -2002,13 +1999,13 @@ export default function KaleidoHub() {
             <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
  Sauvegarde de tes projets</h3>
             <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 4px" }}>Ce texte contient <span style={{ color: "#A78BFA", fontWeight: 700 }}>tous tes projets, rangs et données</span>.</p>
-            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans <strong style={{ color: "#F1F0EE" }}>⚙️</strong>.</p>
+            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans ⚙️.</p>
             <textarea readOnly value={exportData} onClick={e => { e.target.select(); }}
               style={{ flex: 1, minHeight: 160, background: "#0D0D1A", border: "1px solid #7C3AED44", borderRadius: 10, padding: 12, color: "#A78BFA", fontSize: 11, fontFamily: "monospace", outline: "none", resize: "none" }} />
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
               <button onClick={() => {
                 if (navigator.clipboard?.writeText) {
-                  navigator.clipboard.writeText(exportData).then(() => alert("Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
+                  navigator.clipboard.writeText(exportData).then(() => alert("✅ Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
                 } else { alert("Sélectionne le texte dans le champ et copie-le manuellement."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Copier</button>
@@ -2045,7 +2042,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📤</div>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>💾</div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2075,7 +2072,7 @@ export default function KaleidoHub() {
                   setDatabase(dbData);
                   saveToDatabase(dbData);
                   setShowSettingsModal(false);
-                  alert('Données restaurées avec succès !');
+                  alert('✅ Données restaurées avec succès !');
                 } catch(e) {
                   alert('Erreur import : ' + e.message);
                 }
@@ -2105,7 +2102,7 @@ export default function KaleidoHub() {
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📤</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>💾</div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
