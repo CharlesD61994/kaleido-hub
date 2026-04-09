@@ -1979,15 +1979,13 @@ export default function KaleidoHub() {
                     setShowDataImportModal(false);
                     setShowSettingsModal(false);
                     const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-                    alert("
- Projets restaurés !" + (pdfCount > 0 ? `\n\n
- ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
+                    alert("Projets restaurés !" + (pdfCount > 0 ? `
+
+${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
                   } else {
-                    alert("
- Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+                    alert("Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
                   }
-                } catch { alert("
- Erreur — le texte ne semble pas valide."); }
+                } catch { alert("Erreur — le texte ne semble pas valide."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Restaurer</button>
               <button onClick={() => setShowDataImportModal(false)}
@@ -2010,8 +2008,7 @@ export default function KaleidoHub() {
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
               <button onClick={() => {
                 if (navigator.clipboard?.writeText) {
-                  navigator.clipboard.writeText(exportData).then(() => alert("
- Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
+                  navigator.clipboard.writeText(exportData).then(() => alert("Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
                 } else { alert("Sélectionne le texte dans le champ et copie-le manuellement."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Copier</button>
