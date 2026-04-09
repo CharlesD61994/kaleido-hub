@@ -175,8 +175,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "✏️", label: "Renommer", action: onRename },
-          { icon: "📷", label: "Changer la photo", action: onChangePhoto },
+          { icon: "", label: "Renommer", action: onRename },
+          { icon: "", label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -196,7 +196,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           </div>
         )}
         <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
-          <span>🗑️</span><span>Supprimer</span>
+          <span>
+</span><span>Supprimer</span>
         </button>
       </div>
     </>
@@ -312,7 +313,8 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       {!imgSrc ? (
         <div style={{ textAlign: "center", padding: 32 }}>
-          <div style={{ fontSize: 60, marginBottom: 20 }}>📷</div>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>
+</div>
           <h3 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>Ajouter une photo</h3>
           <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 28px" }}>Choisis une photo depuis ta galerie</p>
           <label style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", borderRadius: 16, padding: "14px 32px", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "inline-block" }}>
@@ -389,7 +391,8 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
           <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
-            <span style={{ fontSize: 16 }}>📝</span>
+            <span style={{ fontSize: 16 }}>
+</span>
           </div>
           <div style={{ flex: 1 }}>
             {isEditing ? (
@@ -457,7 +460,8 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         </div>
       </div>
       <div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 72 }}>
-        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>📝</button>
+        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>
+</button>
         <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
         <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
       </div>
@@ -769,7 +773,8 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
       </div>
       <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>
+</div>
         <div style={{ fontSize: 16, marginBottom: 8, color: "#F1F0EE" }}>Aucun patron créé</div>
         <div style={{ fontSize: 13, marginBottom: 24 }}>Crée d'abord tes parties et rangs dans l'éditeur de patron</div>
         <button onClick={() => onNavigateEditor(project)} style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", borderRadius: 12, padding: "12px 24px", color: "#fff", fontSize: 14, cursor: "pointer", fontWeight: 600 }}>Ouvrir l'éditeur</button>
@@ -890,7 +895,8 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -920,7 +926,8 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>
+</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1109,7 +1116,8 @@ function PdfZoomZone({ loading, loadError, pages, zoom }) {
       }}>
         {loading ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16 }}>
-            <div style={{ fontSize: 40 }}>⏳</div>
+            <div style={{ fontSize: 40 }}>
+</div>
             <div style={{ fontSize: 15, color: "#A78BFA" }}>Rendu du PDF en cours...</div>
             <div style={{ fontSize: 12, color: "#6B6A7A" }}>Cela peut prendre quelques secondes</div>
           </div>
@@ -1599,7 +1607,8 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "12px 6px 100px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B6A7A", padding: "60px 20px" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>
+</div>
             <div style={{ fontSize: 16, color: "#F1F0EE", marginBottom: 8 }}>Aucun patron</div>
             <div style={{ fontSize: 13 }}>Crée ou importe un patron avec le bouton +</div>
           </div>
@@ -1894,16 +1903,18 @@ export default function KaleidoHub() {
         <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
           {["personal", "pro"].map(m => (
             <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease" }}>
-              {m === "personal" ? "👤 Personnel" : "💼 Professionnel"}
+              {m === "personal" ? "
+ Personnel" : "
+ Professionnel"}
             </button>
           ))}
         </div>
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: "🫧" },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "📏" },
-            { label: "Terminés", value: termines, icon: "✅" },
+            { label: "Projets", value: projects.length, icon: "" },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "" },
+            { label: "Terminés", value: termines, icon: "" },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 14 }}>{stat.icon}</div>
@@ -1979,13 +1990,13 @@ export default function KaleidoHub() {
                     setShowDataImportModal(false);
                     setShowSettingsModal(false);
                     const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-                    alert("Projets restaurés !" + (pdfCount > 0 ? `
+                    alert("✅ Projets restaurés !" + (pdfCount > 0 ? `
 
-${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
+📄 ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
                   } else {
-                    alert("Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+                    alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
                   }
-                } catch { alert("Erreur — le texte ne semble pas valide."); }
+                } catch { alert("❌ Erreur — le texte ne semble pas valide."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Restaurer</button>
               <button onClick={() => setShowDataImportModal(false)}
@@ -2001,14 +2012,13 @@ ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellemen
             <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
  Sauvegarde de tes projets</h3>
             <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 4px" }}>Ce texte contient <span style={{ color: "#A78BFA", fontWeight: 700 }}>tous tes projets, rangs et données</span>.</p>
-            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans 
-.</p>
+            <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>1. Appuie sur <strong style={{ color: "#F1F0EE" }}>Copier</strong> → 2. Ouvre <strong style={{ color: "#F1F0EE" }}>Notes</strong> → 3. Colle et sauvegarde. Pour restaurer, copie ce texte et utilise <strong style={{ color: "#F1F0EE" }}>Importer</strong> dans ⚙️.</p>
             <textarea readOnly value={exportData} onClick={e => { e.target.select(); }}
               style={{ flex: 1, minHeight: 160, background: "#0D0D1A", border: "1px solid #7C3AED44", borderRadius: 10, padding: 12, color: "#A78BFA", fontSize: 11, fontFamily: "monospace", outline: "none", resize: "none" }} />
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
               <button onClick={() => {
                 if (navigator.clipboard?.writeText) {
-                  navigator.clipboard.writeText(exportData).then(() => alert("Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
+                  navigator.clipboard.writeText(exportData).then(() => alert("✅ Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
                 } else { alert("Sélectionne le texte dans le champ et copie-le manuellement."); }
               }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
  Copier</button>
@@ -2077,8 +2087,7 @@ ${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellemen
                   setDatabase(dbData);
                   saveToDatabase(dbData);
                   setShowSettingsModal(false);
-                  alert('
- Données restaurées avec succès !');
+                  alert('✅ Données restaurées avec succès !');
                 } catch(e) {
                   alert('Erreur import : ' + e.message);
                 }
