@@ -11,12 +11,25 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#BE185D", light: "#F9A8D4" },
 ];
 const DB_KEY = 'kaleido_database';
-const initDatabase = () => {
-  try {
-    const saved = localStorage.getItem(DB_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch(e) {}
-  return {
+const DB_BACKUP_KEY = 'kaleido_database_backup';
+const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
+const debug = (...args) => {
+  if (typeof window !== "undefined" && window.__KALEIDO_DEBUG__) {
+    console.log("[KALEIDO]", ...args);
+  }
+};
+const safeParseJSON = (value) => {
+  try { return value ? JSON.parse(value) : null; } catch (e) { return null; }
+};
+const isValidDatabase = (data) => {
+  if (!data || typeof data !== "object") return false;
+  return Array.isArray(data.projectsPersonal)
+    && Array.isArray(data.projectsPro)
+    && Array.isArray(data.patrons)
+    && data.settings
+    && typeof data.settings === "object";
+};
+const getDefaultDatabase = () => ({
     projectsPersonal: [
       { id: 1, name: "Écharpe hiver", rang: 42, total: 80, colorIdx: 0, image: null, type: "tricot", laine: "", outil: "", notes: "", parties: [] },
       { id: 2, name: "Tuque Noël", rang: 15, total: 30, colorIdx: 1, image: null, type: "crochet", laine: "", outil: "", notes: "", parties: [] },
@@ -25,10 +38,38 @@ const initDatabase = () => {
     projectsPro: [],
     patrons: [],
     settings: { lastProjectId: 3, lastPatronId: 0 }
-  };
+  });
+
+const initDatabase = () => {
+  try {
+    const saved = safeParseJSON(localStorage.getItem(DB_KEY));
+    if (isValidDatabase(saved)) return saved;
+
+    const backup = safeParseJSON(localStorage.getItem(DB_BACKUP_KEY));
+    if (isValidDatabase(backup)) {
+      debug("Base principale invalide, restauration depuis le backup.");
+      localStorage.setItem(DB_KEY, JSON.stringify(backup));
+      return backup;
+    }
+  } catch(e) {
+    console.warn("[KALEIDO] initDatabase error:", e);
+  }
+  return getDefaultDatabase();
 };
 const saveToDatabase = (data) => {
-  try { localStorage.setItem(DB_KEY, JSON.stringify(data)); } catch(e) {}
+  try {
+    if (!isValidDatabase(data)) {
+      console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
+      return false;
+    }
+    const currentRaw = localStorage.getItem(DB_KEY);
+    if (currentRaw) localStorage.setItem(DB_BACKUP_KEY, currentRaw);
+    localStorage.setItem(DB_KEY, JSON.stringify(data));
+    return true;
+  } catch(e) {
+    console.warn("[KALEIDO] saveToDatabase error:", e);
+    return false;
+  }
 };
 // ═══════════════════════════════════════════════════════════════
 // STOCKAGE PDFs — IndexedDB
@@ -60,11 +101,19 @@ const savePdf = async (id, data) => {
 };
 const loadPdf = async (id) => {
   try {
+    if (!id) return null;
     const db = await _pdfDb();
     return await new Promise((resolve, reject) => {
       const tx = db.transaction('pdfs', 'readonly');
       const req = tx.objectStore('pdfs').get(id);
-      req.onsuccess = () => resolve(req.result?.data || null);
+      req.onsuccess = () => {
+        const data = req.result?.data || null;
+        if (!data || typeof data !== "string") {
+          resolve(null);
+          return;
+        }
+        resolve(data);
+      };
       req.onerror = () => reject(req.error);
     });
   } catch(e) {
@@ -126,10 +175,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "
-", label: "Renommer", action: onRename },
-          { icon: "
-", label: "Changer la photo", action: onChangePhoto },
+          { icon: "", label: "Renommer", action: onRename },
+          { icon: "", label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -1174,6 +1221,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [loadErrorMessage, setLoadErrorMessage] = useState("Le fichier n'a pas pu être chargé");
   // Rangs
   const pdfParties = project?.pdfParties || [];
   const hasParties = pdfParties.length > 0;
@@ -1260,9 +1308,23 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   // Chargement PDF — rendu page par page progressif
   useEffect(() => {
     let cancelled = false;
-    if (!project?.pdfId) { setLoadError(true); setLoading(false); return; }
+    setPages([]);
+    setLoading(true);
+    setLoadError(false);
+    setLoadErrorMessage("Le fichier n'a pas pu être chargé");
+    if (!project?.pdfId) {
+      setLoadErrorMessage("Aucun PDF n'est associé à ce projet.");
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
     loadPdf(project.pdfId).then(async (data) => {
-      if (!data) { setLoadError(true); setLoading(false); return; }
+      if (!data) {
+        setLoadErrorMessage("Le PDF est manquant ou illisible.");
+        setLoadError(true);
+        setLoading(false);
+        return;
+      }
       try {
         // Charger pdf.js si pas encore chargé
         if (!window.pdfjsLib) {
@@ -1318,9 +1380,20 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         }
       } catch(e) {
         console.error('PDF error:', e);
-        if (!cancelled) { setLoadError(true); setLoading(false); }
+        if (!cancelled) {
+          setLoadErrorMessage("Le rendu du PDF a échoué.");
+          setLoadError(true);
+          setLoading(false);
+        }
       }
-    }).catch(() => { if (!cancelled) { setLoadError(true); setLoading(false); } });
+    }).catch((e) => {
+      console.error('PDF load error:', e);
+      if (!cancelled) {
+        setLoadErrorMessage("Le chargement du PDF a échoué.");
+        setLoadError(true);
+        setLoading(false);
+      }
+    });
     return () => { cancelled = true; }; // Cleanup si on quitte avant la fin
   }, [project?.pdfId]);
   const total = project?.total || 0;
@@ -1752,9 +1825,37 @@ export default function KaleidoHub() {
   };
   const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); };
   const navigateToLibrary = () => setCurrentView(VIEWS.LIBRARY);
-  const navigateToPatronEditor = (project) => { setCurrentProject(project); setCurrentView(VIEWS.PATRON_EDITOR); };
-  const navigateToRowCounter = (project) => { setCurrentProject(project); setCurrentView(VIEWS.ROW_COUNTER); };
-  const navigateToPdfViewer = (project) => { setCurrentProject(project); setCurrentView(VIEWS.PDF_VIEWER); };
+  const navigateToPatronEditor = (project) => {
+    if (!project) {
+      console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
+      return;
+    }
+    setCurrentProject(project); setCurrentView(VIEWS.PATRON_EDITOR);
+  };
+  const navigateToRowCounter = (project) => {
+    if (!project) {
+      console.warn("[KALEIDO] navigateToRowCounter ignoré: projet manquant.");
+      return;
+    }
+    setCurrentProject(project); setCurrentView(VIEWS.ROW_COUNTER);
+  };
+  const navigateToPdfViewer = async (project) => {
+    if (!project) {
+      console.warn("[KALEIDO] navigateToPdfViewer ignoré: projet manquant.");
+      return;
+    }
+    if (!project.pdfId) {
+      alert("Ce PDF est introuvable pour ce projet.");
+      return;
+    }
+    const data = await loadPdf(project.pdfId);
+    if (!data) {
+      alert("Impossible d’ouvrir ce PDF. Le fichier semble manquant ou corrompu.");
+      return;
+    }
+    setCurrentProject(project);
+    setCurrentView(VIEWS.PDF_VIEWER);
+  };
   const handleNewProject = () => setShowNewMenu(true);
   const handleNewCustomPatron = () => {
     const newId = (database.settings.lastPatronId || 0) + 1;
@@ -1818,12 +1919,9 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: "
-" },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "
-" },
-            { label: "Terminés", value: termines, icon: "
-" },
+            { label: "Projets", value: projects.length, icon: "" },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "" },
+            { label: "Terminés", value: termines, icon: "" },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 14 }}>{stat.icon}</div>
@@ -2136,6 +2234,15 @@ export default function KaleidoHub() {
     const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
+      const errors = validatePatron(patron);
+      if (errors.length) {
+        alert("Impossible de sauvegarder: le patron est invalide.");
+        console.warn("[KALEIDO] handleSave: patron invalide", errors, patron);
+        return;
+      }
+
+      backupPatronState("handleSave", patron);
+
       if (isPatronMode) {
         // Sauvegarder dans la bibliothèque
         updatePatron(currentPatron.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: totalRangsPatron });
@@ -2146,18 +2253,26 @@ export default function KaleidoHub() {
         navigateToHub();
       }
     };
-    const debug = (...args) => {
-      if (typeof window !== "undefined" && window.__KALEIDO_DEBUG__) {
-        console.log("[KALEIDO]", ...args);
-      }
-    };
-
     const makeId = () =>
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     const safeArray = (value) => Array.isArray(value) ? value : [];
+
+    const backupPatronState = (label, state) => {
+      try {
+        localStorage.setItem(PATRON_BACKUP_KEY, JSON.stringify({
+          label,
+          savedAt: new Date().toISOString(),
+          mode: isPatronMode ? "patron" : "project",
+          sourceId: source?.id ?? null,
+          patron: state
+        }));
+      } catch (e) {
+        console.warn("[KALEIDO] backupPatronState error:", e);
+      }
+    };
 
     const validatePatron = (candidate) => {
       const errors = [];
@@ -2210,21 +2325,27 @@ export default function KaleidoHub() {
 
     const applyPatronUpdate = (label, updater) => {
       setPatron(prev => {
-        const next = updater(prev);
+        try {
+          const next = updater(prev);
 
-        if (!next || typeof next !== "object") {
-          console.warn(`[KALEIDO] ${label}: état ignoré (valeur invalide).`);
+          if (!next || typeof next !== "object") {
+            console.warn(`[KALEIDO] ${label}: état ignoré (valeur invalide).`);
+            return prev;
+          }
+
+          const errors = validatePatron(next);
+          if (errors.length) {
+            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
+            return prev;
+          }
+
+          backupPatronState(label, prev);
+          debug(`${label}: OK`);
+          return next;
+        } catch (e) {
+          console.warn(`[KALEIDO] ${label}: exception`, e);
           return prev;
         }
-
-        const errors = validatePatron(next);
-        if (errors.length) {
-          console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
-        } else {
-          debug(`${label}: OK`);
-        }
-
-        return next;
       });
     };
 
