@@ -134,17 +134,17 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
     case "download":
       return (
         <svg {...common}>
-          <path d="M12 4v10" />
-          <path d="m8.5 10.5 3.5 3.5 3.5-3.5" />
-          <path d="M5 19.5h14" />
+          <path d="M12 3v12" />
+          <path d="M7 10l5 5 5-5" />
+          <path d="M5 21h14" />
         </svg>
       );
     case "upload":
       return (
         <svg {...common}>
-          <path d="M12 20V10" />
-          <path d="m8.5 13.5 3.5-3.5 3.5 3.5" />
-          <path d="M5 4.5h14" />
+          <path d="M12 21V9" />
+          <path d="M17 14l-5-5-5 5" />
+          <path d="M5 3h14" />
         </svg>
       );
     case "sparkles":
@@ -377,7 +377,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -530,9 +530,10 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
       ctx.clip();
       // baseScale : l'image doit COUVRIR le cercle entièrement à scale=1
       const baseScale = Math.max(CROP_SIZE / img.width, CROP_SIZE / img.height);
+      const finalScale = baseScale * scale;
       // Taille affichée dans le canvas de sortie
-      const w = img.width * baseScale * scale * (OUT / CROP_SIZE);
-      const h = img.height * baseScale * scale * (OUT / CROP_SIZE);
+      const w = img.width * finalScale * (OUT / CROP_SIZE);
+      const h = img.height * finalScale * (OUT / CROP_SIZE);
       ctx.drawImage(img,
         (OUT - w) / 2 + pos.x * (OUT / CROP_SIZE),
         (OUT - h) / 2 + pos.y * (OUT / CROP_SIZE),
@@ -576,7 +577,10 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
                 top: "50%", left: "50%",
                 transform: `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) scale(${scale})`,
                 transformOrigin: "center",
-                minWidth: "100%", minHeight: "100%",
+                width: "auto",
+                height: "auto",
+                maxWidth: "none",
+                maxHeight: "none",
                 userSelect: "none", pointerEvents: "none"
               }}
               draggable={false}
@@ -2270,15 +2274,15 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="download" tone="violet" size={24} />
+              <IconBadge name="library" tone="violet" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
               </div>
             </button>
             {/* Import — charge depuis un fichier .json */}
-            <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <IconBadge name="upload" tone="green" size={24} />
+            <label style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
+              <IconBadge name="bookOpen" tone="green" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
