@@ -2136,7 +2136,7 @@ export default function KaleidoHub() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="library" size={24} stroke={2.2} color="#A78BFA" /></button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={30} stroke={2.1} color="#A78BFA" /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={24} stroke={2.1} color="#A78BFA" /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
@@ -2150,9 +2150,9 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: <Icon name="projects" size={28} stroke={2.2} color="#A78BFA" /> },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={28} stroke={2.2} color="#22D3EE" /> },
-            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={28} stroke={2.2} color="#34D399" /> },
+            { label: "Projets", value: projects.length, icon: <Icon name="projects" size={30} stroke={2.2} color="#A78BFA" /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={30} stroke={2.2} color="#22D3EE" /> },
+            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={30} stroke={2.2} color="#34D399" /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
