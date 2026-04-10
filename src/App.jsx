@@ -476,6 +476,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const [imgSrc, setImgSrc] = useState(existingImage || null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const lastTouch = useRef(null);
   const lastDist = useRef(null);
@@ -490,6 +491,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
       setImgSrc(ev.target.result);
       setPos({ x: 0, y: 0 });
       setScale(1);
+      setNaturalSize({ width: 0, height: 0 });
     };
     reader.readAsDataURL(file);
   };
@@ -517,6 +519,9 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     }
   };
   const onTouchEnd = () => { setIsDragging(false); lastTouch.current = null; };
+  const previewBaseScale = naturalSize.width && naturalSize.height
+    ? Math.max(CROP_SIZE / naturalSize.width, CROP_SIZE / naturalSize.height)
+    : 1;
   const handleConfirm = () => {
     if (!imgSrc) return;
     const img = new Image();
@@ -539,7 +544,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
         (OUT - h) / 2 + pos.y * (OUT / CROP_SIZE),
         w, h
       );
-      onConfirm(canvas.toDataURL('image/jpeg', 0.9));
+      onConfirm(canvas.toDataURL('image/png'));
     };
     img.src = imgSrc;
   };
@@ -571,17 +576,27 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}>
-            <img src={imgSrc} alt="crop"
+            <img
+              src={imgSrc}
+              alt="crop"
+              onLoad={(e) => {
+                const { naturalWidth, naturalHeight } = e.currentTarget;
+                if (naturalWidth && naturalHeight && (
+                  naturalWidth !== naturalSize.width || naturalHeight !== naturalSize.height
+                )) {
+                  setNaturalSize({ width: naturalWidth, height: naturalHeight });
+                }
+              }}
               style={{
                 position: "absolute",
-                top: "50%", left: "50%",
+                top: "50%",
+                left: "50%",
+                width: naturalSize.width ? `${naturalSize.width * previewBaseScale}px` : "auto",
+                height: naturalSize.height ? `${naturalSize.height * previewBaseScale}px` : "auto",
                 transform: `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) scale(${scale})`,
                 transformOrigin: "center",
-                width: "auto",
-                height: "auto",
-                maxWidth: "none",
-                maxHeight: "none",
-                userSelect: "none", pointerEvents: "none"
+                userSelect: "none",
+                pointerEvents: "none"
               }}
               draggable={false}
             />
@@ -2274,7 +2289,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="library" tone="violet" size={24} />
+              <IconBadge name="download" tone="violet" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2282,7 +2297,7 @@ export default function KaleidoHub() {
             </button>
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <IconBadge name="bookOpen" tone="green" size={24} />
+              <IconBadge name="upload" tone="green" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
