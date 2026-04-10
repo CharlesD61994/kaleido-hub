@@ -134,17 +134,17 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
     case "download":
       return (
         <svg {...common}>
-          <path d="M12 4v10" />
-          <path d="m8.5 10.5 3.5 3.5 3.5-3.5" />
-          <path d="M5 19.5h14" />
+          <path d="M12 3v12" />
+          <path d="M7 10l5 5 5-5" />
+          <path d="M5 21h14" />
         </svg>
       );
     case "upload":
       return (
         <svg {...common}>
-          <path d="M12 20V10" />
-          <path d="m8.5 13.5 3.5-3.5 3.5 3.5" />
-          <path d="M5 4.5h14" />
+          <path d="M12 21V9" />
+          <path d="M17 14l-5-5-5 5" />
+          <path d="M5 3h14" />
         </svg>
       );
     case "sparkles":
