@@ -728,7 +728,20 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [tempNom, setTempNom] = useState(partie.nom);
   const color = KALEIDOSCOPE_COLORS[partie.colorIdx % KALEIDOSCOPE_COLORS.length];
-  const handleSaveNom = () => { onUpdate(partie.id, { nom: tempNom }); setIsEditingNom(false); };
+  useEffect(() => {
+    setTempNom(partie.nom || "");
+  }, [partie.nom]);
+  const handleSaveNom = () => {
+    const cleanNom = (tempNom || "").trim();
+    onUpdate(partie.id, { nom: cleanNom || partie.nom || "Nouvelle partie" });
+    setIsEditingNom(false);
+  };
+  const handleStartEditNom = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTempNom(partie.nom || "");
+    setIsEditingNom(true);
+  };
   const act = (e, fn) => { e.preventDefault(); e.stopPropagation(); fn(); };
   return (
     <div style={{ background: "#1A1A2E", border: `1px solid ${color.light}22`, borderRadius: 16, padding: 16, marginBottom: 16 }}>
@@ -976,6 +989,13 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
   const currentPartieColor = currentPartie
     ? KALEIDOSCOPE_COLORS[currentPartie.colorIdx % KALEIDOSCOPE_COLORS.length]
     : KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
+  const getPartieFirstCountableGlobalId = (partieId) => {
+    if (!partieId) return null;
+    const firstCountable = allRangs.find(r => r.partieId === partieId && !r.isNote);
+    if (firstCountable) return firstCountable.globalId;
+    const firstAny = allRangs.find(r => r.partieId === partieId);
+    return firstAny?.globalId || null;
+  };
   const isLastRangOfPartie = () => {
     if (!currentPartie) return false;
     const nextR = allRangs[currentIndex + 1];
@@ -996,7 +1016,9 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     }
   };
   const confirmNextPartie = () => {
-    setCurrentRangId(allRangs[currentIndex + 1].globalId);
+    const nextPartieId = allRangs[currentIndex + 1]?.partieId;
+    const targetGlobalId = getPartieFirstCountableGlobalId(nextPartieId) || allRangs[currentIndex + 1]?.globalId || null;
+    if (targetGlobalId) setCurrentRangId(targetGlobalId);
     setShowNextPartieModal(false);
     setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
     if (navigator.vibrate) navigator.vibrate(20);
@@ -1016,7 +1038,11 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
     if (navigator.vibrate) navigator.vibrate(20);
   };
-  const goToPartie = (partieId) => { const pi = patron.parties.findIndex(x => x.id === partieId); if (pi !== -1 && patron.parties[pi].rangs.length > 0) setCurrentRangId(`${pi}-0`); };
+  const goToPartie = (partieId) => {
+    const targetGlobalId = getPartieFirstCountableGlobalId(partieId);
+    if (targetGlobalId) setCurrentRangId(targetGlobalId);
+    setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
+  };
   const addCounter = () => setCounters(prev => [...prev, { id: Date.now(), name: `Compteur ${prev.length + 1}`, value: 1, maxRepeats: 4, syncWithGlobal: false, colorIdx: Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length) }]);
   const updateCounter = (id, updates) => setCounters(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
   const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id));
