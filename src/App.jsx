@@ -728,25 +728,30 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [tempNom, setTempNom] = useState(partie.nom || "Nouvelle partie");
   const color = KALEIDOSCOPE_COLORS[partie.colorIdx % KALEIDOSCOPE_COLORS.length];
+
   useEffect(() => {
     setTempNom(partie.nom || "Nouvelle partie");
   }, [partie.nom]);
+
   const handleSaveNom = () => {
     const finalNom = (tempNom || "").trim() || "Nouvelle partie";
-    setTempNom(finalNom);
     onUpdate(partie.id, { nom: finalNom });
+    setTempNom(finalNom);
     setIsEditingNom(false);
   };
+
   const handleCancelNom = () => {
     setTempNom(partie.nom || "Nouvelle partie");
     setIsEditingNom(false);
   };
+
   const handleStartEditNom = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setTempNom(partie.nom || "Nouvelle partie");
     setIsEditingNom(true);
   };
+
   const act = (e, fn) => { e.preventDefault(); e.stopPropagation(); fn(); };
   return (
     <div style={{ background: "#1A1A2E", border: `1px solid ${color.light}22`, borderRadius: 16, padding: 16, marginBottom: 16 }}>
@@ -771,10 +776,26 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
         {/* Nom centré + rangs centré — deux colonnes */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
-            {isEditingNom
-              ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") handleCancelNom(); }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
-              : <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{partie.nom || "Nouvelle partie"}</h3>
-            }
+            {isEditingNom ? (
+              <input
+                value={tempNom}
+                onChange={e => setTempNom(e.target.value)}
+                onKeyDown={e => {
+                  e.stopPropagation();
+                  if (e.key === "Enter") handleSaveNom();
+                  if (e.key === "Escape") handleCancelNom();
+                }}
+                onBlur={handleSaveNom}
+                onClick={e => e.stopPropagation()}
+                onFocus={e => e.stopPropagation()}
+                autoFocus
+                style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }}
+              />
+            ) : (
+              <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>
+                {partie.nom || "Nouvelle partie"}
+              </h3>
+            )}
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
             <span style={{ color: "#F1F0EE", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{partie.rangs.filter(r => !r.isNote).length}</span>
@@ -994,18 +1015,6 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
   const currentPartieColor = currentPartie
     ? KALEIDOSCOPE_COLORS[currentPartie.colorIdx % KALEIDOSCOPE_COLORS.length]
     : KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
-  const currentPartieDisplayRang = currentPartie ? (() => {
-    if (!currentRang) return 1;
-    const countableRangs = allRangs.filter(r => r.partieId === currentPartie.id && !r.isNote);
-    const directIdx = countableRangs.findIndex(r => r.id === currentRang.id);
-    if (directIdx !== -1) return directIdx + 1;
-    const currentGlobalIndex = allRangs.findIndex(r => r.globalId === currentRang.globalId);
-    const beforeOrAt = countableRangs.filter(r => {
-      const idx = allRangs.findIndex(x => x.globalId === r.globalId);
-      return idx !== -1 && idx <= currentGlobalIndex;
-    }).length;
-    return Math.max(1, beforeOrAt || 1);
-  })() : 1;
   const getPartieFirstCountableGlobalId = (partieId) => {
     if (!partieId) return null;
     const firstCountable = allRangs.find(r => r.partieId === partieId && !r.isNote);
@@ -1150,7 +1159,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 20, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
           <div style={{ background: `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, borderRadius: 12, padding: "10px 16px", display: "inline-block", marginBottom: 12, boxShadow: `0 4px 16px ${currentPartieColor.bg}66` }}>
-            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${currentPartieDisplayRang}`}</span>
+            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${Math.max(1, currentPartieRangIndex + 1)}`}</span>
           </div>
           <div style={{ color: "#F1F0EE", fontSize: 19, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, padding: "0 8px", marginBottom: 10 }}>{currentRang?.instruction}</div>
           {currentRang?.mailles && (
@@ -2485,7 +2494,7 @@ export default function KaleidoHub() {
     // Source : patron de bibliothèque OU projet
     const source = currentPatron || currentProject;
     const isPatronMode = !!currentPatron;
-    const [patron, setPatron] = useState(() => ({
+    const [patron, setPatron] = useState(() => normalizePatron({
       nom: source?.name || "Nouveau patron",
       laine: source?.laine || "",
       technique: source?.type || "crochet",
@@ -2502,22 +2511,24 @@ export default function KaleidoHub() {
     const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
-      const errors = validatePatron(patron);
+      const normalizedPatron = normalizePatron(patron);
+      const errors = validatePatron(normalizedPatron);
       if (errors.length) {
         alert("Impossible de sauvegarder: le patron est invalide.");
-        console.warn("[KALEIDO] handleSave: patron invalide", errors, patron);
+        console.warn("[KALEIDO] handleSave: patron invalide", errors, normalizedPatron);
         return;
       }
 
-      backupPatronState("handleSave", patron);
+      backupPatronState("handleSave", normalizedPatron);
+      setPatron(normalizedPatron);
 
       if (isPatronMode) {
         // Sauvegarder dans la bibliothèque
-        updatePatron(currentPatron.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: totalRangsPatron });
+        updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: normalizedPatron.parties.reduce((s, p) => s + safeArray(p.rangs).filter(r => !r.isNote).length, 0) });
         navigateToLibrary();
       } else {
         // Sauvegarder dans les projets
-        updateProject(currentProject.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: Math.max(totalRangsPatron, currentProject.total || 1) });
+        updateProject(currentProject.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: Math.max(normalizedPatron.parties.reduce((s, p) => s + safeArray(p.rangs).filter(r => !r.isNote).length, 0), currentProject.total || 1) });
         navigateToHub();
       }
     };
@@ -2527,6 +2538,54 @@ export default function KaleidoHub() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     const safeArray = (value) => Array.isArray(value) ? value : [];
+
+    const normalizePatron = (candidate) => {
+      const base = candidate && typeof candidate === "object" ? candidate : {};
+      const usedPartieIds = new Set();
+      const usedRangIds = new Set();
+
+      const normalizedParties = safeArray(base.parties).map((partie, partieIndex) => {
+        const rawPartie = partie && typeof partie === "object" ? partie : {};
+        let partieId = rawPartie.id;
+        if (partieId == null || usedPartieIds.has(partieId)) {
+          partieId = makeId();
+        }
+        usedPartieIds.add(partieId);
+
+        const normalizedRangs = safeArray(rawPartie.rangs).map((rang, rangIndex) => {
+          const rawRang = rang && typeof rang === "object" ? rang : {};
+          let rangId = rawRang.id;
+          if (rangId == null || usedRangIds.has(rangId)) {
+            rangId = makeId();
+          }
+          usedRangIds.add(rangId);
+
+          return {
+            id: rangId,
+            instruction: typeof rawRang.instruction === "string" ? rawRang.instruction : "Nouvelle instruction",
+            mailles: rawRang.mailles ?? null,
+            ...(rawRang.isNote ? { isNote: true } : {})
+          };
+        });
+
+        return {
+          id: partieId,
+          nom: (typeof rawPartie.nom === "string" && rawPartie.nom.trim()) ? rawPartie.nom : `Partie ${partieIndex + 1}`,
+          colorIdx: Number.isInteger(rawPartie.colorIdx) ? rawPartie.colorIdx : (partieIndex % KALEIDOSCOPE_COLORS.length),
+          rangs: normalizedRangs
+        };
+      });
+
+      return {
+        ...base,
+        nom: typeof base.nom === "string" && base.nom.trim() ? base.nom : "Nouveau patron",
+        laine: typeof base.laine === "string" ? base.laine : "",
+        technique: typeof base.technique === "string" ? base.technique : "crochet",
+        outil: typeof base.outil === "string" ? base.outil : "",
+        notes: typeof base.notes === "string" ? base.notes : "",
+        parties: normalizedParties
+      };
+    };
 
     const backupPatronState = (label, state) => {
       try {
@@ -2601,21 +2660,30 @@ export default function KaleidoHub() {
             return prev;
           }
 
-          const errors = validatePatron(next);
+          const normalizedNext = normalizePatron(next);
+          const errors = validatePatron(normalizedNext);
           if (errors.length) {
-            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
+            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, normalizedNext);
             return prev;
           }
 
           backupPatronState(label, prev);
           debug(`${label}: OK`);
-          return next;
+          return normalizedNext;
         } catch (e) {
           console.warn(`[KALEIDO] ${label}: exception`, e);
           return prev;
         }
       });
     };
+
+    useEffect(() => {
+      setPatron(prev => {
+        const normalized = normalizePatron(prev);
+        const changed = JSON.stringify(prev) !== JSON.stringify(normalized);
+        return changed ? normalized : prev;
+      });
+    }, []);
 
     const addPartie = () =>
       applyPatronUpdate("addPartie", prev => ({
