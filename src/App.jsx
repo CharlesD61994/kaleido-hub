@@ -11,221 +11,128 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#BE185D", light: "#F9A8D4" },
 ];
 
-const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: color,
-    strokeWidth: stroke,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    style,
-    "aria-hidden": true,
-  };
 
-  switch (name) {
-    case "library":
-    case "book":
-      return (
-        <svg {...common}>
-          <path d="M6.5 5.5A2.5 2.5 0 0 1 9 3h8.5v17H9a2.5 2.5 0 0 0-2.5 2" />
-          <path d="M6.5 5.5v15" />
-          <path d="M9.5 7.5h5.5" />
-          <path d="M9.5 11h5.5" />
-        </svg>
-      );
-    case "bookOpen":
-      return (
-        <svg {...common}>
-          <path d="M12 6.5c-1.5-1.2-3.4-1.8-5.5-1.8H4.5V18h2c2.1 0 4 .6 5.5 1.8" />
-          <path d="M12 6.5c1.5-1.2 3.4-1.8 5.5-1.8h2V18h-2c-2.1 0-4 .6-5.5 1.8" />
-          <path d="M12 6.5V19.8" />
-        </svg>
-      );
-    case "settings":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="3.2" />
-          <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.7-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.7 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .7.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.7Z" />
-        </svg>
-      );
-    case "search":
-      return (
-        <svg {...common}>
-          <circle cx="11" cy="11" r="6.5" />
-          <path d="m16 16 4 4" />
-        </svg>
-      );
-    case "edit":
-      return (
-        <svg {...common}>
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
-        </svg>
-      );
-    case "image":
-      return (
-        <svg {...common}>
-          <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
-          <circle cx="9" cy="10" r="1.3" />
-          <path d="m20.5 16-4.5-4.5L7 20" />
-        </svg>
-      );
-    case "trash":
-      return (
-        <svg {...common}>
-          <path d="M3 6h18" />
-          <path d="M8 6V4.8A1.8 1.8 0 0 1 9.8 3h4.4A1.8 1.8 0 0 1 16 4.8V6" />
-          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
-          <path d="M10 10v7" />
-          <path d="M14 10v7" />
-        </svg>
-      );
-    case "yarn":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="11.5" r="6.8" />
-          <path d="M7.8 8.8c1.1-.9 2.6-1.4 4.2-1.4 1.8 0 3.4.6 4.5 1.7" />
-          <path d="M6.8 11.7c1.4-1.2 3.2-1.9 5.2-1.9 2 0 3.7.7 5.1 2" />
-          <path d="M7.6 14.7c1.2-.8 2.7-1.3 4.4-1.3 1.7 0 3.2.4 4.5 1.3" />
-          <path d="M8 18.2c1.2-.7 2.5-1 4-1" />
-          <path d="M5.6 17.9c1.9.1 3.5.9 4.9 2.6" />
-        </svg>
-      );
-    case "note":
-      return (
-        <svg {...common}>
-          <path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-          <path d="M14 3.5V8h4" />
-          <path d="M9 12h6" />
-          <path d="M9 15.5h6" />
-        </svg>
-      );
-    case "file":
-      return (
-        <svg {...common}>
-          <path d="M8 3.5h6l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
-          <path d="M14 3.5V8h4" />
-        </svg>
-      );
-    case "checkCircle":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="m8.7 12 2.2 2.3 4.5-4.8" />
-        </svg>
-      );
-    case "square":
-      return (
-        <svg {...common}>
-          <rect x="4.5" y="4.5" width="15" height="15" rx="3" />
-        </svg>
-      );
-    case "download":
-      return (
-        <svg {...common}>
-          <path d="M12 4v10" />
-          <path d="m8.5 10.5 3.5 3.5 3.5-3.5" />
-          <path d="M5 19.5h14" />
-        </svg>
-      );
-    case "upload":
-      return (
-        <svg {...common}>
-          <path d="M12 20V10" />
-          <path d="m8.5 13.5 3.5-3.5 3.5 3.5" />
-          <path d="M5 4.5h14" />
-        </svg>
-      );
-    case "sparkles":
-      return (
-        <svg {...common}>
-          <path d="m12 3 1.1 3.3L16.5 7.5l-3.4 1.2L12 12l-1.1-3.3L7.5 7.5l3.4-1.2L12 3Z" />
-          <path d="m18.5 13.5.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z" />
-          <path d="m5.5 14.5.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z" />
-        </svg>
-      );
-    case "grid":
-      return (
-        <svg {...common}>
-          <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
-          <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
-          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
-          <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
-        </svg>
-      );
-    case "chart":
-      return (
-        <svg {...common}>
-          <path d="M5 19.5h14" />
-          <path d="M7.5 16V11" />
-          <path d="M12 16V7.5" />
-          <path d="M16.5 16v-5" />
-        </svg>
-      );
-    case "checkBadge":
-      return (
-        <svg {...common}>
-          <path d="M12 3.5 9.8 5 7 4.6l-.8 2.7L4 9l1.5 2.4-.2 2.8 2.7.8L9.7 17l2.3 1.5 2.3-1.5 2.7.4.8-2.7L20 15l-.4-2.7L21 9.9l-2.1-1.6-.8-2.7-2.8.4L12 3.5Z" />
-          <path d="m9.3 12 1.7 1.8 3.7-4" />
-        </svg>
-      );
-    case "camera":
-      return (
-        <svg {...common}>
-          <path d="M4.5 8.5h3l1.2-2h6.6l1.2 2h3a1.8 1.8 0 0 1 1.8 1.8v7.2a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.2A1.8 1.8 0 0 1 4.5 8.5Z" />
-          <circle cx="12" cy="13" r="3.2" />
-        </svg>
-      );
-    case "undo":
-      return (
-        <svg {...common}>
-          <path d="M9 9 5.5 12.5 9 16" />
-          <path d="M6 12.5h7a4.5 4.5 0 1 1 0 9h-2.5" />
-        </svg>
-      );
-    case "alert":
-      return (
-        <svg {...common}>
-          <path d="M12 4 4.5 18h15L12 4Z" />
-          <path d="M12 9v4.5" />
-          <path d="M12 17h.01" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-};
+const iconStroke = { fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round" };
 
-const IconBadge = ({ name, size = 18, tone = "violet", background, color, badgeSize = 44 }) => {
-  const tones = {
-    violet: { background: "linear-gradient(135deg, #7C3AED, #A78BFA)", color: "#fff" },
-    pink: { background: "linear-gradient(135deg, #DB2777, #F472B6)", color: "#fff" },
-    blue: { background: "linear-gradient(135deg, #0891B2, #22D3EE)", color: "#fff" },
-    green: { background: "linear-gradient(135deg, #059669, #34D399)", color: "#fff" },
-    amber: { background: "linear-gradient(135deg, #D97706, #FCD34D)", color: "#fff" },
-    slate: { background: "linear-gradient(135deg, #2A2A3E, #4C4C6A)", color: "#fff" },
-  };
-  const resolved = tones[tone] || tones.violet;
+function IconLibrary({ size = 20, color = "currentColor", strokeWidth = 1.9 }) {
   return (
-    <div style={{
-      width: badgeSize,
-      height: badgeSize,
-      borderRadius: 12,
-      background: background || resolved.background,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      flexShrink: 0,
-      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
-    }}>
-      <Icon name={name} size={size} color={color || resolved.color} />
-    </div>
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M5 6.5C5 5.67 5.67 5 6.5 5h9A2.5 2.5 0 0 1 18 7.5V18a1 1 0 0 0 1 1" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M7 7h7.5A1.5 1.5 0 0 1 16 8.5V19H7.25A2.25 2.25 0 0 0 5 21.25V7.5A.5.5 0 0 1 5.5 7H7Z" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8.5 10H13M8.5 13H13" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
   );
-};
+}
 
+function IconBookOpen({ size = 22, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M12 7.5C10.7 6.5 8.9 6 7 6c-1.5 0-2.8.3-4 .9V18c1.2-.6 2.5-.9 4-.9 1.9 0 3.7.5 5 1.5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 7.5C13.3 6.5 15.1 6 17 6c1.5 0 2.8.3 4 .9V18c-1.2-.6-2.5-.9-4-.9-1.9 0-3.7.5-5 1.5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 7.5V18.6" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconSearch({ size = 18, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <path d="M16 16l4 4" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconSettings({ size = 22, color = "currentColor", strokeWidth = 1.8 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M12 8.7a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a1.2 1.2 0 0 1 0 1.7l-1.6 1.6a1.2 1.2 0 0 1-1.7 0l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a1.2 1.2 0 0 1-1.2 1.2h-2.3A1.2 1.2 0 0 1 10 20v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a1.2 1.2 0 0 1-1.7 0l-1.6-1.6a1.2 1.2 0 0 1 0-1.7l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4A1.2 1.2 0 0 1 2.8 13v-2.3A1.2 1.2 0 0 1 4 9.5h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a1.2 1.2 0 0 1 0-1.7l1.6-1.6a1.2 1.2 0 0 1 1.7 0l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4A1.2 1.2 0 0 1 11.2 2.8h2.3A1.2 1.2 0 0 1 14.7 4v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a1.2 1.2 0 0 1 1.7 0l1.6 1.6a1.2 1.2 0 0 1 0 1.7l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2A1.2 1.2 0 0 1 21.2 10.7V13a1.2 1.2 0 0 1-1.2 1.2h-.2a1 1 0 0 0-.9.6Z" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconGrid({ size = 20, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <rect x="4" y="4" width="6" height="6" rx="1.8" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <rect x="14" y="4" width="6" height="6" rx="1.8" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <rect x="4" y="14" width="6" height="6" rx="1.8" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <rect x="14" y="14" width="6" height="6" rx="1.8" stroke="currentColor" strokeWidth={strokeWidth}/>
+    </svg>
+  );
+}
+
+function IconBars({ size = 20, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M5 19V11" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M10 19V7" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M15 19V13" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M20 19V5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M3.5 19.5h17" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconCheckBadge({ size = 20, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M12 3.5l2.2 1.5 2.6-.2 1.3 2.2 2.3 1.1-.4 2.6 1.1 2.3-1.8 1.9-.2 2.6-2.5.7-1.5 2.2-2.5-.6-2.5.6-1.5-2.2-2.5-.7-.2-2.6L3 13l1.1-2.3-.4-2.6L6 7l1.3-2.2 2.6.2L12 3.5Z" stroke="currentColor" strokeWidth={strokeWidth} strokeLinejoin="round"/>
+      <path d="M8.7 12.2l2.1 2.1 4.4-4.5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconPencil({ size = 22, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M4 20l3.8-.8L18.6 8.4a1.7 1.7 0 0 0 0-2.4l-.6-.6a1.7 1.7 0 0 0-2.4 0L4.8 16.2 4 20Z" stroke="currentColor" strokeWidth={strokeWidth} strokeLinejoin="round"/>
+      <path d="M13.8 7.2l3 3" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconImage({ size = 22, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <rect x="4" y="5" width="16" height="14" rx="3" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <circle cx="9" cy="10" r="1.5" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <path d="M6.5 17l4.2-4.2a1.4 1.4 0 0 1 2 0l1.6 1.6a1.4 1.4 0 0 0 2 0l1.2-1.2a1.4 1.4 0 0 1 2 0L20 14" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconTrash({ size = 22, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M4 7h16" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <path d="M7 7l.8 11a2 2 0 0 0 2 1.8h4.4a2 2 0 0 0 2-1.8L17 7" stroke="currentColor" strokeWidth={strokeWidth} strokeLinejoin="round"/>
+      <path d="M10 10.5v5M14 10.5v5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function IconUndo({ size = 18, color = "currentColor", strokeWidth = 1.9 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ color, display: "block" }} fill="none">
+      <path d="M9 9H5V5" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 9a7 7 0 1 1 2 4.9" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function IconYarn({ size = 38, color = "currentColor", strokeWidth = 1.7 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" style={{ color, display: "block" }} fill="none">
+      <circle cx="24" cy="21" r="11.5" stroke="currentColor" strokeWidth={strokeWidth}/>
+      <path d="M16 15c3 2 5.5 4 8 6.5M20 11c2.8 2.1 5.1 4.1 7.8 6.8M13.8 20c3.6 1.8 7 3.8 10.5 7M15 26c4 1.3 7.6 2.8 11.4 5.4M21.5 33c2.8-.7 5.5-1.6 8-2.9" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M18 32c-2.2 2.4-4.8 4.4-7.7 5.6" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+      <path d="M10.3 37.8c3.7-.7 8-.8 12.5.2" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round"/>
+    </svg>
+  );
+}
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
@@ -358,7 +265,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: color.light, opacity: 0.96 }}><IconYarn size={36} /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -390,15 +297,15 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: <Icon name="edit" size={21} color="#E2E0DC" />, label: "Renommer", action: onRename },
-          { icon: <Icon name="image" size={21} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
+          { icon: <IconPencil size={24} />, label: "Renommer", action: onRename },
+          { icon: <IconImage size={24} />, label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
-          <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+          <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "11px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
           </button>
         ))}
         {/* Couleur de la bulle */}
-        <button onClick={() => setShowColors(s => !s)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+        <button onClick={() => setShowColors(s => !s)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "11px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
           <div style={{ width: 18, height: 18, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, flexShrink: 0 }} />
           <span>Couleur de la bulle</span>
         </button>
@@ -410,8 +317,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
             ))}
           </div>
         )}
-        <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
-          <span><Icon name="trash" size={21} color="#F87171" /></span><span>Supprimer</span>
+        <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 24, height: 24 }}><IconTrash size={24} /></span><span>Supprimer</span>
         </button>
       </div>
     </>
@@ -527,7 +434,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       {!imgSrc ? (
         <div style={{ textAlign: "center", padding: 32 }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><IconBadge name="camera" tone="pink" size={28} badgeSize={64} /></div>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>📷</div>
           <h3 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>Ajouter une photo</h3>
           <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 28px" }}>Choisis une photo depuis ta galerie</p>
           <label style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", borderRadius: 16, padding: "14px 32px", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "inline-block" }}>
@@ -604,7 +511,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
           <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
-            <Icon name="note" size={16} color="#FCD34D" />
+            <span style={{ fontSize: 16 }}>📝</span>
           </div>
           <div style={{ flex: 1 }}>
             {isEditing ? (
@@ -629,7 +536,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
           </div>
         </div>
         <div style={{ position: "absolute", top: 12, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 0.3s ease", zIndex: 10 }}>
-          <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}><Icon name="undo" size={16} color="#fff" /></button>
+          <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}><IconUndo size={18} /></button>
           <button onClick={e => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
         </div>
       </div>
@@ -672,7 +579,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         </div>
       </div>
       <div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 72 }}>
-        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}><Icon name="note" size={15} color="#fff" /></button>
+        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>📝</button>
         <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
         <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
       </div>
@@ -984,7 +891,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
       </div>
       <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IconBadge name="yarn" tone="violet" size={24} badgeSize={52} /></div>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
         <div style={{ fontSize: 16, marginBottom: 8, color: "#F1F0EE" }}>Aucun patron créé</div>
         <div style={{ fontSize: 13, marginBottom: 24 }}>Crée d'abord tes parties et rangs dans l'éditeur de patron</div>
         <button onClick={() => onNavigateEditor(project)} style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", borderRadius: 12, padding: "12px 24px", color: "#fff", fontSize: 14, cursor: "pointer", fontWeight: 600 }}>Ouvrir l'éditeur</button>
@@ -1105,7 +1012,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="sparkles" tone="amber" size={24} badgeSize={56} /></div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -1135,7 +1042,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="undo" tone="slate" size={22} badgeSize={56} /></div>
+              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1202,7 +1109,7 @@ function ImportPdfModal({ onClose, onCreate }) {
         <div style={{ marginBottom: 20 }}>
           <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Fichier PDF</label>
           <label style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: pdfData ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px dashed ${pdfData ? "#22D3EE" : "#0891B244"}`, borderRadius: 10, cursor: "pointer" }}>
-            <span style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>{loading ? <Icon name="settings" size={18} color="#22D3EE" style={{ opacity: 0.9 }} /> : pdfData ? <Icon name="checkCircle" size={18} color="#22D3EE" /> : <Icon name="file" size={18} color="#6B6A7A" />}</span>
+            <span style={{ fontSize: 22 }}>{loading ? "⏳" : pdfData ? "✅" : "📄"}</span>
             <div>
               <div style={{ color: pdfData ? "#22D3EE" : "#6B6A7A", fontSize: 14, fontWeight: pdfData ? 600 : 400 }}>
                 {loading ? "Chargement..." : pdfData ? pdfName : "Appuyer pour choisir un PDF"}
@@ -1215,7 +1122,7 @@ function ImportPdfModal({ onClose, onCreate }) {
         {/* Toggle configurer rangs */}
         <div style={{ marginBottom: configRangs ? 16 : 24 }}>
           <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif" }}>
-            <span>{configRangs ? <Icon name="checkCircle" size={16} color="#22D3EE" /> : <Icon name="square" size={16} color="#6B6A7A" />}</span>
+            <span>{configRangs ? "✅" : "⬜"}</span>
             <span>Configurer les rangs et parties <span style={{ color: "#6B6A7A", fontSize: 12 }}>(optionnel)</span></span>
           </button>
         </div>
@@ -1795,7 +1702,8 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="book" size={22} color="#A78BFA" />Bibliothèque</span></span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+ Bibliothèque</span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
             <span style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "monospace" }}>{patrons.length} patron{patrons.length !== 1 ? 's' : ''}</span>
@@ -1803,7 +1711,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px" }}>
-          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="search" size={16} color="#6B6A7A" /></span>
+          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><IconSearch size={18} /></span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un patron..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 16 }} />
         </div>
@@ -1812,7 +1720,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "12px 6px 100px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B6A7A", padding: "60px 20px" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IconBadge name="yarn" tone="violet" size={24} badgeSize={52} /></div>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
             <div style={{ fontSize: 16, color: "#F1F0EE", marginBottom: 8 }}>Aucun patron</div>
             <div style={{ fontSize: 13 }}>Crée ou importe un patron avec le bouton +</div>
           </div>
@@ -1861,7 +1769,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
 </div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={16} color="#F1F0EE" />Créer un patron</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
                 </div>
               </button>
@@ -1869,7 +1777,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
 </div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="file" size={16} color="#F1F0EE" />Importer un patron PDF</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
                 </div>
               </button>
@@ -1911,7 +1819,7 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
             style={{ width: "100%", background: "#13131F", border: "1px solid #0891B244", borderRadius: 10, padding: "12px 14px", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
         </div>
         <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: configRangs ? 16 : 24 }}>
-          <span>{configRangs ? <Icon name="checkCircle" size={16} color="#22D3EE" /> : <Icon name="square" size={16} color="#6B6A7A" />}</span>
+          <span>{configRangs ? "✅" : "⬜"}</span>
           <span>Configurer les rangs et parties</span>
         </button>
         {configRangs && (
@@ -2097,27 +2005,27 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="book" size={22} color="#A78BFA" /></button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={24} color="#A78BFA" /></button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 42, height: 42, display: "flex", alignItems: "center", justifyContent: "center", color: "#C4B5FD", cursor: "pointer" }}><IconLibrary size={24} /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 42, height: 42, display: "flex", alignItems: "center", justifyContent: "center", color: "#C4B5FD", cursor: "pointer" }}><IconSettings size={24} /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
         <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
           {["personal", "pro"].map(m => (
             <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease" }}>
-              {m === "personal" ? "Personnel" : "Professionnel"}
+              {m === "personal" ? "🧵 Personnel" : "💼 Professionnel"}
             </button>
           ))}
         </div>
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: <Icon name="grid" size={20} color="#A78BFA" /> },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={20} color="#22D3EE" /> },
-            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={20} color="#34D399" /> },
+            { label: "Projets", value: projects.length, icon: <IconGrid size={22} /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <IconBars size={22} /> },
+            { label: "Terminés", value: termines, icon: <IconCheckBadge size={22} /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
-              <div style={{ height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
+              <div style={{ fontSize: 0, display: "flex", alignItems: "center", justifyContent: "center", minHeight: 24, color: stat.label === "Projets" ? "#C4B5FD" : stat.label === "Rangs" ? "#22D3EE" : "#86EFAC" }}>{stat.icon}</div>
               <div style={{ color: "#F1F0EE", fontWeight: 700, fontSize: 14, marginTop: 2 }}>{stat.value}</div>
               <div style={{ color: "#6B6A7A", fontSize: 10, marginTop: 1 }}>{stat.label}</div>
             </div>
@@ -2125,7 +2033,7 @@ export default function KaleidoHub() {
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px", marginBottom: 8 }}>
-          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="search" size={16} color="#6B6A7A" /></span>
+          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><IconSearch size={18} /></span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un projet..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif" }} />
         </div>
@@ -2229,7 +2137,8 @@ export default function KaleidoHub() {
         <div onClick={() => setShowSettingsModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430 }}>
             <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
-            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}><Icon name="settings" size={18} color="#A78BFA" />Paramètres</h2>
+            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>
+ Paramètres</h2>
             {/* Export — télécharge un fichier .json */}
             <button onClick={async () => {
               try {
@@ -2251,7 +2160,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="book" tone="violet" size={24} />
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}><IconLibrary size={25} /></div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2259,7 +2168,7 @@ export default function KaleidoHub() {
             </button>
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <IconBadge name="bookOpen" tone="green" size={24} />
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}><IconBookOpen size={25} /></div>
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
@@ -2301,9 +2210,9 @@ export default function KaleidoHub() {
               {(database.patrons || []).length > 0 && (
                 <button onClick={() => { setShowNewMenu(false); setShowSelectPatronModal(true); }}
                   style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", textAlign: "left" }}>
-                  <IconBadge name="bookOpen" tone="green" size={24} />
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📥</div>
                   <div>
-                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Choisir un patron</div>
+                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Choisir un patron</div>
                     <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>{(database.patrons || []).length} patron{(database.patrons||[]).length > 1 ? 's' : ''} dans ta bibliothèque</div>
                   </div>
                 </button>
@@ -2311,9 +2220,9 @@ export default function KaleidoHub() {
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <IconBadge name="book" tone="violet" size={24} />
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>💾</div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Aller à la bibliothèque</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
                 </div>
               </button>
