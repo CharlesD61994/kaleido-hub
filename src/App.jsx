@@ -164,6 +164,17 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
           <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
         </svg>
       );
+    case "projects":
+      return (
+        <svg {...common}>
+          <rect x="4.5" y="5" width="11" height="14" rx="2.2" />
+          <path d="M8 9h4" />
+          <path d="M8 12.5h4.5" />
+          <path d="M16.5 8.5h3" />
+          <path d="M16.5 12h3" />
+          <path d="M16.5 15.5h3" />
+        </svg>
+      );
     case "chart":
       return (
         <svg {...common}>
@@ -1803,7 +1814,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={22} color="#A78BFA" />Bibliothèque</span></span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={26} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
             <span style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "monospace" }}>{patrons.length} patron{patrons.length !== 1 ? 's' : ''}</span>
@@ -2106,7 +2117,7 @@ export default function KaleidoHub() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="book" size={22} color="#A78BFA" /></button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={24} color="#A78BFA" /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={28} color="#A78BFA" /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
@@ -2120,9 +2131,9 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: <Icon name="grid" size={20} color="#A78BFA" /> },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={20} color="#22D3EE" /> },
-            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={20} color="#34D399" /> },
+            { label: "Projets", value: projects.length, icon: <Icon name="projects" size={24} color="#A78BFA" /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={24} color="#22D3EE" /> },
+            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={24} color="#34D399" /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
