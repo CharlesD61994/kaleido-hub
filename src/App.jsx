@@ -732,10 +732,9 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
     setTempNom(partie.nom || "Nouvelle partie");
   }, [partie.nom]);
   const handleSaveNom = () => {
-    const cleanNom = (tempNom || "").trim();
-    const finalNom = cleanNom || "Nouvelle partie";
-    onUpdate(partie.id, { nom: finalNom });
+    const finalNom = (tempNom || "").trim() || "Nouvelle partie";
     setTempNom(finalNom);
+    onUpdate(partie.id, { nom: finalNom });
     setIsEditingNom(false);
   };
   const handleCancelNom = () => {
@@ -995,6 +994,18 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
   const currentPartieColor = currentPartie
     ? KALEIDOSCOPE_COLORS[currentPartie.colorIdx % KALEIDOSCOPE_COLORS.length]
     : KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
+  const currentPartieDisplayRang = currentPartie ? (() => {
+    if (!currentRang) return 1;
+    const countableRangs = allRangs.filter(r => r.partieId === currentPartie.id && !r.isNote);
+    const directIdx = countableRangs.findIndex(r => r.id === currentRang.id);
+    if (directIdx !== -1) return directIdx + 1;
+    const currentGlobalIndex = allRangs.findIndex(r => r.globalId === currentRang.globalId);
+    const beforeOrAt = countableRangs.filter(r => {
+      const idx = allRangs.findIndex(x => x.globalId === r.globalId);
+      return idx !== -1 && idx <= currentGlobalIndex;
+    }).length;
+    return Math.max(1, beforeOrAt || 1);
+  })() : 1;
   const getPartieFirstCountableGlobalId = (partieId) => {
     if (!partieId) return null;
     const firstCountable = allRangs.find(r => r.partieId === partieId && !r.isNote);
@@ -1139,7 +1150,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 20, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
           <div style={{ background: `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, borderRadius: 12, padding: "10px 16px", display: "inline-block", marginBottom: 12, boxShadow: `0 4px 16px ${currentPartieColor.bg}66` }}>
-            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${Math.max(1, currentPartieRangIndex + 1)}`}</span>
+            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${currentPartieDisplayRang}`}</span>
           </div>
           <div style={{ color: "#F1F0EE", fontSize: 19, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, padding: "0 8px", marginBottom: 10 }}>{currentRang?.instruction}</div>
           {currentRang?.mailles && (
