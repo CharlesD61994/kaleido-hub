@@ -2116,8 +2116,8 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="book" size={22} color="#A78BFA" /></button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={28} color="#A78BFA" /></button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="library" size={24} stroke={2.2} color="#A78BFA" /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={30} stroke={2.1} color="#A78BFA" /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
@@ -2131,12 +2131,12 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: <Icon name="projects" size={24} color="#A78BFA" /> },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={24} color="#22D3EE" /> },
-            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={24} color="#34D399" /> },
+            { label: "Projets", value: projects.length, icon: <Icon name="projects" size={28} stroke={2.2} color="#A78BFA" /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={28} stroke={2.2} color="#22D3EE" /> },
+            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={28} stroke={2.2} color="#34D399" /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
-              <div style={{ height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
+              <div style={{ height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
               <div style={{ color: "#F1F0EE", fontWeight: 700, fontSize: 14, marginTop: 2 }}>{stat.value}</div>
               <div style={{ color: "#6B6A7A", fontSize: 10, marginTop: 1 }}>{stat.label}</div>
             </div>
@@ -2270,7 +2270,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="book" tone="violet" size={24} />
+              <IconBadge name="library" tone="violet" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2330,7 +2330,7 @@ export default function KaleidoHub() {
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <IconBadge name="book" tone="violet" size={24} />
+                <IconBadge name="library" tone="violet" size={24} />
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
