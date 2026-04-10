@@ -27,12 +27,21 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
 
   switch (name) {
     case "library":
+    case "book":
       return (
         <svg {...common}>
-          <path d="M4 6.5c0-1.1.9-2 2-2h11.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5Z" />
-          <path d="M8 4.5v15" />
-          <path d="M11.5 8.5h5" />
-          <path d="M11.5 12h5" />
+          <path d="M6.5 5.5A2.5 2.5 0 0 1 9 3h8.5v17H9a2.5 2.5 0 0 0-2.5 2" />
+          <path d="M6.5 5.5v15" />
+          <path d="M9.5 7.5h5.5" />
+          <path d="M9.5 11h5.5" />
+        </svg>
+      );
+    case "bookOpen":
+      return (
+        <svg {...common}>
+          <path d="M12 6.5c-1.5-1.2-3.4-1.8-5.5-1.8H4.5V18h2c2.1 0 4 .6 5.5 1.8" />
+          <path d="M12 6.5c1.5-1.2 3.4-1.8 5.5-1.8h2V18h-2c-2.1 0-4 .6-5.5 1.8" />
+          <path d="M12 6.5V19.8" />
         </svg>
       );
     case "settings":
@@ -77,9 +86,12 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
     case "yarn":
       return (
         <svg {...common}>
-          <path d="M8.2 6.2c-2.5 2-3.2 5.2-1.7 7.2 1.8 2.4 5.6 2.5 8.6.2 2.9-2.2 3.9-5.8 2.1-8.2-1.5-2-4.7-2.1-7.3-.5" />
-          <path d="M9.2 8.5c1.6-1.2 3.5-1.3 4.4-.1 1 1.3.4 3.4-1.2 4.7-1.6 1.2-3.6 1.3-4.5 0-1-1.2-.4-3.3 1.3-4.6Z" />
-          <path d="M5 18c1.5.2 2.6 1 3.5 2.5" />
+          <circle cx="12" cy="11.5" r="6.8" />
+          <path d="M7.8 8.8c1.1-.9 2.6-1.4 4.2-1.4 1.8 0 3.4.6 4.5 1.7" />
+          <path d="M6.8 11.7c1.4-1.2 3.2-1.9 5.2-1.9 2 0 3.7.7 5.1 2" />
+          <path d="M7.6 14.7c1.2-.8 2.7-1.3 4.4-1.3 1.7 0 3.2.4 4.5 1.3" />
+          <path d="M8 18.2c1.2-.7 2.5-1 4-1" />
+          <path d="M5.6 17.9c1.9.1 3.5.9 4.9 2.6" />
         </svg>
       );
     case "note":
@@ -165,6 +177,13 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
         <svg {...common}>
           <path d="M4.5 8.5h3l1.2-2h6.6l1.2 2h3a1.8 1.8 0 0 1 1.8 1.8v7.2a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.2A1.8 1.8 0 0 1 4.5 8.5Z" />
           <circle cx="12" cy="13" r="3.2" />
+        </svg>
+      );
+    case "undo":
+      return (
+        <svg {...common}>
+          <path d="M9 9 5.5 12.5 9 16" />
+          <path d="M6 12.5h7a4.5 4.5 0 1 1 0 9h-2.5" />
         </svg>
       );
     case "alert":
@@ -339,7 +358,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={30} color="#F8F7FF" /></span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -371,15 +390,15 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: <Icon name="edit" size={16} color="#E2E0DC" />, label: "Renommer", action: onRename },
-          { icon: <Icon name="image" size={16} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
+          { icon: <Icon name="edit" size={21} color="#E2E0DC" />, label: "Renommer", action: onRename },
+          { icon: <Icon name="image" size={21} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
-          <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+          <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
           </button>
         ))}
         {/* Couleur de la bulle */}
-        <button onClick={() => setShowColors(s => !s)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+        <button onClick={() => setShowColors(s => !s)} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
           <div style={{ width: 18, height: 18, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, flexShrink: 0 }} />
           <span>Couleur de la bulle</span>
         </button>
@@ -391,8 +410,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
             ))}
           </div>
         )}
-        <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
-          <span><Icon name="trash" size={16} color="#F87171" /></span><span>Supprimer</span>
+        <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+          <span><Icon name="trash" size={21} color="#F87171" /></span><span>Supprimer</span>
         </button>
       </div>
     </>
@@ -610,7 +629,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
           </div>
         </div>
         <div style={{ position: "absolute", top: 12, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 0.3s ease", zIndex: 10 }}>
-          <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}>↩</button>
+          <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}><Icon name="undo" size={16} color="#fff" /></button>
           <button onClick={e => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
         </div>
       </div>
@@ -1116,7 +1135,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="upload" tone="slate" size={22} badgeSize={56} /></div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="undo" tone="slate" size={22} badgeSize={56} /></div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -1776,7 +1795,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={18} color="#A78BFA" />Bibliothèque</span></span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="book" size={22} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
             <span style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "monospace" }}>{patrons.length} patron{patrons.length !== 1 ? 's' : ''}</span>
@@ -2078,8 +2097,8 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="library" size={18} color="#A78BFA" /></button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={21} color="#A78BFA" /></button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="book" size={22} color="#A78BFA" /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={24} color="#A78BFA" /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
@@ -2093,9 +2112,9 @@ export default function KaleidoHub() {
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: <Icon name="grid" size={14} color="#A78BFA" /> },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={14} color="#22D3EE" /> },
-            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={14} color="#34D399" /> },
+            { label: "Projets", value: projects.length, icon: <Icon name="grid" size={20} color="#A78BFA" /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={20} color="#22D3EE" /> },
+            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={20} color="#34D399" /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
               <div style={{ height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
@@ -2232,7 +2251,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="download" tone="violet" size={22} />
+              <IconBadge name="book" tone="violet" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2240,7 +2259,7 @@ export default function KaleidoHub() {
             </button>
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <IconBadge name="upload" tone="green" size={22} />
+              <IconBadge name="bookOpen" tone="green" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
@@ -2282,9 +2301,9 @@ export default function KaleidoHub() {
               {(database.patrons || []).length > 0 && (
                 <button onClick={() => { setShowNewMenu(false); setShowSelectPatronModal(true); }}
                   style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", textAlign: "left" }}>
-                  <IconBadge name="upload" tone="green" size={22} />
+                  <IconBadge name="bookOpen" tone="green" size={24} />
                   <div>
-                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="library" size={16} color="#F1F0EE" />Choisir un patron</div>
+                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Choisir un patron</div>
                     <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>{(database.patrons || []).length} patron{(database.patrons||[]).length > 1 ? 's' : ''} dans ta bibliothèque</div>
                   </div>
                 </button>
@@ -2292,9 +2311,9 @@ export default function KaleidoHub() {
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <IconBadge name="download" tone="violet" size={22} />
+                <IconBadge name="book" tone="violet" size={24} />
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="library" size={16} color="#F1F0EE" />Aller à la bibliothèque</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
                 </div>
               </button>
