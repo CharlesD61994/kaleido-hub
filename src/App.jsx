@@ -134,17 +134,17 @@ const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
     case "download":
       return (
         <svg {...common}>
-          <path d="M12 3v12" />
-          <path d="M7 10l5 5 5-5" />
-          <path d="M5 21h14" />
+          <path d="M12 4v10" />
+          <path d="m8.5 10.5 3.5 3.5 3.5-3.5" />
+          <path d="M5 19.5h14" />
         </svg>
       );
     case "upload":
       return (
         <svg {...common}>
-          <path d="M12 21V9" />
-          <path d="M17 14l-5-5-5 5" />
-          <path d="M5 3h14" />
+          <path d="M12 20V10" />
+          <path d="m8.5 13.5 3.5-3.5 3.5 3.5" />
+          <path d="M5 4.5h14" />
         </svg>
       );
     case "sparkles":
@@ -2270,7 +2270,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <IconBadge name="library" tone="violet" size={24} />
+              <IconBadge name="download" tone="violet" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2278,7 +2278,7 @@ export default function KaleidoHub() {
             </button>
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <IconBadge name="bookOpen" tone="green" size={24} />
+              <IconBadge name="upload" tone="green" size={24} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
