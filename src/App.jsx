@@ -376,36 +376,8 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "8px 4px", cursor: "pointer" }}
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
-        <div style={{
-          position: "absolute",
-          inset: 6,
-          borderRadius: "50%",
-          background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`,
-          border: `2px solid ${color.light}44`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          boxShadow: `0 4px 18px ${color.bg}66`
-        }}>
-          {project.image ? (
-            <img
-              src={project.image}
-              alt={project.name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center center",
-                borderRadius: "50%",
-                display: "block"
-              }}
-            />
-          ) : (
-            <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="yarn" size={34} color="#F8F7FF" />
-            </span>
-          )}
+        <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
