@@ -377,7 +377,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "84%", height: "84%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
+          {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -473,9 +473,9 @@ function DeleteModal({ project, onConfirm, onClose }) {
 // PHOTO CROP MODAL
 // ═══════════════════════════════════════════════════════════════
 function PhotoCropModal({ onClose, onConfirm, existingImage }) {
-  const [imgSrc, setImgSrc] = useState(existingImage || null);
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
+  const [imgSrc, setImgSrc] = useState(existingImage?.src || existingImage || null);
+  const [pos, setPos] = useState(existingImage?.pos || { x: 0, y: 0 });
+  const [scale, setScale] = useState(existingImage?.scale || 1);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const lastTouch = useRef(null);
@@ -544,7 +544,12 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
         (OUT - h) / 2 + pos.y * (OUT / CROP_SIZE),
         w, h
       );
-      onConfirm(canvas.toDataURL('image/png'));
+      onConfirm({
+        src: imgSrc,
+        pos,
+        scale,
+        preview: canvas.toDataURL('image/png')
+      });
     };
     img.src = imgSrc;
   };
@@ -749,7 +754,7 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
             {isEditingNom
-              ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSaveNom()} onBlur={handleSaveNom} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
+              ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { setTempNom(partie.nom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
               : <h3 onClick={() => setIsEditingNom(true)} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{partie.nom}</h3>
             }
           </div>
