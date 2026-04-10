@@ -727,19 +727,25 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
   const [isEditingNom, setIsEditingNom] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [tempNom, setTempNom] = useState(partie.nom);
+  const [displayNom, setDisplayNom] = useState(partie.nom || "Nouvelle partie");
   const color = KALEIDOSCOPE_COLORS[partie.colorIdx % KALEIDOSCOPE_COLORS.length];
   useEffect(() => {
-    setTempNom(partie.nom || "");
+    const syncedNom = partie.nom || "Nouvelle partie";
+    setTempNom(syncedNom);
+    setDisplayNom(syncedNom);
   }, [partie.nom]);
   const handleSaveNom = () => {
     const cleanNom = (tempNom || "").trim();
-    onUpdate(partie.id, { nom: cleanNom || partie.nom || "Nouvelle partie" });
+    const finalNom = cleanNom || "Nouvelle partie";
+    setTempNom(finalNom);
+    setDisplayNom(finalNom);
+    onUpdate(partie.id, { nom: finalNom });
     setIsEditingNom(false);
   };
   const handleStartEditNom = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setTempNom(partie.nom || "");
+    setTempNom(displayNom || partie.nom || "Nouvelle partie");
     setIsEditingNom(true);
   };
   const act = (e, fn) => { e.preventDefault(); e.stopPropagation(); fn(); };
@@ -767,8 +773,8 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
             {isEditingNom
-              ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { setTempNom(partie.nom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
-              : <h3 onClick={() => setIsEditingNom(true)} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{partie.nom}</h3>
+              ? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); onUpdate(partie.id, { nom: nextNom || "Nouvelle partie" }); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || displayNom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); onUpdate(partie.id, { nom: fallbackNom }); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
+              : <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{displayNom}</h3>
             }
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
@@ -1131,7 +1137,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
       <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
         <div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 20, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
           <div style={{ background: `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, borderRadius: 12, padding: "10px 16px", display: "inline-block", marginBottom: 12, boxShadow: `0 4px 16px ${currentPartieColor.bg}66` }}>
-            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${currentCountIndex + 1}`}</span>
+            <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${Math.max(1, currentPartieRangIndex + 1)}`}</span>
           </div>
           <div style={{ color: "#F1F0EE", fontSize: 19, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5, padding: "0 8px", marginBottom: 10 }}>{currentRang?.instruction}</div>
           {currentRang?.mailles && (
