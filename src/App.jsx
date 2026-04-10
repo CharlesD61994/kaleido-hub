@@ -10,6 +10,203 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#C4B5FD" },
   { bg: "#BE185D", light: "#F9A8D4" },
 ];
+
+const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: color,
+    strokeWidth: stroke,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style,
+    "aria-hidden": true,
+  };
+
+  switch (name) {
+    case "library":
+      return (
+        <svg {...common}>
+          <path d="M4 6.5c0-1.1.9-2 2-2h11.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5Z" />
+          <path d="M8 4.5v15" />
+          <path d="M11.5 8.5h5" />
+          <path d="M11.5 12h5" />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="3.2" />
+          <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.7-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.7 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .7.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.7Z" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4 4" />
+        </svg>
+      );
+    case "edit":
+      return (
+        <svg {...common}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L8 18l-4 1 1-4 11.5-11.5Z" />
+        </svg>
+      );
+    case "image":
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+          <circle cx="9" cy="10" r="1.3" />
+          <path d="m20.5 16-4.5-4.5L7 20" />
+        </svg>
+      );
+    case "trash":
+      return (
+        <svg {...common}>
+          <path d="M3 6h18" />
+          <path d="M8 6V4.8A1.8 1.8 0 0 1 9.8 3h4.4A1.8 1.8 0 0 1 16 4.8V6" />
+          <path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14" />
+          <path d="M10 10v7" />
+          <path d="M14 10v7" />
+        </svg>
+      );
+    case "yarn":
+      return (
+        <svg {...common}>
+          <path d="M8.2 6.2c-2.5 2-3.2 5.2-1.7 7.2 1.8 2.4 5.6 2.5 8.6.2 2.9-2.2 3.9-5.8 2.1-8.2-1.5-2-4.7-2.1-7.3-.5" />
+          <path d="M9.2 8.5c1.6-1.2 3.5-1.3 4.4-.1 1 1.3.4 3.4-1.2 4.7-1.6 1.2-3.6 1.3-4.5 0-1-1.2-.4-3.3 1.3-4.6Z" />
+          <path d="M5 18c1.5.2 2.6 1 3.5 2.5" />
+        </svg>
+      );
+    case "note":
+      return (
+        <svg {...common}>
+          <path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
+          <path d="M14 3.5V8h4" />
+          <path d="M9 12h6" />
+          <path d="M9 15.5h6" />
+        </svg>
+      );
+    case "file":
+      return (
+        <svg {...common}>
+          <path d="M8 3.5h6l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20V5A1.5 1.5 0 0 1 7.5 3.5Z" />
+          <path d="M14 3.5V8h4" />
+        </svg>
+      );
+    case "checkCircle":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="m8.7 12 2.2 2.3 4.5-4.8" />
+        </svg>
+      );
+    case "square":
+      return (
+        <svg {...common}>
+          <rect x="4.5" y="4.5" width="15" height="15" rx="3" />
+        </svg>
+      );
+    case "download":
+      return (
+        <svg {...common}>
+          <path d="M12 4v10" />
+          <path d="m8.5 10.5 3.5 3.5 3.5-3.5" />
+          <path d="M5 19.5h14" />
+        </svg>
+      );
+    case "upload":
+      return (
+        <svg {...common}>
+          <path d="M12 20V10" />
+          <path d="m8.5 13.5 3.5-3.5 3.5 3.5" />
+          <path d="M5 4.5h14" />
+        </svg>
+      );
+    case "sparkles":
+      return (
+        <svg {...common}>
+          <path d="m12 3 1.1 3.3L16.5 7.5l-3.4 1.2L12 12l-1.1-3.3L7.5 7.5l3.4-1.2L12 3Z" />
+          <path d="m18.5 13.5.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z" />
+          <path d="m5.5 14.5.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1Z" />
+        </svg>
+      );
+    case "grid":
+      return (
+        <svg {...common}>
+          <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" />
+          <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" />
+          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" />
+          <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" />
+        </svg>
+      );
+    case "chart":
+      return (
+        <svg {...common}>
+          <path d="M5 19.5h14" />
+          <path d="M7.5 16V11" />
+          <path d="M12 16V7.5" />
+          <path d="M16.5 16v-5" />
+        </svg>
+      );
+    case "checkBadge":
+      return (
+        <svg {...common}>
+          <path d="M12 3.5 9.8 5 7 4.6l-.8 2.7L4 9l1.5 2.4-.2 2.8 2.7.8L9.7 17l2.3 1.5 2.3-1.5 2.7.4.8-2.7L20 15l-.4-2.7L21 9.9l-2.1-1.6-.8-2.7-2.8.4L12 3.5Z" />
+          <path d="m9.3 12 1.7 1.8 3.7-4" />
+        </svg>
+      );
+    case "camera":
+      return (
+        <svg {...common}>
+          <path d="M4.5 8.5h3l1.2-2h6.6l1.2 2h3a1.8 1.8 0 0 1 1.8 1.8v7.2a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.2A1.8 1.8 0 0 1 4.5 8.5Z" />
+          <circle cx="12" cy="13" r="3.2" />
+        </svg>
+      );
+    case "alert":
+      return (
+        <svg {...common}>
+          <path d="M12 4 4.5 18h15L12 4Z" />
+          <path d="M12 9v4.5" />
+          <path d="M12 17h.01" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+const IconBadge = ({ name, size = 18, tone = "violet", background, color, badgeSize = 44 }) => {
+  const tones = {
+    violet: { background: "linear-gradient(135deg, #7C3AED, #A78BFA)", color: "#fff" },
+    pink: { background: "linear-gradient(135deg, #DB2777, #F472B6)", color: "#fff" },
+    blue: { background: "linear-gradient(135deg, #0891B2, #22D3EE)", color: "#fff" },
+    green: { background: "linear-gradient(135deg, #059669, #34D399)", color: "#fff" },
+    amber: { background: "linear-gradient(135deg, #D97706, #FCD34D)", color: "#fff" },
+    slate: { background: "linear-gradient(135deg, #2A2A3E, #4C4C6A)", color: "#fff" },
+  };
+  const resolved = tones[tone] || tones.violet;
+  return (
+    <div style={{
+      width: badgeSize,
+      height: badgeSize,
+      borderRadius: 12,
+      background: background || resolved.background,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
+    }}>
+      <Icon name={name} size={size} color={color || resolved.color} />
+    </div>
+  );
+};
+
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
@@ -142,7 +339,7 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
       onClick={() => onProjectClick && onProjectClick(project)}>
       <div style={{ position: "relative", width: size, height: size }}>
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, border: `2px solid ${color.light}44`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", boxShadow: `0 4px 18px ${color.bg}66` }}>
-          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ fontSize: "clamp(24px, 8vw, 34px)" }}>🧶</span>}
+          {project.image ? <img src={project.image} alt={project.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", padding: "4px" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={30} color="#F8F7FF" /></span>}
         </div>
         <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
@@ -174,8 +371,8 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
         </div>
         {[
-          { icon: "✏️", label: "Renommer", action: onRename },
-          { icon: "📷", label: "Changer la photo", action: onChangePhoto },
+          { icon: <Icon name="edit" size={16} color="#E2E0DC" />, label: "Renommer", action: onRename },
+          { icon: <Icon name="image" size={16} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
         ].map(item => (
           <button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
             <span>{item.icon}</span><span>{item.label}</span>
@@ -195,7 +392,7 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           </div>
         )}
         <button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
-          <span>🗑️</span><span>Supprimer</span>
+          <span><Icon name="trash" size={16} color="#F87171" /></span><span>Supprimer</span>
         </button>
       </div>
     </>
@@ -311,7 +508,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}>
       {!imgSrc ? (
         <div style={{ textAlign: "center", padding: 32 }}>
-          <div style={{ fontSize: 60, marginBottom: 20 }}>📷</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><IconBadge name="camera" tone="pink" size={28} badgeSize={64} /></div>
           <h3 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>Ajouter une photo</h3>
           <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 28px" }}>Choisis une photo depuis ta galerie</p>
           <label style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", borderRadius: 16, padding: "14px 32px", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "inline-block" }}>
@@ -388,7 +585,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
           <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
-            <span style={{ fontSize: 16 }}>📝</span>
+            <Icon name="note" size={16} color="#FCD34D" />
           </div>
           <div style={{ flex: 1 }}>
             {isEditing ? (
@@ -456,7 +653,7 @@ function RangItem({ rang, rangIndex, onUpdate, onDelete, onDuplicate, onMoveUp, 
         </div>
       </div>
       <div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 72 }}>
-        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}>📝</button>
+        <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}><Icon name="note" size={15} color="#fff" /></button>
         <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
         <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
       </div>
@@ -768,7 +965,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
       </div>
       <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IconBadge name="yarn" tone="violet" size={24} badgeSize={52} /></div>
         <div style={{ fontSize: 16, marginBottom: 8, color: "#F1F0EE" }}>Aucun patron créé</div>
         <div style={{ fontSize: 13, marginBottom: 24 }}>Crée d'abord tes parties et rangs dans l'éditeur de patron</div>
         <button onClick={() => onNavigateEditor(project)} style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", borderRadius: 12, padding: "12px 24px", color: "#fff", fontSize: 14, cursor: "pointer", fontWeight: 600 }}>Ouvrir l'éditeur</button>
@@ -889,7 +1086,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>🎉</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="sparkles" tone="amber" size={24} badgeSize={56} /></div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Partie terminée !</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux passer à la partie suivante ?</p>
@@ -919,7 +1116,7 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
         return (
           <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <div style={{ background: "#1A1A2E", borderRadius: 24, padding: 28, width: "100%", maxWidth: 360, textAlign: "center", border: `1px solid ${currentPartieColor.light}33` }}>
-              <div style={{ fontSize: 42, marginBottom: 12 }}>↩️</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><IconBadge name="upload" tone="slate" size={22} badgeSize={56} /></div>
               <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Revenir en arrière ?</div>
               <h2 style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "'Syne', sans-serif", margin: "0 0 8px" }}>{currentPartie?.nom}</h2>
               <p style={{ color: "#6B6A7A", fontSize: 14, margin: "0 0 24px" }}>Tu veux retourner à la partie précédente ?</p>
@@ -986,7 +1183,7 @@ function ImportPdfModal({ onClose, onCreate }) {
         <div style={{ marginBottom: 20 }}>
           <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Fichier PDF</label>
           <label style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: pdfData ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px dashed ${pdfData ? "#22D3EE" : "#0891B244"}`, borderRadius: 10, cursor: "pointer" }}>
-            <span style={{ fontSize: 22 }}>{loading ? "⏳" : pdfData ? "✅" : "📄"}</span>
+            <span style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>{loading ? <Icon name="settings" size={18} color="#22D3EE" style={{ opacity: 0.9 }} /> : pdfData ? <Icon name="checkCircle" size={18} color="#22D3EE" /> : <Icon name="file" size={18} color="#6B6A7A" />}</span>
             <div>
               <div style={{ color: pdfData ? "#22D3EE" : "#6B6A7A", fontSize: 14, fontWeight: pdfData ? 600 : 400 }}>
                 {loading ? "Chargement..." : pdfData ? pdfName : "Appuyer pour choisir un PDF"}
@@ -999,7 +1196,7 @@ function ImportPdfModal({ onClose, onCreate }) {
         {/* Toggle configurer rangs */}
         <div style={{ marginBottom: configRangs ? 16 : 24 }}>
           <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, fontFamily: "'DM Sans', sans-serif" }}>
-            <span>{configRangs ? "✅" : "⬜"}</span>
+            <span>{configRangs ? <Icon name="checkCircle" size={16} color="#22D3EE" /> : <Icon name="square" size={16} color="#6B6A7A" />}</span>
             <span>Configurer les rangs et parties <span style={{ color: "#6B6A7A", fontSize: 12 }}>(optionnel)</span></span>
           </button>
         </div>
@@ -1579,8 +1776,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
- Bibliothèque</span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={18} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
             <span style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "monospace" }}>{patrons.length} patron{patrons.length !== 1 ? 's' : ''}</span>
@@ -1588,7 +1784,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px" }}>
-          <span style={{ color: "#6B6A7A" }}>🔍</span>
+          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="search" size={16} color="#6B6A7A" /></span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un patron..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 16 }} />
         </div>
@@ -1597,7 +1793,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       <div style={{ padding: "12px 6px 100px" }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: "center", color: "#6B6A7A", padding: "60px 20px" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🧶</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IconBadge name="yarn" tone="violet" size={24} badgeSize={52} /></div>
             <div style={{ fontSize: 16, color: "#F1F0EE", marginBottom: 8 }}>Aucun patron</div>
             <div style={{ fontSize: 13 }}>Crée ou importe un patron avec le bouton +</div>
           </div>
@@ -1643,16 +1839,18 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
             <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>Nouveau patron</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <button onClick={() => { setShowNewMenu(false); onNewCustomPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #DB277722)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>✍️</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Créer un patron</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={16} color="#F1F0EE" />Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
                 </div>
               </button>
               <button onClick={() => { setShowNewMenu(false); onNewPdfPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #0891B222, #22D3EE22)", border: "1px solid #0891B244", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📄</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+</div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Importer un patron PDF</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="file" size={16} color="#F1F0EE" />Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
                 </div>
               </button>
@@ -1694,7 +1892,7 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
             style={{ width: "100%", background: "#13131F", border: "1px solid #0891B244", borderRadius: 10, padding: "12px 14px", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
         </div>
         <button onClick={() => setConfigRangs(r => !r)} style={{ width: "100%", padding: "12px 16px", borderRadius: 12, background: configRangs ? "rgba(8,145,178,0.15)" : "#13131F", border: `1px solid ${configRangs ? "#22D3EE44" : "#ffffff11"}`, color: configRangs ? "#22D3EE" : "#6B6A7A", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: configRangs ? 16 : 24 }}>
-          <span>{configRangs ? "✅" : "⬜"}</span>
+          <span>{configRangs ? <Icon name="checkCircle" size={16} color="#22D3EE" /> : <Icon name="square" size={16} color="#6B6A7A" />}</span>
           <span>Configurer les rangs et parties</span>
         </button>
         {configRangs && (
@@ -1880,27 +2078,27 @@ export default function KaleidoHub() {
             <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 22, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Kaleido</span>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer" }}>📚</button>
-            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22 }}>⚙️</button>
+            <button onClick={navigateToLibrary} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", cursor: "pointer" }}><Icon name="library" size={18} color="#A78BFA" /></button>
+            <button onClick={() => setShowSettingsModal(true)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA" }}><Icon name="settings" size={21} color="#A78BFA" /></button>
           </div>
         </div>
         {/* Toggle Personnel / Professionnel */}
         <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
           {["personal", "pro"].map(m => (
             <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease" }}>
-              {m === "personal" ? "🧵 Personnel" : "💼 Professionnel"}
+              {m === "personal" ? "Personnel" : "Professionnel"}
             </button>
           ))}
         </div>
         {/* Stats */}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {[
-            { label: "Projets", value: projects.length, icon: "📋" },
-            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: "📊" },
-            { label: "Terminés", value: termines, icon: "✅" },
+            { label: "Projets", value: projects.length, icon: <Icon name="grid" size={14} color="#A78BFA" /> },
+            { label: "Rangs", value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={14} color="#22D3EE" /> },
+            { label: "Terminés", value: termines, icon: <Icon name="checkBadge" size={14} color="#34D399" /> },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, background: "#1E1E3288", borderRadius: 12, padding: "8px 8px", textAlign: "center" }}>
-              <div style={{ fontSize: 14 }}>{stat.icon}</div>
+              <div style={{ height: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>{stat.icon}</div>
               <div style={{ color: "#F1F0EE", fontWeight: 700, fontSize: 14, marginTop: 2 }}>{stat.value}</div>
               <div style={{ color: "#6B6A7A", fontSize: 10, marginTop: 1 }}>{stat.label}</div>
             </div>
@@ -1908,7 +2106,7 @@ export default function KaleidoHub() {
         </div>
         {/* Recherche */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#1E1E32", borderRadius: 12, padding: "10px 14px", marginBottom: 8 }}>
-          <span style={{ color: "#6B6A7A" }}>🔍</span>
+          <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="search" size={16} color="#6B6A7A" /></span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un projet..."
             style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", flex: 1, fontFamily: "'DM Sans', sans-serif" }} />
         </div>
@@ -2012,7 +2210,7 @@ export default function KaleidoHub() {
         <div onClick={() => setShowSettingsModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
           <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430 }}>
             <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
-            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center" }}>⚙️ Paramètres</h2>
+            <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}><Icon name="settings" size={18} color="#A78BFA" />Paramètres</h2>
             {/* Export — télécharge un fichier .json */}
             <button onClick={async () => {
               try {
@@ -2034,7 +2232,7 @@ export default function KaleidoHub() {
                 URL.revokeObjectURL(url);
               } catch(e) { alert('Erreur export : ' + e.message); }
             }} style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📚</div>
+              <IconBadge name="download" tone="violet" size={22} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Exporter mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
@@ -2042,7 +2240,7 @@ export default function KaleidoHub() {
             </button>
             {/* Import — charge depuis un fichier .json */}
             <label style={{ width: "100%", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📥</div>
+              <IconBadge name="upload" tone="green" size={22} />
               <div style={{ textAlign: "left" }}>
                 <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 2 }}>Importer mes données</div>
                 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Charge un fichier <strong style={{ color: "#34D399" }}>.json</strong> pour tout restaurer</div>
@@ -2084,9 +2282,9 @@ export default function KaleidoHub() {
               {(database.patrons || []).length > 0 && (
                 <button onClick={() => { setShowNewMenu(false); setShowSelectPatronModal(true); }}
                   style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", textAlign: "left" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📥</div>
+                  <IconBadge name="upload" tone="green" size={22} />
                   <div>
-                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Choisir un patron</div>
+                    <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="library" size={16} color="#F1F0EE" />Choisir un patron</div>
                     <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>{(database.patrons || []).length} patron{(database.patrons||[]).length > 1 ? 's' : ''} dans ta bibliothèque</div>
                   </div>
                 </button>
@@ -2094,9 +2292,9 @@ export default function KaleidoHub() {
               {/* Aller créer un patron */}
               <button onClick={() => { setShowNewMenu(false); navigateToLibrary(); }}
                 style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #A78BFA22)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>📚</div>
+                <IconBadge name="download" tone="violet" size={22} />
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Aller à la bibliothèque</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="library" size={16} color="#F1F0EE" />Aller à la bibliothèque</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Crée ou importe un patron d'abord</div>
                 </div>
               </button>
