@@ -773,7 +773,7 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
             {isEditingNom
-              ? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
+              ? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); onUpdate(partie.id, { nom: nextNom || "Nouvelle partie" }); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || displayNom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); onUpdate(partie.id, { nom: fallbackNom }); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
               : <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{displayNom}</h3>
             }
           </div>
@@ -1934,7 +1934,8 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <button onClick={() => { setShowNewMenu(false); onNewCustomPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #DB277722)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-</div>
+                  <Icon name="edit" size={22} color="#fff" />
+                </div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={16} color="#F1F0EE" />Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
@@ -1942,7 +1943,8 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
               </button>
               <button onClick={() => { setShowNewMenu(false); onNewPdfPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #0891B222, #22D3EE22)", border: "1px solid #0891B244", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-</div>
+                  <Icon name="file" size={22} color="#fff" />
+                </div>
                 <div>
                   <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="file" size={16} color="#F1F0EE" />Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
@@ -2489,27 +2491,22 @@ export default function KaleidoHub() {
     const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
-      const normalizedPatron = normalizePatron(patron);
-      const errors = validatePatron(normalizedPatron);
+      const errors = validatePatron(patron);
       if (errors.length) {
         alert("Impossible de sauvegarder: le patron est invalide.");
-        console.warn("[KALEIDO] handleSave: patron invalide", errors, normalizedPatron);
+        console.warn("[KALEIDO] handleSave: patron invalide", errors, patron);
         return;
       }
 
-      const totalRangsNormalized = normalizedPatron.parties.reduce(
-        (s, p) => s + p.rangs.filter(r => !r.isNote).length,
-        0
-      );
-
-      setPatron(normalizedPatron);
-      backupPatronState("handleSave", normalizedPatron);
+      backupPatronState("handleSave", patron);
 
       if (isPatronMode) {
-        updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized });
+        // Sauvegarder dans la bibliothèque
+        updatePatron(currentPatron.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: totalRangsPatron });
         navigateToLibrary();
       } else {
-        updateProject(currentProject.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: Math.max(totalRangsNormalized, currentProject.total || 1) });
+        // Sauvegarder dans les projets
+        updateProject(currentProject.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: Math.max(totalRangsPatron, currentProject.total || 1) });
         navigateToHub();
       }
     };
@@ -2519,59 +2516,6 @@ export default function KaleidoHub() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     const safeArray = (value) => Array.isArray(value) ? value : [];
-
-    const normalizePatron = (candidate) => {
-      const base = candidate && typeof candidate === "object" ? candidate : {};
-      const partieIds = new Set();
-      const rangIds = new Set();
-      const normalizedParties = safeArray(base.parties).map((partie, partieIndex) => {
-        const rawPartie = partie && typeof partie === "object" ? partie : {};
-        let partieId = rawPartie.id;
-        if (partieId == null || partieIds.has(partieId)) {
-          partieId = `partie-${partieIndex}-${makeId()}`;
-        }
-        partieIds.add(partieId);
-
-        const normalizedRangs = safeArray(rawPartie.rangs).map((rang, rangIndex) => {
-          const rawRang = rang && typeof rang === "object" ? rang : {};
-          let rangId = rawRang.id;
-          if (rangId == null || rangIds.has(rangId)) {
-            rangId = `rang-${partieIndex}-${rangIndex}-${makeId()}`;
-          }
-          rangIds.add(rangId);
-          return {
-            ...rawRang,
-            id: rangId,
-            instruction: typeof rawRang.instruction === "string" ? rawRang.instruction : "",
-            mailles: rawRang.mailles ?? null,
-          };
-        });
-
-        return {
-          ...rawPartie,
-          id: partieId,
-          nom: (typeof rawPartie.nom === "string" && rawPartie.nom.trim()) ? rawPartie.nom : "Nouvelle partie",
-          colorIdx: Number.isInteger(rawPartie.colorIdx) ? rawPartie.colorIdx : (partieIndex % KALEIDOSCOPE_COLORS.length),
-          rangs: normalizedRangs,
-        };
-      });
-
-      return {
-        nom: typeof base.nom === "string" ? base.nom : (source?.name || "Nouveau patron"),
-        laine: typeof base.laine === "string" ? base.laine : "",
-        technique: typeof base.technique === "string" ? base.technique : (source?.type || "crochet"),
-        outil: typeof base.outil === "string" ? base.outil : "",
-        notes: typeof base.notes === "string" ? base.notes : "",
-        parties: normalizedParties,
-      };
-    };
-
-    useEffect(() => {
-      setPatron(prev => {
-        const normalized = normalizePatron(prev);
-        return JSON.stringify(prev) === JSON.stringify(normalized) ? prev : normalized;
-      });
-    }, []);
 
     const backupPatronState = (label, state) => {
       try {
@@ -2646,16 +2590,15 @@ export default function KaleidoHub() {
             return prev;
           }
 
-          const normalizedNext = normalizePatron(next);
-          const errors = validatePatron(normalizedNext);
+          const errors = validatePatron(next);
           if (errors.length) {
-            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, normalizedNext);
+            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
             return prev;
           }
 
           backupPatronState(label, prev);
           debug(`${label}: OK`);
-          return normalizedNext;
+          return next;
         } catch (e) {
           console.warn(`[KALEIDO] ${label}: exception`, e);
           return prev;
@@ -2867,7 +2810,7 @@ export default function KaleidoHub() {
               onMoveUp={id => movePartie(id, 'up')} onMoveDown={id => movePartie(id, 'down')}
               isFirst={index === 0} isLast={index === patron.parties.length - 1}
               onAddRang={addRang} onUpdateRang={updateRang} onDeleteRang={deleteRang}
-              onDuplicateRang={duplicateRang} onMoveRangUp={id => moveRang(id, 'up')} onMoveRangDown={id => moveRang(id, 'down')} />
+              onDuplicateRang={duplicateRang} onMoveRangUp={(partieId, rangId) => moveRang(partieId, rangId, 'up')} onMoveRangDown={(partieId, rangId) => moveRang(partieId, rangId, 'down')} />
           ))}
           <button onClick={addPartie} style={{ width: "100%", padding: "16px", borderRadius: 16, background: "none", border: "2px dashed #7C3AED44", color: "#7C3AED", fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             + Ajouter une partie
