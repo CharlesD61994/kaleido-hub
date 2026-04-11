@@ -1308,12 +1308,12 @@ function ImportPdfModal({ onClose, onCreate }) {
             {/* Parties */}
             <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Parties <span style={{ color: "#6B6A7A", textTransform: "none", letterSpacing: 0 }}>(optionnel)</span></label>
             {parties.map((p, i) => (
-              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", width: "100%", minWidth: 0 }}>
                 <div style={{ width: 20, height: 20, borderRadius: "50%", background: `linear-gradient(135deg, ${KALEIDOSCOPE_COLORS[i % KALEIDOSCOPE_COLORS.length].bg}, ${KALEIDOSCOPE_COLORS[i % KALEIDOSCOPE_COLORS.length].light})`, flexShrink: 0 }} />
                 <input value={p.nom} onChange={e => updatePartie(p.id, "nom", e.target.value)} placeholder={`Partie ${i + 1}`}
-                  style={{ flex: 1, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 12px", color: "#F1F0EE", fontSize: 15, outline: "none" }} />
+                  style={{ flex: 1, minWidth: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 12px", color: "#F1F0EE", fontSize: 15, outline: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
                 <input value={p.rangs} onChange={e => updatePartie(p.id, "rangs", e.target.value)} placeholder="Rangs" type="number"
-                  style={{ width: 70, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 10px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center" }} />
+                  style={{ width: 64, flexShrink: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 8px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
                 <button onClick={() => removePartie(p.id)} style={{ width: 28, height: 28, borderRadius: 6, background: "#DC262633", border: "none", color: "#F87171", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
               </div>
             ))}
@@ -2002,12 +2002,12 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
             )}
             <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Parties</label>
             {parties.map((p, i) => (
-              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
+              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", width: "100%", minWidth: 0 }}>
                 <div style={{ width: 18, height: 18, borderRadius: "50%", background: `linear-gradient(135deg, ${KALEIDOSCOPE_COLORS[i%KALEIDOSCOPE_COLORS.length].bg}, ${KALEIDOSCOPE_COLORS[i%KALEIDOSCOPE_COLORS.length].light})`, flexShrink: 0 }} />
                 <input value={p.nom} onChange={e => updatePartie(p.id, "nom", e.target.value)} placeholder={`Partie ${i+1}`}
-                  style={{ flex: 1, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 12px", color: "#F1F0EE", fontSize: 15, outline: "none" }} />
+                  style={{ flex: 1, minWidth: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 12px", color: "#F1F0EE", fontSize: 15, outline: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
                 <input value={p.rangs} onChange={e => updatePartie(p.id, "rangs", e.target.value)} placeholder="Rangs" type="number"
-                  style={{ width: 70, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 10px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center" }} />
+                  style={{ width: 64, flexShrink: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 8px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
                 <button onClick={() => removePartie(p.id)} style={{ width: 28, height: 28, borderRadius: 6, background: "#DC262633", border: "none", color: "#F87171", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
               </div>
             ))}
