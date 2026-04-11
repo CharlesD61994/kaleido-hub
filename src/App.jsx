@@ -969,21 +969,12 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
 
   useEffect(() => {
     if (!project?.id) return;
+    const rangSauvegarde = Math.max(1, allRangs.slice(0, Math.max(currentIndex, 0) + 1).filter(r => !r.isNote).length);
     const timer = setTimeout(() => {
-      onSaveProgress(rang, project?.total || 0, elapsedTime);
+      onSaveProgress(rangSauvegarde, totalRangsForCount, elapsedTime);
     }, 250);
     return () => clearTimeout(timer);
-  }, [project?.id, rang, elapsedTime]);
-
-  useEffect(() => {
-    if (!project?.id) return;
-    const handleBeforeUnload = () => {
-      onSaveProgress(rang, project?.total || 0, elapsedTime);
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [project?.id, rang, elapsedTime]);
-
+  }, [project?.id, currentIndex, elapsedTime, totalRangsForCount]);
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
     return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
@@ -1326,12 +1317,12 @@ function ImportPdfModal({ onClose, onCreate }) {
             {/* Parties */}
             <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Parties <span style={{ color: "#6B6A7A", textTransform: "none", letterSpacing: 0 }}>(optionnel)</span></label>
             {parties.map((p, i) => (
-              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", width: "100%", minWidth: 0 }}>
+              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <div style={{ width: 20, height: 20, borderRadius: "50%", background: `linear-gradient(135deg, ${KALEIDOSCOPE_COLORS[i % KALEIDOSCOPE_COLORS.length].bg}, ${KALEIDOSCOPE_COLORS[i % KALEIDOSCOPE_COLORS.length].light})`, flexShrink: 0 }} />
                 <input value={p.nom} onChange={e => updatePartie(p.id, "nom", e.target.value)} placeholder={`Partie ${i + 1}`}
-                  style={{ flex: 1, minWidth: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 12px", color: "#F1F0EE", fontSize: 15, outline: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
+                  style={{ flex: 1, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 12px", color: "#F1F0EE", fontSize: 15, outline: "none" }} />
                 <input value={p.rangs} onChange={e => updatePartie(p.id, "rangs", e.target.value)} placeholder="Rangs" type="number"
-                  style={{ width: 64, flexShrink: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 8px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
+                  style={{ width: 70, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 10px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center" }} />
                 <button onClick={() => removePartie(p.id)} style={{ width: 28, height: 28, borderRadius: 6, background: "#DC262633", border: "none", color: "#F87171", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
               </div>
             ))}
@@ -1551,6 +1542,14 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
     return () => clearInterval(interval);
   }, [isTimerRunning, startTime]);
+
+  useEffect(() => {
+    if (!project?.id) return;
+    const timer = setTimeout(() => {
+      onSaveProgress(rang, project?.total || 0, elapsedTime);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [project?.id, rang, elapsedTime]);
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
     return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
@@ -1955,7 +1954,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                   <Icon name="edit" size={22} color="#fff" />
                 </div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Créer un patron</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={16} color="#F1F0EE" />Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
                 </div>
               </button>
@@ -1964,7 +1963,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                   <Icon name="file" size={22} color="#fff" />
                 </div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4 }}>Importer un patron PDF</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="file" size={16} color="#F1F0EE" />Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
                 </div>
               </button>
@@ -2020,12 +2019,12 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
             )}
             <label style={{ color: "#22D3EE", fontSize: 11, fontFamily: "monospace", display: "block", marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Parties</label>
             {parties.map((p, i) => (
-              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center", width: "100%", minWidth: 0 }}>
+              <div key={p.id} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "center" }}>
                 <div style={{ width: 18, height: 18, borderRadius: "50%", background: `linear-gradient(135deg, ${KALEIDOSCOPE_COLORS[i%KALEIDOSCOPE_COLORS.length].bg}, ${KALEIDOSCOPE_COLORS[i%KALEIDOSCOPE_COLORS.length].light})`, flexShrink: 0 }} />
                 <input value={p.nom} onChange={e => updatePartie(p.id, "nom", e.target.value)} placeholder={`Partie ${i+1}`}
-                  style={{ flex: 1, minWidth: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 12px", color: "#F1F0EE", fontSize: 15, outline: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
+                  style={{ flex: 1, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 12px", color: "#F1F0EE", fontSize: 15, outline: "none" }} />
                 <input value={p.rangs} onChange={e => updatePartie(p.id, "rangs", e.target.value)} placeholder="Rangs" type="number"
-                  style={{ width: 64, flexShrink: 0, background: "rgba(255,255,255,0.06)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "10px 8px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }} />
+                  style={{ width: 70, background: "#1A1A2E", border: "1px solid #0891B233", borderRadius: 8, padding: "9px 10px", color: "#F1F0EE", fontSize: 15, outline: "none", textAlign: "center" }} />
                 <button onClick={() => removePartie(p.id)} style={{ width: 28, height: 28, borderRadius: 6, background: "#DC262633", border: "none", color: "#F87171", fontSize: 14, cursor: "pointer", flexShrink: 0 }}>✕</button>
               </div>
             ))}
@@ -2071,8 +2070,15 @@ export default function KaleidoHub() {
   const projectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
   const projects = database[projectsKey] || [];
   const updateProject = (projectId, updates) => {
-    const newDb = { ...database, [projectsKey]: projects.map(p => p.id === projectId ? { ...p, ...updates } : p) };
-    setDatabase(newDb); saveToDatabase(newDb);
+    const updateList = (list) => (list || []).map(p => p.id === projectId ? { ...p, ...updates } : p);
+    const newDb = {
+      ...database,
+      projectsPersonal: updateList(database.projectsPersonal),
+      projectsPro: updateList(database.projectsPro),
+    };
+    setDatabase(newDb);
+    if (currentProject?.id === projectId) setCurrentProject(prev => prev ? { ...prev, ...updates } : prev);
+    saveToDatabase(newDb);
   };
   const deleteProjectFromDB = (projectId) => {
     const newDb = { ...database, [projectsKey]: projects.filter(p => p.id !== projectId) };
@@ -2103,68 +2109,43 @@ export default function KaleidoHub() {
   const updatePatron = (patronId, updates) => {
     const updatedPatrons = (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p);
     const updatedPatron = updatedPatrons.find(p => p.id === patronId);
-
-    const computeCustomTotal = (patron) => Math.max(
-      1,
-      (patron?.parties || []).reduce(
-        (sum, partie) => sum + ((partie?.rangs || []).filter(r => !r?.isNote).length),
-        0
-      )
-    );
-
-    const syncProjectFromPatron = (project) => {
+    const syncLinkedProject = (project) => {
       if (project.patronId !== patronId || !updatedPatron) return project;
-
-      if (updatedPatron.projectType === 'custom') {
-        return {
-          ...project,
-          name: updatedPatron.name,
-          colorIdx: updatedPatron.colorIdx,
-          image: updatedPatron.image || null,
-          projectType: 'custom',
-          type: updatedPatron.type,
-          laine: updatedPatron.laine,
-          outil: updatedPatron.outil,
-          notes: updatedPatron.notes,
-          parties: updatedPatron.parties || [],
-          total: computeCustomTotal(updatedPatron),
-        };
-      }
-
+      const total = updatedPatron.projectType === "pdf"
+        ? (updatedPatron.total || project.total || 0)
+        : ((updatedPatron.parties || []).reduce((s, part) => s + ((part.rangs || []).filter(r => !r.isNote).length), 0));
       return {
         ...project,
-        name: updatedPatron.name,
-        colorIdx: updatedPatron.colorIdx,
-        image: updatedPatron.image || null,
-        projectType: 'pdf',
-        pdfId: updatedPatron.pdfId,
-        pdfParties: updatedPatron.pdfParties || [],
-        total: updatedPatron.total || 1,
+        name: updatedPatron.name ?? project.name,
+        colorIdx: updatedPatron.colorIdx ?? project.colorIdx,
+        image: updatedPatron.image ?? project.image,
+        type: updatedPatron.type ?? project.type,
+        laine: updatedPatron.laine ?? project.laine,
+        outil: updatedPatron.outil ?? project.outil,
+        notes: updatedPatron.notes ?? project.notes,
+        projectType: updatedPatron.projectType ?? project.projectType,
+        parties: updatedPatron.parties ?? project.parties,
+        pdfId: updatedPatron.pdfId ?? project.pdfId,
+        pdfParties: updatedPatron.pdfParties ?? project.pdfParties,
+        total: total || project.total || 0,
       };
     };
-
     const newDb = {
       ...database,
       patrons: updatedPatrons,
-      projectsPersonal: (database.projectsPersonal || []).map(syncProjectFromPatron),
-      projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
+      projectsPersonal: (database.projectsPersonal || []).map(syncLinkedProject),
+      projectsPro: (database.projectsPro || []).map(syncLinkedProject),
     };
-    setDatabase(newDb); saveToDatabase(newDb);
+    setDatabase(newDb);
+    if (currentPatron?.id === patronId) setCurrentPatron(prev => prev ? { ...prev, ...updates } : prev);
+    saveToDatabase(newDb);
   };
   const deletePatronFromDB = (patronId) => {
     const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
     setDatabase(newDb); saveToDatabase(newDb);
   };
-  const navigateToHub = () => {
-    setCurrentView(VIEWS.HUB);
-    setCurrentProject(null);
-    setCurrentPatron(null);
-  };
-  const navigateToLibrary = () => {
-    setCurrentView(VIEWS.LIBRARY);
-    setCurrentProject(null);
-    setCurrentPatron(null);
-  };
+  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setCurrentPatron(null); };
+  const navigateToLibrary = () => { setCurrentView(VIEWS.LIBRARY); setCurrentProject(null); setCurrentPatron(null); };
   const navigateToPatronEditor = (project) => {
     if (!project) {
       console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
@@ -2202,6 +2183,7 @@ export default function KaleidoHub() {
     const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
     const newPatron = { id: newId, name: "Nouveau patron", colorIdx, image: null, projectType: "custom", type: "crochet", laine: "", outil: "", notes: "", parties: [], createdAt: new Date().toISOString() };
     addPatron(newPatron);
+    setCurrentProject(null);
     setCurrentPatron(newPatron);
     setCurrentView(VIEWS.PATRON_EDITOR);
   };
@@ -2550,77 +2532,25 @@ export default function KaleidoHub() {
     }));
     const [isEditingNom, setIsEditingNom] = useState(false);
     const [tempNom, setTempNom] = useState(patron.nom);
-    const patronAutosaveKey = JSON.stringify({
-      nom: patron.nom,
-      laine: patron.laine,
-      technique: patron.technique,
-      outil: patron.outil,
-      notes: patron.notes,
-      parties: patron.parties,
-      sourceId: source?.id || null,
-      mode: isPatronMode ? "patron" : "project"
-    });
+
+    useEffect(() => {
+      const freshSource = currentPatron || currentProject;
+      setPatron(normalizePatron({
+        nom: freshSource?.name || "Nouveau patron",
+        laine: freshSource?.laine || "",
+        technique: freshSource?.type || "crochet",
+        outil: freshSource?.outil || "",
+        notes: freshSource?.notes || "",
+        parties: freshSource?.parties || [],
+      }));
+      setTempNom(freshSource?.name || "Nouveau patron");
+    }, [currentPatron?.id, currentProject?.id]);
     const totalRangsPatron = patron.parties.reduce(
       (s, p) => s + p.rangs.filter(r => !r.isNote).length,
       0
     );
     const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
-
-    useEffect(() => {
-      const totalRangsAutosave = patron.parties.reduce(
-        (s, p) => s + (Array.isArray(p.rangs) ? p.rangs.filter(r => !r.isNote).length : 0),
-        0
-      );
-
-      const timer = setTimeout(() => {
-        if (isPatronMode && currentPatron?.id) {
-          setDatabase(prev => {
-            const updatedPatrons = (prev.patrons || []).map(p =>
-              p.id === currentPatron.id
-                ? {
-                    ...p,
-                    name: patron.nom,
-                    laine: patron.laine,
-                    type: patron.technique,
-                    outil: patron.outil,
-                    notes: patron.notes,
-                    parties: patron.parties,
-                    total: totalRangsAutosave
-                  }
-                : p
-            );
-            const newDb = { ...prev, patrons: updatedPatrons };
-            saveToDatabase(newDb);
-            return newDb;
-          });
-        } else if (!isPatronMode && currentProject?.id) {
-          setDatabase(prev => {
-            const key = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
-            const updatedProjects = (prev[key] || []).map(p =>
-              p.id === currentProject.id
-                ? {
-                    ...p,
-                    name: patron.nom,
-                    laine: patron.laine,
-                    type: patron.technique,
-                    outil: patron.outil,
-                    notes: patron.notes,
-                    parties: patron.parties,
-                    total: Math.max(totalRangsAutosave, p.total || 1)
-                  }
-                : p
-            );
-            const newDb = { ...prev, [key]: updatedProjects };
-            saveToDatabase(newDb);
-            return newDb;
-          });
-        }
-      }, 350);
-
-      return () => clearTimeout(timer);
-    }, [patronAutosaveKey]);
-
     const handleSave = () => {
       const normalizedPatron = normalizePatron(patron);
       const errors = validatePatron(normalizedPatron);
@@ -2795,6 +2725,43 @@ export default function KaleidoHub() {
         }
       });
     };
+
+    useEffect(() => {
+      const normalizedPatron = normalizePatron(patron);
+      const errors = validatePatron(normalizedPatron);
+      if (errors.length) return;
+
+      const totalRangsNormalized = normalizedPatron.parties.reduce(
+        (s, p) => s + p.rangs.filter(r => !r.isNote).length,
+        0
+      );
+
+      const timer = setTimeout(() => {
+        if (isPatronMode && currentPatron?.id) {
+          updatePatron(currentPatron.id, {
+            name: normalizedPatron.nom,
+            laine: normalizedPatron.laine,
+            type: normalizedPatron.technique,
+            outil: normalizedPatron.outil,
+            notes: normalizedPatron.notes,
+            parties: normalizedPatron.parties,
+            total: totalRangsNormalized,
+          });
+        } else if (!isPatronMode && currentProject?.id) {
+          updateProject(currentProject.id, {
+            name: normalizedPatron.nom,
+            laine: normalizedPatron.laine,
+            type: normalizedPatron.technique,
+            outil: normalizedPatron.outil,
+            notes: normalizedPatron.notes,
+            parties: normalizedPatron.parties,
+            total: Math.max(totalRangsNormalized, currentProject.total || 1),
+          });
+        }
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }, [patron, isPatronMode, currentPatron?.id, currentProject?.id]);
 
     const addPartie = () =>
       applyPatronUpdate("addPartie", prev => ({
@@ -3015,7 +2982,7 @@ export default function KaleidoHub() {
       <LibraryView
         database={database}
         onNavigateHub={navigateToHub}
-        onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
+        onEditPatron={(patron) => { const fresh = (database.patrons || []).find(x => x.id === patron.id); setCurrentProject(null); setCurrentPatron(fresh ? { ...fresh } : { ...patron }); setCurrentView(VIEWS.PATRON_EDITOR); }}
         onNewCustomPatron={handleNewCustomPatron}
         onNewPdfPatron={handleNewPdfPatron}
         onDeletePatron={(id) => { deletePatronFromDB(id); }}
