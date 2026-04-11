@@ -1934,19 +1934,17 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <button onClick={() => { setShowNewMenu(false); onNewCustomPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #7C3AED22, #DB277722)", border: "1px solid #7C3AED44", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #DB2777)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-                  <Icon name="edit" size={22} color="#fff" />
-                </div>
+</div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="edit" size={16} color="#F1F0EE" />Créer un patron</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Créer un patron</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Saisis tes parties et rangs manuellement</div>
                 </div>
               </button>
               <button onClick={() => { setShowNewMenu(false); onNewPdfPatron(); }} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", borderRadius: 16, background: "linear-gradient(135deg, #0891B222, #22D3EE22)", border: "1px solid #0891B244", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #0891B2, #22D3EE)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-                  <Icon name="file" size={22} color="#fff" />
-                </div>
+</div>
                 <div>
-                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}><Icon name="file" size={16} color="#F1F0EE" />Importer un patron PDF</div>
+                  <div style={{ color: "#F1F0EE", fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>Importer un patron PDF</div>
                   <div style={{ color: "#6B6A7A", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un PDF et donne un nom</div>
                 </div>
               </button>
@@ -2083,13 +2081,60 @@ export default function KaleidoHub() {
     setDatabase(newDb); saveToDatabase(newDb);
   };
   const updatePatron = (patronId, updates) => {
+    const existingPatron = (database.patrons || []).find(p => p.id === patronId);
+    if (!existingPatron) return;
+
+    const nextPatron = { ...existingPatron, ...updates };
+    const computedTotal = nextPatron.projectType === 'custom'
+      ? (nextPatron.parties || []).reduce((sum, part) => sum + ((part.rangs || []).filter(r => !r.isNote).length), 0)
+      : (nextPatron.pdfParties || []).length > 0
+        ? (nextPatron.pdfParties || []).reduce((sum, part) => sum + (parseInt(part.totalRangs) || 0), 0)
+        : (nextPatron.total || 0);
+
+    const normalizedPatron = {
+      ...nextPatron,
+      total: computedTotal
+    };
+
+    const syncLinkedProject = (project) => {
+      if (project.patronId !== patronId) return project;
+
+      const sharedUpdates = {
+        name: normalizedPatron.name,
+        colorIdx: normalizedPatron.colorIdx,
+        image: normalizedPatron.image,
+        total: normalizedPatron.total,
+        projectType: normalizedPatron.projectType,
+      };
+
+      if (normalizedPatron.projectType === 'custom') {
+        return {
+          ...project,
+          ...sharedUpdates,
+          type: normalizedPatron.type,
+          laine: normalizedPatron.laine,
+          outil: normalizedPatron.outil,
+          notes: normalizedPatron.notes,
+          parties: (normalizedPatron.parties || []).map(part => ({
+            ...part,
+            rangs: (part.rangs || []).map(rang => ({ ...rang }))
+          }))
+        };
+      }
+
+      return {
+        ...project,
+        ...sharedUpdates,
+        pdfId: normalizedPatron.pdfId,
+        pdfParties: (normalizedPatron.pdfParties || []).map(part => ({ ...part }))
+      };
+    };
+
     const newDb = {
       ...database,
-      patrons: (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p),
-      ...(updates.image !== undefined ? {
-        projectsPersonal: (database.projectsPersonal || []).map(p => p.patronId === patronId ? { ...p, image: updates.image } : p),
-        projectsPro: (database.projectsPro || []).map(p => p.patronId === patronId ? { ...p, image: updates.image } : p),
-      } : {})
+      patrons: (database.patrons || []).map(p => p.id === patronId ? normalizedPatron : p),
+      projectsPersonal: (database.projectsPersonal || []).map(syncLinkedProject),
+      projectsPro: (database.projectsPro || []).map(syncLinkedProject),
     };
     setDatabase(newDb); saveToDatabase(newDb);
   };
@@ -2869,7 +2914,7 @@ export default function KaleidoHub() {
               onMoveUp={id => movePartie(id, 'up')} onMoveDown={id => movePartie(id, 'down')}
               isFirst={index === 0} isLast={index === patron.parties.length - 1}
               onAddRang={addRang} onUpdateRang={updateRang} onDeleteRang={deleteRang}
-              onDuplicateRang={duplicateRang} onMoveRangUp={(partieId, rangId) => moveRang(partieId, rangId, 'up')} onMoveRangDown={(partieId, rangId) => moveRang(partieId, rangId, 'down')} />
+              onDuplicateRang={duplicateRang} onMoveRangUp={id => moveRang(id, 'up')} onMoveRangDown={id => moveRang(id, 'down')} />
           ))}
           <button onClick={addPartie} style={{ width: "100%", padding: "16px", borderRadius: 16, background: "none", border: "2px dashed #7C3AED44", color: "#7C3AED", fontSize: 16, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             + Ajouter une partie
