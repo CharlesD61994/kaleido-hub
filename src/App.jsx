@@ -966,6 +966,13 @@ function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSavePro
     const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
     return () => clearInterval(interval);
   }, [isTimerRunning, startTime]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [currentRangId, elapsedTime]);
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
     return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
@@ -1533,6 +1540,13 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
     return () => clearInterval(interval);
   }, [isTimerRunning, startTime]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSaveProgress(rang, project?.total || 0, elapsedTime);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [rang, elapsedTime]);
   const formatTime = (ms) => {
     const s = Math.floor(ms / 1000), m = Math.floor(s / 60), h = Math.floor(m / 60);
     return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
@@ -2053,8 +2067,15 @@ export default function KaleidoHub() {
   const projectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
   const projects = database[projectsKey] || [];
   const updateProject = (projectId, updates) => {
-    const newDb = { ...database, [projectsKey]: projects.map(p => p.id === projectId ? { ...p, ...updates } : p) };
-    setDatabase(newDb); saveToDatabase(newDb);
+    const updateList = (list) => (list || []).map(p => p.id === projectId ? { ...p, ...updates } : p);
+    const newDb = {
+      ...database,
+      projectsPersonal: updateList(database.projectsPersonal),
+      projectsPro: updateList(database.projectsPro),
+    };
+    setDatabase(newDb);
+    if (currentProject?.id === projectId) setCurrentProject(prev => prev ? { ...prev, ...updates } : prev);
+    saveToDatabase(newDb);
   };
   const deleteProjectFromDB = (projectId) => {
     const newDb = { ...database, [projectsKey]: projects.filter(p => p.id !== projectId) };
@@ -2131,14 +2152,20 @@ export default function KaleidoHub() {
       projectsPersonal: (database.projectsPersonal || []).map(syncProjectFromPatron),
       projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
     };
-    setDatabase(newDb); saveToDatabase(newDb);
+    setDatabase(newDb);
+    if (currentPatron?.id === patronId && updatedPatron) setCurrentPatron({ ...currentPatron, ...updatedPatron });
+    if (currentProject?.patronId === patronId && updatedPatron) {
+      const syncedProject = syncProjectFromPatron(currentProject);
+      setCurrentProject(syncedProject);
+    }
+    saveToDatabase(newDb);
   };
   const deletePatronFromDB = (patronId) => {
     const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
     setDatabase(newDb); saveToDatabase(newDb);
   };
-  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); };
-  const navigateToLibrary = () => setCurrentView(VIEWS.LIBRARY);
+  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setCurrentPatron(null); };
+  const navigateToLibrary = () => { setCurrentView(VIEWS.LIBRARY); setCurrentProject(null); setCurrentPatron(null); };
   const navigateToPatronEditor = (project) => {
     if (!project) {
       console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
@@ -2531,6 +2558,18 @@ export default function KaleidoHub() {
     }));
     const [isEditingNom, setIsEditingNom] = useState(false);
     const [tempNom, setTempNom] = useState(patron.nom);
+
+    useEffect(() => {
+      setPatron({
+        nom: source?.name || "Nouveau patron",
+        laine: source?.laine || "",
+        technique: source?.type || "crochet",
+        outil: source?.outil || "",
+        notes: source?.notes || "",
+        parties: source?.parties || [],
+      });
+      setTempNom(source?.name || "Nouveau patron");
+    }, [source?.id, source?.name, source?.laine, source?.type, source?.outil, source?.notes, JSON.stringify(source?.parties || [])]);
     const totalRangsPatron = patron.parties.reduce(
       (s, p) => s + p.rangs.filter(r => !r.isNote).length,
       0
@@ -2621,6 +2660,43 @@ export default function KaleidoHub() {
         return JSON.stringify(prev) === JSON.stringify(normalized) ? prev : normalized;
       });
     }, []);
+
+    useEffect(() => {
+      const normalizedPatron = normalizePatron(patron);
+      const errors = validatePatron(normalizedPatron);
+      if (errors.length) return;
+
+      const totalRangsNormalized = normalizedPatron.parties.reduce(
+        (s, p) => s + p.rangs.filter(r => !r.isNote).length,
+        0
+      );
+
+      const timer = setTimeout(() => {
+        if (isPatronMode && currentPatron?.id) {
+          updatePatron(currentPatron.id, {
+            name: normalizedPatron.nom,
+            laine: normalizedPatron.laine,
+            type: normalizedPatron.technique,
+            outil: normalizedPatron.outil,
+            notes: normalizedPatron.notes,
+            parties: normalizedPatron.parties,
+            total: totalRangsNormalized
+          });
+        } else if (!isPatronMode && currentProject?.id) {
+          updateProject(currentProject.id, {
+            name: normalizedPatron.nom,
+            laine: normalizedPatron.laine,
+            type: normalizedPatron.technique,
+            outil: normalizedPatron.outil,
+            notes: normalizedPatron.notes,
+            parties: normalizedPatron.parties,
+            total: Math.max(totalRangsNormalized, currentProject.total || 1)
+          });
+        }
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }, [patron, isPatronMode, currentPatron?.id, currentProject?.id]);
 
     const backupPatronState = (label, state) => {
       try {
@@ -2931,7 +3007,12 @@ export default function KaleidoHub() {
       <LibraryView
         database={database}
         onNavigateHub={navigateToHub}
-        onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
+        onEditPatron={(patron) => {
+          const freshPatron = (database.patrons || []).find(p => p.id === patron.id) || patron;
+          setCurrentProject(null);
+          setCurrentPatron(freshPatron);
+          setCurrentView(VIEWS.PATRON_EDITOR);
+        }}
         onNewCustomPatron={handleNewCustomPatron}
         onNewPdfPatron={handleNewPdfPatron}
         onDeletePatron={(id) => { deletePatronFromDB(id); }}
