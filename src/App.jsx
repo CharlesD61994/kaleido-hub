@@ -1904,7 +1904,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                       const fresh = (database.patrons || []).find(p => p.id === patron.id);
                       setEditingPdfPatron(fresh ? { ...fresh } : { ...patron });
                     }
-                    else { const fresh = (database.patrons || []).find(p => p.id === patron.id); onEditPatron(fresh ? { ...fresh } : { ...patron }); }
+                    else onEditPatron(patron);
                   }}
                   mode="personal"
                 />
@@ -2141,8 +2141,16 @@ export default function KaleidoHub() {
     const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
     setDatabase(newDb); saveToDatabase(newDb);
   };
-  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setCurrentPatron(null); };
-  const navigateToLibrary = () => { setCurrentView(VIEWS.LIBRARY); setCurrentProject(null); setCurrentPatron(null); };
+  const navigateToHub = () => {
+    setCurrentView(VIEWS.HUB);
+    setCurrentProject(null);
+    setCurrentPatron(null);
+  };
+  const navigateToLibrary = () => {
+    setCurrentView(VIEWS.LIBRARY);
+    setCurrentProject(null);
+    setCurrentPatron(null);
+  };
   const navigateToPatronEditor = (project) => {
     if (!project) {
       console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
@@ -2180,6 +2188,7 @@ export default function KaleidoHub() {
     const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
     const newPatron = { id: newId, name: "Nouveau patron", colorIdx, image: null, projectType: "custom", type: "crochet", laine: "", outil: "", notes: "", parties: [], createdAt: new Date().toISOString() };
     addPatron(newPatron);
+    setCurrentProject(null);
     setCurrentPatron(newPatron);
     setCurrentView(VIEWS.PATRON_EDITOR);
   };
@@ -2529,17 +2538,17 @@ export default function KaleidoHub() {
     const [isEditingNom, setIsEditingNom] = useState(false);
     const [tempNom, setTempNom] = useState(patron.nom);
     useEffect(() => {
-      const nextPatron = {
-        nom: source?.name || "Nouveau patron",
-        laine: source?.laine || "",
-        technique: source?.type || "crochet",
-        outil: source?.outil || "",
-        notes: source?.notes || "",
-        parties: Array.isArray(source?.parties) ? source.parties : [],
-      };
-      setPatron(nextPatron);
-      setTempNom(nextPatron.nom);
-    }, [source?.id, source?.name, source?.laine, source?.type, source?.outil, source?.notes, source?.parties]);
+      const freshSource = currentPatron || currentProject;
+      setPatron({
+        nom: freshSource?.name || "Nouveau patron",
+        laine: freshSource?.laine || "",
+        technique: freshSource?.type || "crochet",
+        outil: freshSource?.outil || "",
+        notes: freshSource?.notes || "",
+        parties: freshSource?.parties || [],
+      });
+      setTempNom(freshSource?.name || "Nouveau patron");
+    }, [currentPatron, currentProject]);
     const totalRangsPatron = patron.parties.reduce(
       (s, p) => s + p.rangs.filter(r => !r.isNote).length,
       0
@@ -2940,7 +2949,12 @@ export default function KaleidoHub() {
       <LibraryView
         database={database}
         onNavigateHub={navigateToHub}
-        onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
+        onEditPatron={(patron) => {
+          const fresh = (database.patrons || []).find(x => x.id === patron.id);
+          setCurrentProject(null);
+          setCurrentPatron(fresh ? { ...fresh } : { ...patron });
+          setCurrentView(VIEWS.PATRON_EDITOR);
+        }}
         onNewCustomPatron={handleNewCustomPatron}
         onNewPdfPatron={handleNewPdfPatron}
         onDeletePatron={(id) => { deletePatronFromDB(id); }}
