@@ -1904,7 +1904,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
                       const fresh = (database.patrons || []).find(p => p.id === patron.id);
                       setEditingPdfPatron(fresh ? { ...fresh } : { ...patron });
                     }
-                    else onEditPatron(patron);
+                    else { const fresh = (database.patrons || []).find(p => p.id === patron.id); onEditPatron(fresh ? { ...fresh } : { ...patron }); }
                   }}
                   mode="personal"
                 />
@@ -2131,14 +2131,18 @@ export default function KaleidoHub() {
       projectsPersonal: (database.projectsPersonal || []).map(syncProjectFromPatron),
       projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
     };
-    setDatabase(newDb); saveToDatabase(newDb);
+    setDatabase(newDb);
+    saveToDatabase(newDb);
+    if (currentPatron?.id === patronId && updatedPatron) {
+      setCurrentPatron({ ...updatedPatron });
+    }
   };
   const deletePatronFromDB = (patronId) => {
     const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
     setDatabase(newDb); saveToDatabase(newDb);
   };
-  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); };
-  const navigateToLibrary = () => setCurrentView(VIEWS.LIBRARY);
+  const navigateToHub = () => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setCurrentPatron(null); };
+  const navigateToLibrary = () => { setCurrentView(VIEWS.LIBRARY); setCurrentProject(null); setCurrentPatron(null); };
   const navigateToPatronEditor = (project) => {
     if (!project) {
       console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
@@ -2524,6 +2528,18 @@ export default function KaleidoHub() {
     }));
     const [isEditingNom, setIsEditingNom] = useState(false);
     const [tempNom, setTempNom] = useState(patron.nom);
+    useEffect(() => {
+      const nextPatron = {
+        nom: source?.name || "Nouveau patron",
+        laine: source?.laine || "",
+        technique: source?.type || "crochet",
+        outil: source?.outil || "",
+        notes: source?.notes || "",
+        parties: Array.isArray(source?.parties) ? source.parties : [],
+      };
+      setPatron(nextPatron);
+      setTempNom(nextPatron.nom);
+    }, [source?.id, source?.name, source?.laine, source?.type, source?.outil, source?.notes, source?.parties]);
     const totalRangsPatron = patron.parties.reduce(
       (s, p) => s + p.rangs.filter(r => !r.isNote).length,
       0
