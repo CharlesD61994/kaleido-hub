@@ -773,7 +773,7 @@ function PartieSection({ partie, onUpdate, onDelete, onDuplicate, onMoveUp, onMo
         <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
             {isEditingNom
-              ? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); onUpdate(partie.id, { nom: nextNom || "Nouvelle partie" }); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || displayNom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); onUpdate(partie.id, { nom: fallbackNom }); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
+              ? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
               : <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{displayNom}</h3>
             }
           </div>
@@ -2491,22 +2491,27 @@ export default function KaleidoHub() {
     const updatePatronInfo = (field, value) => applyPatronUpdate("updatePatronInfo", prev => ({ ...prev, [field]: value }));
     const handleSaveNom = () => { applyPatronUpdate("handleSaveNom", prev => ({ ...prev, nom: tempNom })); setIsEditingNom(false); };
     const handleSave = () => {
-      const errors = validatePatron(patron);
+      const normalizedPatron = normalizePatron(patron);
+      const errors = validatePatron(normalizedPatron);
       if (errors.length) {
         alert("Impossible de sauvegarder: le patron est invalide.");
-        console.warn("[KALEIDO] handleSave: patron invalide", errors, patron);
+        console.warn("[KALEIDO] handleSave: patron invalide", errors, normalizedPatron);
         return;
       }
 
-      backupPatronState("handleSave", patron);
+      const totalRangsNormalized = normalizedPatron.parties.reduce(
+        (s, p) => s + p.rangs.filter(r => !r.isNote).length,
+        0
+      );
+
+      setPatron(normalizedPatron);
+      backupPatronState("handleSave", normalizedPatron);
 
       if (isPatronMode) {
-        // Sauvegarder dans la bibliothèque
-        updatePatron(currentPatron.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: totalRangsPatron });
+        updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized });
         navigateToLibrary();
       } else {
-        // Sauvegarder dans les projets
-        updateProject(currentProject.id, { name: patron.nom, laine: patron.laine, type: patron.technique, outil: patron.outil, notes: patron.notes, parties: patron.parties, total: Math.max(totalRangsPatron, currentProject.total || 1) });
+        updateProject(currentProject.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: Math.max(totalRangsNormalized, currentProject.total || 1) });
         navigateToHub();
       }
     };
@@ -2516,6 +2521,59 @@ export default function KaleidoHub() {
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
     const safeArray = (value) => Array.isArray(value) ? value : [];
+
+    const normalizePatron = (candidate) => {
+      const base = candidate && typeof candidate === "object" ? candidate : {};
+      const partieIds = new Set();
+      const rangIds = new Set();
+      const normalizedParties = safeArray(base.parties).map((partie, partieIndex) => {
+        const rawPartie = partie && typeof partie === "object" ? partie : {};
+        let partieId = rawPartie.id;
+        if (partieId == null || partieIds.has(partieId)) {
+          partieId = `partie-${partieIndex}-${makeId()}`;
+        }
+        partieIds.add(partieId);
+
+        const normalizedRangs = safeArray(rawPartie.rangs).map((rang, rangIndex) => {
+          const rawRang = rang && typeof rang === "object" ? rang : {};
+          let rangId = rawRang.id;
+          if (rangId == null || rangIds.has(rangId)) {
+            rangId = `rang-${partieIndex}-${rangIndex}-${makeId()}`;
+          }
+          rangIds.add(rangId);
+          return {
+            ...rawRang,
+            id: rangId,
+            instruction: typeof rawRang.instruction === "string" ? rawRang.instruction : "",
+            mailles: rawRang.mailles ?? null,
+          };
+        });
+
+        return {
+          ...rawPartie,
+          id: partieId,
+          nom: (typeof rawPartie.nom === "string" && rawPartie.nom.trim()) ? rawPartie.nom : "Nouvelle partie",
+          colorIdx: Number.isInteger(rawPartie.colorIdx) ? rawPartie.colorIdx : (partieIndex % KALEIDOSCOPE_COLORS.length),
+          rangs: normalizedRangs,
+        };
+      });
+
+      return {
+        nom: typeof base.nom === "string" ? base.nom : (source?.name || "Nouveau patron"),
+        laine: typeof base.laine === "string" ? base.laine : "",
+        technique: typeof base.technique === "string" ? base.technique : (source?.type || "crochet"),
+        outil: typeof base.outil === "string" ? base.outil : "",
+        notes: typeof base.notes === "string" ? base.notes : "",
+        parties: normalizedParties,
+      };
+    };
+
+    useEffect(() => {
+      setPatron(prev => {
+        const normalized = normalizePatron(prev);
+        return JSON.stringify(prev) === JSON.stringify(normalized) ? prev : normalized;
+      });
+    }, []);
 
     const backupPatronState = (label, state) => {
       try {
@@ -2590,15 +2648,16 @@ export default function KaleidoHub() {
             return prev;
           }
 
-          const errors = validatePatron(next);
+          const normalizedNext = normalizePatron(next);
+          const errors = validatePatron(normalizedNext);
           if (errors.length) {
-            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, next);
+            console.warn(`[KALEIDO] ${label}: patron invalide`, errors, normalizedNext);
             return prev;
           }
 
           backupPatronState(label, prev);
           debug(`${label}: OK`);
-          return next;
+          return normalizedNext;
         } catch (e) {
           console.warn(`[KALEIDO] ${label}: exception`, e);
           return prev;
