@@ -376,13 +376,13 @@ const size = "clamp(108px, 30vw, 122px)";
 const progressRatio = Math.min((project.total ? project.rang / project.total : 0), 1);
 const glowStrength = Math.pow(progressRatio, 1.35);
 const glowOpacity = 0.16 + (glowStrength * 0.62);
-const glowNear = 10 + (glowStrength * 16);
-const glowFar = 18 + (glowStrength * 34);
+const glowNear = 8 + (glowStrength * 12);
+const glowFar = 14 + (glowStrength * 22);
 const ringShadow = 4 + (glowStrength * 8);
 const bubbleLift = 3 + (glowStrength * 4);
 const pulseDuration = `${3.4 - (glowStrength * 1.2)}s`;
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
 onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
 onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
@@ -392,7 +392,7 @@ onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; 
 onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
-<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}33 44%, transparent 74%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}88, 0 0 ${glowFar}px ${color.bg}55`, animation: `bubblePulse ${pulseDuration} ease-in-out infinite`, willChange: "transform, opacity, box-shadow" }} />
+<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, animation: `bubblePulse ${pulseDuration} ease-in-out infinite`, willChange: "transform, opacity, box-shadow" }} />
 <div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)", animation: `bubbleBreath ${pulseDuration} ease-in-out infinite`, transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1 }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 </div>
@@ -1170,7 +1170,7 @@ style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light}
 </div>
 {/* Précédent / Suivant */}
 <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
-<div style={{ display: "flex", gap: 16, alignItems: "center", justifyContent: "center" }}>
+<div style={{ display: "flex", gap: 16, alignItems: "center", justifyContent: "center", paddingTop: 2 }}>
 <button
 onClick={prevRang}
 disabled={currentIndex === 0}
