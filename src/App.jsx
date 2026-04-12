@@ -374,20 +374,26 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const size = "clamp(108px, 30vw, 122px)";
 const progressRatio = Math.min((project.total ? project.rang / project.total : 0), 1);
-const glowOpacity = 0.28 + (progressRatio * 0.42);
-const glowNear = 14 + (progressRatio * 10);
-const glowFar = 30 + (progressRatio * 18);
-const bubbleLift = 4 + (progressRatio * 2);
+const glowStrength = Math.pow(progressRatio, 1.35);
+const glowOpacity = 0.16 + (glowStrength * 0.62);
+const glowNear = 10 + (glowStrength * 16);
+const glowFar = 18 + (glowStrength * 34);
+const ringShadow = 4 + (glowStrength * 8);
+const bubbleLift = 3 + (glowStrength * 4);
+const pulseDuration = `${3.4 - (glowStrength * 1.2)}s`;
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
-onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.985)"; }}
-onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1)"; }}>
+onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
+onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
+onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
+onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
+onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
+onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
-<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}22 42%, transparent 72%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}30`, transition: "box-shadow 220ms ease, background 220ms ease, opacity 220ms ease" }} />
-<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${18 + bubbleLift}px rgba(0,0,0,0.22), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)", transition: "transform 160ms ease, box-shadow 200ms ease", zIndex: 1 }}>
+<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}33 44%, transparent 74%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}88, 0 0 ${glowFar}px ${color.bg}55`, animation: `bubblePulse ${pulseDuration} ease-in-out infinite`, willChange: "transform, opacity, box-shadow" }} />
+<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)", animation: `bubbleBreath ${pulseDuration} ease-in-out infinite`, transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1 }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 </div>
 <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
@@ -399,7 +405,7 @@ strokeLinecap="round" transform="rotate(-90 55 55)"
 style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 4px ${color.light})` }} />
 </svg>
 {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-style={{ position: "absolute", top: -4, right: -4, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
+style={{ position: "absolute", top: -4, right: -4, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
 </div>
 <div style={{ textAlign: "center", width: size, maxWidth: 110 }}>
 <div style={{ color: "#F1F0EE", fontSize: "clamp(10px, 2.8vw, 12px)", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{project.name}</div>
@@ -1080,7 +1086,19 @@ if (!hasParties) return (
 const circ_r = 43.5, circ_c = 2 * Math.PI * circ_r;
 return (
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", position: "relative", overflow: "hidden" }}>
-<style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; } @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} } .kgbg { background: linear-gradient(-45deg, #0D0D1A, #1A0A2E, #0D0D1A, #1E1E32); background-size: 400% 400%; animation: gradientShift 8s ease infinite; } @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.1} 50%{transform:translateY(-20px) rotate(180deg);opacity:0.3} }`}</style>
+<style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; } @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} } .kgbg { background: linear-gradient(-45deg, #0D0D1A, #1A0A2E, #0D0D1A, #1E1E32); background-size: 400% 400%; animation: gradientShift 8s ease infinite; } @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.1} 50%{transform:translateY(-20px) rotate(180deg);opacity:0.3} }
+@keyframes bubblePulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.82; }
+  50% { transform: translate(-50%, -50%) scale(1.045); opacity: 1; }
+}
+@keyframes bubbleBreath {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.018); }
+}
+@keyframes infoBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}`}</style>
 <div className="kgbg" style={{ position: "absolute", top:0, left:0, right:0, bottom:0 }} />
 {Array.from({ length: 6 }).map((_, i) => (
 <div key={i} style={{ position: "absolute", top: `${20+i*15}%`, left: `${10+i*12}%`, width: 20, height: 20, borderRadius: "50%", background: `${currentPartieColor.light}22`, animation: `float ${3+i*0.5}s ease-in-out infinite`, animationDelay: `${i*0.3}s` }} />
