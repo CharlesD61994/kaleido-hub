@@ -280,14 +280,12 @@ try {
 const saved = safeParseJSON(localStorage.getItem(DB_KEY));
 if (isValidDatabase(saved)) return saved;
 
-```
 const backup = safeParseJSON(localStorage.getItem(DB_BACKUP_KEY));
 if (isValidDatabase(backup)) {
   debug("Base principale invalide, restauration depuis le backup.");
   localStorage.setItem(DB_KEY, JSON.stringify(backup));
   return backup;
 }
-```
 
 } catch(e) {
 console.warn("[KALEIDO] initDatabase error:", e);
@@ -1076,7 +1074,7 @@ return (
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", position: "relative", overflow: "hidden" }}>
 <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; } @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} } .kgbg { background: linear-gradient(-45deg, #0D0D1A, #1A0A2E, #0D0D1A, #1E1E32); background-size: 400% 400%; animation: gradientShift 8s ease infinite; } @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.1} 50%{transform:translateY(-20px) rotate(180deg);opacity:0.3} }`}</style>
 <div className="kgbg" style={{ position: "absolute", top:0, left:0, right:0, bottom:0 }} />
-{Array.from({ length: 6 }).map((*, i) => (
+{Array.from({ length: 6 }).map((_, i) => (
 <div key={i} style={{ position: "absolute", top: `${20+i*15}%`, left: `${10+i*12}%`, width: 20, height: 20, borderRadius: "50%", background: `${currentPartieColor.light}22`, animation: `float ${3+i*0.5}s ease-in-out infinite`, animationDelay: `${i*0.3}s` }} />
 ))}
 {/* Header */}
@@ -2096,7 +2094,6 @@ const updatePatron = (patronId, updates) => {
 const updatedPatrons = (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p);
 const updatedPatron = updatedPatrons.find(p => p.id === patronId);
 
-```
 const computeCustomTotal = (patron) => Math.max(
   1,
   (patron?.parties || []).reduce(
@@ -2143,7 +2140,6 @@ const newDb = {
   projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
 };
 setDatabase(newDb); saveToDatabase(newDb);
-```
 
 };
 const deletePatronFromDB = (patronId) => {
@@ -2559,7 +2555,6 @@ console.warn("[KALEIDO] handleSave: patron invalide", errors, normalizedPatron);
 return;
 }
 
-```
   const totalRangsNormalized = normalizedPatron.parties.reduce(
     (s, p) => s + p.rangs.filter(r => !r.isNote).length,
     0
@@ -2938,7 +2933,6 @@ return (
     </div>
   </div>
 );
-```
 
 };
 // ─── RENDU CONDITIONNEL ───────────────────────────────────
