@@ -370,7 +370,7 @@ tx.oncomplete = resolve;
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANTS HUB
 // ═══════════════════════════════════════════════════════════════
-function ProjectBubble({ project, onMenuOpen, onProjectClick, mode, isLibrary = false, isFocused = false, onFocus, onBlurFocus }) {
+function ProjectBubble({ project, onMenuOpen, onProjectClick, mode, isLibrary = false, isFocused = false, hasAnyFocus = false, onFocus, onBlurFocus }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const size = "clamp(94px, 27vw, 108px)";
 const glowOpacity = 0.42;
@@ -380,7 +380,7 @@ const ringShadow = 5;
 const bubbleLift = 2;
 const pulseDuration = "3.2s";
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 180ms ease, filter 220ms ease, opacity 180ms ease", transform: isFocused ? "scale(1.045) translateY(-2px)" : "scale(1)", filter: isFocused ? "saturate(1.08) brightness(1.04)" : "saturate(1.02)", opacity: focusedProjectId != null && !isFocused ? 0.72 : 1 }}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 180ms ease, filter 220ms ease, opacity 180ms ease", transform: isFocused ? "scale(1.045) translateY(-2px)" : "scale(1)", filter: isFocused ? "saturate(1.08) brightness(1.04)" : "saturate(1.02)", opacity: hasAnyFocus && !isFocused ? 0.72 : 1 }}
 onClick={() => { if (onFocus) onFocus(); onProjectClick && onProjectClick(project); }}
 onTouchStart={(e) => { if (onFocus) onFocus(); e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
 onTouchEnd={(e) => { e.currentTarget.style.transform = isFocused ? "scale(1.045) translateY(-2px)" : "scale(1) translateY(0)"; if (onBlurFocus) setTimeout(() => onBlurFocus(), 900); }}
@@ -1922,6 +1922,7 @@ const [focusedProjectId, setFocusedProjectId] = useState(null);
               <div key={patron.id} style={{ animation: `fadeIn 0.3s ease ${idx * 0.04}s both` }}>
                 <ProjectBubble
                   project={{ ...patron, rang: patron.projectType === 'pdf' ? 0 : (patron.parties?.reduce((s, p) => s + p.rangs.length, 0) || 0), total: patron.projectType === 'pdf' ? Math.max(1, patron.total||1) : Math.max(1, patron.parties?.reduce((s, p) => s + p.rangs.length, 0) || 1) }}
+                  hasAnyFocus={focusedProjectId != null}
                   onMenuOpen={handleMenuOpen}
                   onProjectClick={() => {
                     if (patron.projectType === 'pdf') {
@@ -2301,7 +2302,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 10, columnGap: 6, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
-<ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
+<ProjectBubble project={project} hasAnyFocus={false} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
 </div>
 ))}
 </div>
@@ -2499,6 +2500,7 @@ project={{
 rang: patron.projectType === 'pdf' ? 0 : (patron.parties?.reduce((s,p) => s + p.rangs?.length, 0) || 0),
 total: patron.projectType === 'pdf' ? 1 : Math.max(1, patron.parties?.reduce((s,p) => s + p.rangs?.length, 0) || 1),
 }}
+hasAnyFocus={false}
 onMenuOpen={null}
 onProjectClick={() => {
 const newId = database.settings.lastProjectId + 1;
