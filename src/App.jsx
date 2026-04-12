@@ -374,26 +374,28 @@ tx.oncomplete = resolve;
 // ═══════════════════════════════════════════════════════════════
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
-const size = “min(30vw, 115px)”;
+const size = “min(28vw, 110px)”;
 return (
-<div style={{ display: “flex”, flexDirection: “column”, alignItems: “center”, gap: 6, padding: “8px 4px”, cursor: “pointer” }}
+<div style={{ display: “flex”, flexDirection: “column”, alignItems: “center”, gap: 8, padding: “10px 2px”, cursor: “pointer” }}
 onClick={() => onProjectClick && onProjectClick(project)}>
 <div style={{ position: “relative”, width: size, height: size }}>
-<div style={{ width: “84%”, height: “84%”, borderRadius: “50%”, background: `radial-gradient(circle at 35% 35%, ${color.light}33, ${color.bg}cc)`, display: “flex”, alignItems: “center”, justifyContent: “center”, overflow: “hidden”, position: “absolute”, top: “50%”, left: “50%”, transform: “translate(-50%, -50%)”, boxShadow: `0 4px 18px ${color.bg}66` }}>
-{project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading=“lazy” style={{ width: “100%”, height: “100%”, objectFit: “cover”, borderRadius: “50%”, display: “block” }} /> : <span style={{ color: “#F8F7FF”, display: “flex”, alignItems: “center”, justifyContent: “center” }}><Icon name="yarn" size={34} color="#F8F7FF" /></span>}
+{/* Glow effect */}
+<div style={{ position: “absolute”, top: “50%”, left: “50%”, transform: “translate(-50%, -50%)”, width: “85%”, height: “85%”, borderRadius: “50%”, background: color.bg, filter: “blur(12px)”, opacity: 0.5, zIndex: 0 }} />
+<div style={{ width: “80%”, height: “80%”, borderRadius: “50%”, background: `radial-gradient(circle at 35% 35%, ${color.light}44, ${color.bg}dd)`, display: “flex”, alignItems: “center”, justifyContent: “center”, overflow: “hidden”, position: “absolute”, top: “50%”, left: “50%”, transform: “translate(-50%, -50%)”, zIndex: 1 }}>
+{project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading=“lazy” style={{ width: “100%”, height: “100%”, objectFit: “cover”, borderRadius: “50%”, display: “block” }} /> : <span style={{ color: “#F8F7FF”, display: “flex”, alignItems: “center”, justifyContent: “center” }}><Icon name="yarn" size={32} color="#F8F7FF" /></span>}
 </div>
-<svg style={{ position: “absolute”, top: 0, left: 0, width: “100%”, height: “100%”, pointerEvents: “none” }} viewBox=“0 0 110 110”>
-<circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
-<circle cx=“55” cy=“55” r=“51” fill=“none” stroke={color.light} strokeWidth=“4.5”
+<svg style={{ position: “absolute”, top: 0, left: 0, width: “100%”, height: “100%”, pointerEvents: “none”, zIndex: 2 }} viewBox=“0 0 110 110”>
+<circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
+<circle cx=“55” cy=“55” r=“51” fill=“none” stroke={color.light} strokeWidth=“5”
 strokeDasharray={2 * Math.PI * 51}
 strokeDashoffset={2 * Math.PI * 51 * (1 - Math.min(project.rang / project.total, 1))}
 strokeLinecap=“round” transform=“rotate(-90 55 55)”
-style={{ transition: “stroke-dashoffset 0.6s ease” }} />
+style={{ transition: “stroke-dashoffset 0.6s ease”, filter: `drop-shadow(0 0 4px ${color.light})` }} />
 </svg>
 {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-style={{ position: “absolute”, top: -4, right: -4, width: 22, height: 22, borderRadius: “50%”, background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: “2.5px solid #0D0D1A”, cursor: “pointer”, display: “flex”, alignItems: “center”, justifyContent: “center”, fontSize: 11, fontStyle: “italic”, fontWeight: 700, color: “#fff”, boxShadow: “0 2px 8px rgba(0,0,0,0.5)”, zIndex: 10 }}>i</button>}
+style={{ position: “absolute”, top: -4, right: -4, width: 24, height: 24, borderRadius: “50%”, background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: “2.5px solid #0D0D1A”, cursor: “pointer”, display: “flex”, alignItems: “center”, justifyContent: “center”, fontSize: 11, fontStyle: “italic”, fontWeight: 700, color: “#fff”, boxShadow: “0 2px 8px rgba(0,0,0,0.5)”, zIndex: 10 }}>i</button>}
 </div>
-<div style={{ textAlign: “center”, width: size, maxWidth: 115 }}>
+<div style={{ textAlign: “center”, width: size, maxWidth: 110 }}>
 <div style={{ color: “#F1F0EE”, fontSize: “clamp(10px, 2.8vw, 12px)”, fontFamily: “‘DM Sans’, sans-serif”, fontWeight: 500 }}>{project.name}</div>
 {mode === “pro” && project.client && <div style={{ color: color.light, fontSize: 10, marginTop: 1, fontFamily: “monospace” }}>{project.client}</div>}
 </div>
@@ -2247,22 +2249,22 @@ const HubView = () => (
 {/* Stats */}
 <div style={{ display: “flex”, gap: 8, marginBottom: 10 }}>
 {[
-{ label: “Projets”, value: projects.length, icon: <Icon name="projects" size={30} stroke={2.2} color="#A78BFA" /> },
-{ label: “Rangs”, value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={30} stroke={2.2} color="#22D3EE" /> },
-{ label: “Terminés”, value: termines, icon: <Icon name="checkBadge" size={30} stroke={2.2} color="#34D399" /> },
+{ label: “PROJETS”, value: projects.length, icon: <Icon name="projects" size={28} stroke={2.2} color="#A78BFA" />, border: “#7C3AED”, glow: “#7C3AED” },
+{ label: “RANGS”, value: totalRangs > 999 ? `${(totalRangs/1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={28} stroke={2.2} color="#22D3EE" />, border: “#0891B2”, glow: “#0891B2” },
+{ label: “TERMINÉS”, value: termines, icon: <Icon name="checkBadge" size={28} stroke={2.2} color="#34D399" />, border: “#059669”, glow: “#059669” },
 ].map(stat => (
-<div key={stat.label} style={{ flex: 1, background: “#1E1E3288”, borderRadius: 12, padding: “8px 8px”, textAlign: “center” }}>
-<div style={{ height: 24, display: “flex”, alignItems: “center”, justifyContent: “center” }}>{stat.icon}</div>
-<div style={{ color: “#F1F0EE”, fontWeight: 700, fontSize: 14, marginTop: 2 }}>{stat.value}</div>
-<div style={{ color: “#6B6A7A”, fontSize: 10, marginTop: 1 }}>{stat.label}</div>
+<div key={stat.label} style={{ flex: 1, background: “#111128”, borderRadius: 14, padding: “12px 8px”, textAlign: “center”, border: `1px solid ${stat.border}88`, boxShadow: `0 0 14px ${stat.glow}44, inset 0 0 12px ${stat.glow}11` }}>
+<div style={{ height: 28, display: “flex”, alignItems: “center”, justifyContent: “center”, marginBottom: 4 }}>{stat.icon}</div>
+<div style={{ color: “#F1F0EE”, fontWeight: 700, fontSize: 20 }}>{stat.value}</div>
+<div style={{ color: “#6B6A7A”, fontSize: 10, marginTop: 2, fontFamily: “monospace”, letterSpacing: 0.5 }}>{stat.label}</div>
 </div>
 ))}
 </div>
 {/* Recherche */}
-<div style={{ display: “flex”, alignItems: “center”, gap: 10, background: “#1E1E32”, borderRadius: 12, padding: “10px 14px”, marginBottom: 8 }}>
+<div style={{ display: “flex”, alignItems: “center”, gap: 10, background: “#1A1A2E”, borderRadius: 14, padding: “12px 14px”, marginBottom: 8, border: “1px solid rgba(255,255,255,0.12)” }}>
 <span style={{ color: “#6B6A7A”, display: “flex”, alignItems: “center”, justifyContent: “center” }}><Icon name="search" size={16} color="#6B6A7A" /></span>
 <input value={search} onChange={e => setSearch(e.target.value)} placeholder=“Rechercher un projet…”
-style={{ background: “none”, border: “none”, outline: “none”, color: “#F1F0EE”, flex: 1, fontFamily: “‘DM Sans’, sans-serif” }} />
+style={{ background: “none”, border: “none”, outline: “none”, color: “#F1F0EE”, flex: 1, fontFamily: “‘DM Sans’, sans-serif”, fontSize: 15 }} />
 </div>
 {/* Filtres */}
 <div style={{ display: “flex”, gap: 6, overflowX: “auto”, paddingBottom: 2 }}>
@@ -2271,8 +2273,8 @@ style={{ background: “none”, border: “none”, outline: “none”, color:
 ))}
 </div>
 </div>
-<div style={{ padding: “4px 6px 100px” }}>
-<div style={{ display: “grid”, gridTemplateColumns: “repeat(3, 1fr)”, rowGap: 4, columnGap: 0 }}>
+<div style={{ padding: “4px 10px 100px” }}>
+<div style={{ display: “grid”, gridTemplateColumns: “repeat(3, 1fr)”, rowGap: 4, columnGap: 0, justifyItems: “center” }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === “pdf” ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
