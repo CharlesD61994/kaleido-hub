@@ -1068,6 +1068,7 @@ const addCounter = () => setCounters(prev => [...prev, { id: Date.now(), name: `
 const updateCounter = (id, updates) => setCounters(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
 const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id));
 if (!hasParties) return (
+<>
 {focusedProjectId != null && <div onClick={() => setFocusedProjectId(null)} style={{ position: "fixed", inset: 0, background: "rgba(5,6,18,0.18)", backdropFilter: "blur(2px)", zIndex: 2, pointerEvents: "auto" }} />}
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#F1F0EE", maxWidth: 430, margin: "0 auto", padding: 20 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
@@ -1081,6 +1082,7 @@ if (!hasParties) return (
 <button onClick={() => onNavigateEditor(project)} style={{ background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", borderRadius: 12, padding: "12px 24px", color: "#fff", fontSize: 14, cursor: "pointer", fontWeight: 600 }}>Ouvrir l'éditeur</button>
 </div>
 </div>
+</>
 );
 const circ_r = 43.5, circ_c = 2 * Math.PI * circ_r;
 return (
