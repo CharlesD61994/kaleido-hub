@@ -380,11 +380,11 @@ const ringShadow = 5;
 const bubbleLift = 2;
 const pulseDuration = "3.2s";
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 180ms ease, filter 220ms ease, opacity 180ms ease", transform: isFocused ? "scale(1.045) translateY(-2px)" : "scale(1)", filter: isFocused ? "saturate(1.08) brightness(1.04)" : "saturate(1.02)", opacity: hasAnyFocus && !isFocused ? 0.72 : 1 }}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 180ms ease, filter 220ms ease, opacity 180ms ease", transform: isFocused ? "scale(1.05) translateY(-2px)" : "scale(1)", filter: isFocused ? "saturate(1.08) brightness(1.04)" : "saturate(1.02)", opacity: hasAnyFocus && !isFocused ? 0.5 : 1, zIndex: isFocused ? 3 : 1 }}
 onClick={() => { if (onFocus) onFocus(); onProjectClick && onProjectClick(project); }}
 onTouchStart={(e) => { if (onFocus) onFocus(); e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
-onTouchEnd={(e) => { e.currentTarget.style.transform = isFocused ? "scale(1.045) translateY(-2px)" : "scale(1) translateY(0)"; if (onBlurFocus) setTimeout(() => onBlurFocus(), 900); }}
-onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; if (onBlurFocus) onBlurFocus(); }}
+onTouchEnd={(e) => { e.currentTarget.style.transform = isFocused ? "scale(1.05) translateY(-2px)" : "scale(1) translateY(0)"; }}
+onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
 onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
 onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
 onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}>
@@ -403,13 +403,14 @@ strokeLinecap="round" transform="rotate(-90 55 55)"
 style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 4px ${color.light})` }} />
 </svg>
 {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-style={{ position: "absolute", top: -10, right: -10, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
+style={{ position: "absolute", top: -12, right: -12, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
 </div>
 <div style={{ textAlign: "center", width: size, maxWidth: 110 }}>
 <div style={{ color: "#F1F0EE", fontSize: "clamp(10px, 2.8vw, 12px)", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{project.name}</div>
 {mode === "pro" && project.client && <div style={{ color: color.light, fontSize: 10, marginTop: 1, fontFamily: "monospace" }}>{project.client}</div>}
 </div>
 </div>
+</>
 );
 }
 function ContextMenu({ project, position, onClose, onRename, onDelete, onChangePhoto, onChangeColor }) {
@@ -1086,6 +1087,13 @@ if (!hasParties) return (
 );
 const circ_r = 43.5, circ_c = 2 * Math.PI * circ_r;
 return (
+<>
+{focusedProjectId && (
+  <div
+    onClick={() => setFocusedProjectId(null)}
+    style={{ position: "fixed", inset: 0, background: "rgba(5,6,18,0.2)", backdropFilter: "blur(3px)", zIndex: 2 }}
+  />
+)}
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", position: "relative", overflow: "hidden" }}>
 <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; } @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} } .kgbg { background: linear-gradient(-45deg, #0D0D1A, #1A0A2E, #0D0D1A, #1E1E32); background-size: 400% 400%; animation: gradientShift 8s ease infinite; } @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);opacity:0.1} 50%{transform:translateY(-20px) rotate(180deg);opacity:0.3} }
 @keyframes bubblePulse {
