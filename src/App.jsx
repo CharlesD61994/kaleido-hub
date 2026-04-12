@@ -376,9 +376,9 @@ const size = "clamp(108px, 30vw, 122px)";
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer" }}
 onClick={() => onProjectClick && onProjectClick(project)}>
-<div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
+<div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
-<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "84%", height: "84%", borderRadius: "50%", background: "transparent", boxShadow: `0 0 12px ${color.bg}66, 0 0 24px ${color.bg}44`, opacity: 1, zIndex: 0, pointerEvents: "none" }} />
+<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "92%", height: "92%", borderRadius: "50%", background: `radial-gradient(circle, ${color.bg}88 0%, ${color.bg}44 45%, transparent 72%)`, filter: "blur(12px)", opacity: 0.85, zIndex: 0, pointerEvents: "none" }} />
 <div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 </div>
@@ -1121,7 +1121,7 @@ const col = KALEIDOSCOPE_COLORS[p.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isActive = currentPartie?.id === p.id;
 return (
 <button key={p.id} onClick={() => goToPartie(p.id)}
-style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 9999, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, whiteSpace: "nowrap", flexShrink: 0 }}>
+style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 9999, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", whiteSpace: "nowrap", flexShrink: 0 }}>
 {p.nom}
 </button>
 );
@@ -1130,7 +1130,7 @@ style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light}
 </div>
 {/* Instruction courante */}
 <div style={{ position: "relative", zIndex: 10, padding: "0 20px 12px" }}>
-<div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 9999, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
+<div style={{ background: "rgba(30,30,50,0.9)", backdropFilter: "blur(20px)", border: `2px solid ${currentPartieColor.light}44`, borderRadius: 20, padding: "16px 20px", textAlign: "center", boxShadow: `0 8px 32px ${currentPartieColor.bg}33` }}>
 <div style={{ background: `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, borderRadius: 12, padding: "10px 16px", display: "inline-block", marginBottom: 12, boxShadow: `0 4px 16px ${currentPartieColor.bg}66` }}>
 <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{currentRang?.isNote ? "Note" : `Rang ${Math.max(1, currentPartieRangIndex + 1)}`}</span>
 </div>
