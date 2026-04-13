@@ -378,7 +378,7 @@ const glowNear = 12;
 const glowFar = 26;
 const ringShadow = 6;
 const bubbleLift = 4;
-const pulseDuration = "3.2s";
+const pulseDuration = "3s";
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
