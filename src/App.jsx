@@ -3039,7 +3039,7 @@ onUpdatePatron={(id, updates) => updatePatron(id, updates)}
 onChangePatronPhoto={(id) => setPhotoTarget({ id, context: “patron” })}
 editingPdfPatron={editingPdfPatron}
 setEditingPdfPatron={(p) => {
-// Always get fresh database version
+// Toujours prendre la version fraîche de database
 if (p) { const fresh = (database.patrons||[]).find(x => x.id === p.id); setEditingPdfPatron(fresh ? {…fresh} : {…p}); }
 else setEditingPdfPatron(null);
 }}
