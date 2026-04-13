@@ -13,11 +13,12 @@ const KALEIDOSCOPE_COLORS = [
 
 const GLOBAL_MOTION_CSS = `
   button, [data-kaleido-pressable="true"] {
-    transition: transform 160ms ease, box-shadow 220ms ease, filter 220ms ease, opacity 180ms ease;
-    will-change: transform;
+    transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 180ms ease, opacity 180ms ease;
+    will-change: transform, filter;
   }
   button:active, [data-kaleido-pressable="true"]:active {
-    transform: scale(0.965);
+    transform: scale(0.94) translateY(1px);
+    filter: brightness(1.08);
   }
   [data-kaleido-modal-backdrop="true"] {
     animation: kaleidoFadeIn 220ms ease both;
@@ -435,12 +436,12 @@ const pulseDuration = "3.2s";
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
-onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
-onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
-onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
-onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.972) translateY(1px)"; }}
-onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}
-onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; }}>
+onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.948) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
+onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
+onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
+onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.952) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
+onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
+onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
 <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`,  willChange: "transform, opacity, box-shadow" }} />
@@ -1123,7 +1124,7 @@ const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id))
 if (!hasParties) return (
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#F1F0EE", maxWidth: 430, margin: "0 auto", padding: 20 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
-<button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 </div>
 <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
@@ -1157,7 +1158,7 @@ return (
 {/* Header */}
 <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-<button onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <div style={{ flex: 1 }}>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>{patron.technique}{patron.outil ? ` • ${patron.outil}` : ""}</div>
@@ -1760,7 +1761,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
       <div style={{ flexShrink: 0, background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", zIndex: 10, padding: "48px 16px 12px" }}>
         {/* Ligne header : retour + titre + timer */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <button onClick={handleBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", color: color.light, fontSize: 15, cursor: "pointer", flexShrink: 0 }}>←</button>
+          <button data-kaleido-back-button="true" onClick={handleBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", color: color.light, fontSize: 15, cursor: "pointer", flexShrink: 0 }}>←</button>
           <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project?.name}</h1>
           <div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 14, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
             <span style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "monospace", fontWeight: 700 }}>{formatTime(elapsedTime)}</span>
@@ -1943,7 +1944,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       {/* Header */}
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <button onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
+          <button data-kaleido-back-button="true" onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
           <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={26} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
@@ -2313,6 +2314,82 @@ useEffect(() => {
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerleave', resetParallax);
     window.removeEventListener('blur', resetParallax);
+  };
+}, [currentView]);
+
+useEffect(() => {
+  if (currentView === VIEWS.HUB) return undefined;
+
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+  let consumed = false;
+
+  const isInteractiveTarget = (target) => {
+    if (!(target instanceof Element)) return false;
+    return Boolean(
+      target.closest('input, textarea, select, button, a, [contenteditable="true"], [data-kaleido-no-edge-back="true"]')
+    );
+  };
+
+  const findVisibleBackButton = () => {
+    const buttons = Array.from(document.querySelectorAll('[data-kaleido-back-button="true"]'));
+    return buttons.find((btn) => {
+      const style = window.getComputedStyle(btn);
+      const rect = btn.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && rect.width > 0
+        && rect.height > 0
+        && btn.offsetParent !== null;
+    }) || null;
+  };
+
+  const onTouchStart = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    if (isInteractiveTarget(e.target)) return;
+
+    const touch = e.touches[0];
+    if (touch.clientX > 26) return;
+
+    startX = touch.clientX;
+    startY = touch.clientY;
+    tracking = true;
+    consumed = false;
+  };
+
+  const onTouchMove = (e) => {
+    if (!tracking || !e.touches || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    const dx = touch.clientX - startX;
+    const dy = Math.abs(touch.clientY - startY);
+
+    if (dx > 56 && dy < 42 && !consumed) {
+      const backButton = findVisibleBackButton();
+      if (backButton) {
+        consumed = true;
+        tracking = false;
+        backButton.click();
+      }
+    }
+  };
+
+  const onTouchEnd = () => {
+    tracking = false;
+    consumed = false;
+  };
+
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('touchend', onTouchEnd, { passive: true });
+  window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+  return () => {
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
   };
 }, [currentView]);
 // ─── VUE HUB ──────────────────────────────────────────────
@@ -2975,7 +3052,7 @@ return (
     <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} ::-webkit-scrollbar{width:0} *{-webkit-tap-highlight-color:transparent} input,textarea,select{font-size:16px!important}`}</style>
     <div style={{ background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", padding: "44px 20px 20px", position: "sticky", top: 0, zIndex: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-        <button onClick={isPatronMode ? navigateToLibrary : navigateToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+        <button data-kaleido-back-button="true" onClick={isPatronMode ? navigateToLibrary : navigateToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
         {isEditingNom
           ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSaveNom()} onBlur={handleSaveNom} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 18, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1 }} />
           : <h1 onClick={() => setIsEditingNom(true)} style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1, cursor: "pointer" }}>{patron.nom}</h1>
