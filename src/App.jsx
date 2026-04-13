@@ -2676,7 +2676,6 @@ partieId = `partie-${partieIndex}-${makeId()}`;
 }
 partieIds.add(partieId);
 
-```
 const normalizedRangs = safeArray(rawPartie.rangs).map((rang, rangIndex) => {
   const rawRang = rang && typeof rang === "object" ? rang : {};
   let rangId = rawRang.id;
@@ -2699,7 +2698,6 @@ return {
   colorIdx: Number.isInteger(rawPartie.colorIdx) ? rawPartie.colorIdx : (partieIndex % KALEIDOSCOPE_COLORS.length),
   rangs: normalizedRangs,
 };
-```
 
 });
 
@@ -2751,7 +2749,6 @@ errors.push("Partie invalide: entrée non valide.");
 continue;
 }
 
-```
 if (partie.id == null) {
   errors.push("Partie invalide: id manquant.");
 } else if (partieIds.has(partie.id)) {
@@ -2779,7 +2776,6 @@ for (const rang of rangs) {
     rangIds.add(rang.id);
   }
 }
-```
 
 }
 
@@ -2791,7 +2787,6 @@ setPatron(prev => {
 try {
 const next = updater(prev);
 
-```
   if (!next || typeof next !== "object") {
     console.warn(`[KALEIDO] ${label}: état ignoré (valeur invalide).`);
     return prev;
@@ -2811,7 +2806,6 @@ const next = updater(prev);
   console.warn(`[KALEIDO] ${label}: exception`, e);
   return prev;
 }
-```
 
 });
 };
@@ -2850,7 +2844,6 @@ const parties = safeArray(prev.parties);
 const p = parties.find(x => x.id === id);
 if (!p) return prev;
 
-```
 return {
   ...prev,
   parties: [
@@ -2866,7 +2859,6 @@ return {
     }
   ]
 };
-```
 
 });
 };
@@ -2938,7 +2930,6 @@ applyPatronUpdate("duplicateRang", prev => ({
 parties: safeArray(prev.parties).map(p => {
 if (p.id !== partieId) return p;
 
-```
   return {
     ...p,
     rangs: safeArray(p.rangs).reduce((acc, r) => {
@@ -2954,7 +2945,6 @@ if (p.id !== partieId) return p;
     }, [])
   };
 })
-```
 
 }));
 
@@ -2964,7 +2954,6 @@ applyPatronUpdate("moveRang", prev => ({
 parties: safeArray(prev.parties).map(p => {
 if (p.id !== partieId) return p;
 
-```
   const arr = [...safeArray(p.rangs)];
   const i = arr.findIndex(r => r.id === rangId);
   const ni = dir === "up" ? i - 1 : i + 1;
@@ -2974,7 +2963,6 @@ if (p.id !== partieId) return p;
   [arr[i], arr[ni]] = [arr[ni], arr[i]];
   return { ...p, rangs: arr };
 })
-```
 
 }));
 return (
