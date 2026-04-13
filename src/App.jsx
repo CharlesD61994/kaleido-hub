@@ -3073,3 +3073,4 @@ if (currentView === VIEWS.PDF_VIEWER) return (
 <PdfViewerView project={currentProject} onNavigateHub={navigateToHub} onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })} />
 );
 return HubView();
+}
