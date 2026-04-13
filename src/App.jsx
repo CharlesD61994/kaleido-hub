@@ -373,21 +373,13 @@ tx.oncomplete = resolve;
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const size = "clamp(108px, 30vw, 122px)";
-const progressRatio = Math.min((project.total ? project.rang / project.total : 0), 1);
-const glowOpacity = 0.28 + (progressRatio * 0.42);
-const glowNear = 14 + (progressRatio * 10);
-const glowFar = 30 + (progressRatio * 18);
-const bubbleLift = 4 + (progressRatio * 2);
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
-onClick={() => onProjectClick && onProjectClick(project)}
-onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.985)"; }}
-onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1)"; }}>
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer" }}
+onClick={() => onProjectClick && onProjectClick(project)}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
-<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}22 42%, transparent 72%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}30`, transition: "box-shadow 220ms ease, background 220ms ease, opacity 220ms ease" }} />
-<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${18 + bubbleLift}px rgba(0,0,0,0.22), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)", transition: "transform 160ms ease, box-shadow 200ms ease", zIndex: 1 }}>
+<div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", background: `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}22 40%, transparent 70%)`, boxShadow: `0 0 20px ${color.bg}66, 0 0 40px ${color.bg}33`, zIndex: 0, pointerEvents: "none" }} />
+<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 1 }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 </div>
 <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
@@ -399,7 +391,7 @@ strokeLinecap="round" transform="rotate(-90 55 55)"
 style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 4px ${color.light})` }} />
 </svg>
 {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-style={{ position: "absolute", top: -4, right: -4, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
+style={{ position: "absolute", top: -4, right: -4, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.5)", zIndex: 10 }}>i</button>}
 </div>
 <div style={{ textAlign: "center", width: size, maxWidth: 110 }}>
 <div style={{ color: "#F1F0EE", fontSize: "clamp(10px, 2.8vw, 12px)", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{project.name}</div>
