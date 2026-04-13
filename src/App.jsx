@@ -309,7 +309,7 @@ return false;
 }
 };
 // ═══════════════════════════════════════════════════════════════
-// STOCKAGE PDFs — IndexedDB
+// STOCKAGE PDFs – IndexedDB
 // ═══════════════════════════════════════════════════════════════
 const _pdfDb = (() => {
 let db = null;
@@ -616,7 +616,7 @@ Choisir une photo
 </div>
 ) : (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", height: "100vh", overflow: "hidden" }}>
-{/* Overlay sombre autour du cercle — ne couvre PAS les boutons */}
+{/* Overlay sombre autour du cercle -- ne couvre PAS les boutons */}
 <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 0 }} />
 {/* Texte */}
 <div style={{ position: "relative", zIndex: 2, marginTop: 60, marginBottom: 20 }}>
@@ -652,7 +652,7 @@ pointerEvents: "none"
 draggable={false}
 />
 </div>
-{/* Boutons — toujours visibles, z-index élevé */}
+{/* Boutons -- toujours visibles, z-index élevé */}
 <div style={{ position: "relative", zIndex: 2, display: "flex", gap: 14, marginTop: 36 }}>
 <button onClick={onClose} style={{ padding: "14px 30px", borderRadius: 14, border: "2px solid #555", background: "#2A2A3E", color: "#F1F0EE", fontSize: 16, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>Annuler</button>
 <button onClick={handleConfirm} style={{ padding: "14px 30px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #7C3AED, #EC4899)", color: "#fff", fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Confirmer ✓</button>
@@ -815,7 +815,7 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 </>
 )}
 </div>
-{/* Nom centré + rangs centré — deux colonnes */}
+{/* Nom centré + rangs centré -- deux colonnes */}
 <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
 {isEditingNom
@@ -883,7 +883,7 @@ const [isEditingMax, setIsEditingMax] = useState(false);
 const [tempMax, setTempMax] = useState("");
 const col = KALEIDOSCOPE_COLORS[counter.colorIdx % KALEIDOSCOPE_COLORS.length];
 const displayValue = counter.syncWithGlobal ? ((globalRangCount - 1) % (counter.maxRepeats || 4)) + 1 : counter.value;
-// Swipe handlers — séparés pour éviter les conflits
+// Swipe handlers -- séparés pour éviter les conflits
 const onTS = (e) => { if (!isEditing && !isEditingMax) setSwipeStartX(e.touches[0].clientX); };
 const onTM = (e) => { if (!isEditing && !isEditingMax && swipeStartX - e.touches[0].clientX > 30) setIsSwipedOpen(true); };
 const onTE = (e) => { const t = e.changedTouches?.[0]; if (t && !isEditing && !isEditingMax && swipeStartX - t.clientX < -30) setIsSwipedOpen(false); };
@@ -912,7 +912,7 @@ style={{ background: counter.syncWithGlobal ? "#333" : col.bg, border: "none", b
 </div>
 {counter.syncWithGlobal && <div style={{ color: "#666", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Sync • Reset après {counter.maxRepeats || 4}</div>}
 </div>
-{/* Actions swipe — stopPropagation sur chaque bouton */}
+{/* Actions swipe -- stopPropagation sur chaque bouton */}
 <div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 6 : -95, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 85 }}>
 <button onClick={e => doAction(e, () => onUpdate({ syncWithGlobal: !counter.syncWithGlobal }))}
 style={{ background: counter.syncWithGlobal ? col.bg : "#666", border: "none", borderRadius: 6, padding: "4px 5px", color: "#fff", fontSize: 9, cursor: "pointer", fontWeight: 600, height: 28 }}>SYNC</button>
@@ -936,7 +936,7 @@ style={{ background: "#DC2626", border: "none", borderRadius: 6, padding: "4px 5
 );
 }
 // ═══════════════════════════════════════════════════════════════
-// COMPTEUR DE RANGS (composant indépendant — corrige le bug reset)
+// COMPTEUR DE RANGS (composant indépendant -- corrige le bug reset)
 // ═══════════════════════════════════════════════════════════════
 function ProgressionSwipeCard({ currentPartieColor, currentIndex, totalRangs, circ_r, circ_c, currentPartie, currentPartieRangIndex, currentPartieTotal, onAddCounter, currentCountIndex }) {
 const [swiped, setSwiped] = useState(false);
@@ -1033,7 +1033,7 @@ const partieRangsOnly = currentPartie ? currentPartie.rangs.filter(r => !r.isNot
 // Si on est sur une note, trouver le dernier rang normal avant la note dans la partie
 const currentPartieRangIndex = currentPartie ? (() => {
 if (!currentRang?.isNote) return partieRangsOnly.findIndex(r => r.id === currentRang?.id);
-// On est sur une note — chercher le dernier rang normal avant dans la partie
+// On est sur une note -- chercher le dernier rang normal avant dans la partie
 const idxInAll = currentPartie.rangs.findIndex(r => r.id === currentRang?.id);
 const lastNormalBefore = currentPartie.rangs.slice(0, idxInAll).filter(r => !r.isNote);
 if (lastNormalBefore.length === 0) return -1;
@@ -1424,7 +1424,7 @@ Créer la bulle
 );
 }
 // ═══════════════════════════════════════════════════════════════
-// PDF ZOOM ZONE — pinch-zoom maison, indépendant du header
+// PDF ZOOM ZONE -- pinch-zoom maison, indépendant du header
 // ═══════════════════════════════════════════════════════════════
 function PdfZoomZone({ loading, loadError, pages, zoom }) {
 const [scale, setScale] = useState(1);
@@ -1524,7 +1524,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
       style={{ background: "#1A1A2E", borderRadius: 14, border: `1px solid ${color.light}22`, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
       {/* Contenu principal */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, transform: swiped ? "translateX(-100px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
-        {/* Cercle — progression globale */}
+        {/* Cercle -- progression globale */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: 80, flexShrink: 0 }}>
           <div style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2, fontWeight: 700 }}>Global</div>
           <div style={{ position: "relative", width: 64, height: 64 }}>
@@ -1540,7 +1540,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
             </svg>
             <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#F1F0EE", fontSize: 19, fontWeight: 700, fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>{rang}</span>
-              <span style={{ color: color.light, fontSize: 11, fontFamily: "monospace", marginTop: 1 }}>/{total > 0 ? total : "—"}</span>
+              <span style={{ color: color.light, fontSize: 11, fontFamily: "monospace", marginTop: 1 }}>/{total > 0 ? total : "--"}</span>
             </div>
           </div>
           {total > 0 && <span style={{ color: "#6B6A7A", fontSize: 9, fontFamily: "monospace" }}>{pct}%</span>}
@@ -1686,7 +1686,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     onSaveProgress(rang, project?.total || 0, elapsedTime);
     onNavigateHub();
   };
-  // Chargement PDF — rendu page par page progressif
+  // Chargement PDF -- rendu page par page progressif
   useEffect(() => {
     let cancelled = false;
     setPages([]);
@@ -1735,7 +1735,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         const pdf = await window.pdfjsLib.getDocument({ data: arr }).promise;
         if (cancelled) return;
         setLoading(false); // Afficher le conteneur dès que le PDF est parsé
-        // Scale adapté selon le nombre de pages — moins de mémoire pour les gros PDFs
+        // Scale adapté selon le nombre de pages -- moins de mémoire pour les gros PDFs
         const dpr = window.devicePixelRatio || 2;
         const scale = pdf.numPages > 30 ? 1.5 : pdf.numPages > 15 ? dpr * 1.5 : dpr * 2;
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -2446,11 +2446,11 @@ saveToDatabase(imported);
 setShowDataImportModal(false);
 setShowSettingsModal(false);
 const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
+alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF -- tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
 } else {
-alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+alert("❌ Texte invalide -- assure-toi de coller une sauvegarde Kaleido.");
 }
-} catch { alert("❌ Erreur — le texte ne semble pas valide."); }
+} catch { alert("❌ Erreur -- le texte ne semble pas valide."); }
 }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
 Restaurer</button>
 <button onClick={() => setShowDataImportModal(false)}
@@ -2487,7 +2487,7 @@ style={{ padding: "12px 20px", borderRadius: 12, background: "#333", border: "no
 <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 430, animation: "slideUp 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>
 <div style={{ width: 36, height: 4, background: "#333", borderRadius: 2, margin: "0 auto 20px" }} />
 <h2 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 18, margin: "0 0 20px", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}><Icon name="settings" size={18} color="#A78BFA" />Paramètres</h2>
-{/* Export — télécharge un fichier .json */}
+{/* Export -- télécharge un fichier .json */}
 <button onClick={async () => {
 try {
 const allProjects = [...(database.projectsPersonal||[]), ...(database.projectsPro||[])];
@@ -2514,7 +2514,7 @@ URL.revokeObjectURL(url);
 <div style={{ color: "#6B6A7A", fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}>Télécharge un fichier <strong style={{ color: "#A78BFA" }}>.json</strong> avec tous tes projets et PDFs</div>
 </div>
 </button>
-{/* Import — charge depuis un fichier .json */}
+{/* Import -- charge depuis un fichier .json */}
 <label style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", padding: "16px", borderRadius: 14, background: "linear-gradient(135deg, #05966922, #34D39922)", border: "1px solid #05966944", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
 <IconBadge name="upload" tone="green" size={24} />
 <div style={{ textAlign: "left" }}>
@@ -2578,7 +2578,7 @@ style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 20px", b
 </div>
 </div>
 )}
-{/* Sélection patron — grille de bulles */}
+{/* Sélection patron -- grille de bulles */}
 {showSelectPatronModal && (
 <div onClick={() => setShowSelectPatronModal(false)} style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "flex-end", animation: "fadeIn 0.22s ease both", justifyContent: "center" }}>
 <div onClick={e => e.stopPropagation()} style={{ background: "#1A1A2E", borderRadius: "24px 24px 0 0", padding: "20px 6px 40px", width: "100%", maxWidth: 430, maxHeight: "80vh", display: "flex", flexDirection: "column", animation: "slideUp 0.32s cubic-bezier(0.34,1.56,0.64,1) both" }}>
@@ -3160,7 +3160,7 @@ onClose={() => setPhotoTarget(null)}
 onConfirm={(imgData) => { updatePatron(photoTarget.id, { image: imgData }); setPhotoTarget(null); }}
 />
 )}
-{/* Modale édition patron PDF — dans KaleidoHub pour accès direct à database */}
+{/* Modale édition patron PDF – dans KaleidoHub pour accès direct à database */}
 {editingPdfPatron && (
 <EditPdfPatronModal
 key={editingPdfPatron.id + ‘-’ + (editingPdfPatron.pdfParties||[]).length}
