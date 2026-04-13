@@ -372,7 +372,7 @@ tx.oncomplete = resolve;
 // ═══════════════════════════════════════════════════════════════
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
-const size = "min(28vw, 110px)";
+const size = "clamp(108px, 30vw, 122px)";
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 2px", cursor: "pointer" }}
 onClick={() => onProjectClick && onProjectClick(project)}>
@@ -2270,7 +2270,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 </div>
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", rowGap: 4, columnGap: 0, justifyItems: "center" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 10, columnGap: 6, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
