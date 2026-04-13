@@ -3002,7 +3002,7 @@ className="splash-logo"
 src={LOGO_SRC}
 alt="Kaleido"
 style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '3px solid #7C3AED44' }}
-onError={(e) => { e.currentTarget.style.display = 'none'; }}
+onError={(e) => { e.target.style.display='none'; }}
 />
 <span style={{
 fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 36,
@@ -3039,7 +3039,7 @@ onUpdatePatron={(id, updates) => updatePatron(id, updates)}
 onChangePatronPhoto={(id) => setPhotoTarget({ id, context: “patron” })}
 editingPdfPatron={editingPdfPatron}
 setEditingPdfPatron={(p) => {
-// Always get fresh database version
+// Toujours prendre la version fraîche de database
 if (p) { const fresh = (database.patrons||[]).find(x => x.id === p.id); setEditingPdfPatron(fresh ? {…fresh} : {…p}); }
 else setEditingPdfPatron(null);
 }}
@@ -3081,5 +3081,5 @@ if (currentView === VIEWS.ROW_COUNTER) return (
 if (currentView === VIEWS.PDF_VIEWER) return (
 <PdfViewerView project={currentProject} onNavigateHub={navigateToHub} onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })} />
 );
-return <HubView />;
+return HubView();
 }
