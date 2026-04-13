@@ -59,6 +59,11 @@ const GLOBAL_MOTION_CSS = `
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.018); }
   }
+  @keyframes kaleidoProgressPulse {
+    0% { transform: scale(0.965); filter: brightness(0.98); }
+    55% { transform: scale(1.085); filter: brightness(1.1); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
 `;
 
 const getViewMotionStyle = (transitionName) => {
@@ -450,11 +455,11 @@ onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)
 </div>
 <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
 <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
-<circle cx="55" cy="55" r="51" fill="none" stroke={color.light} strokeWidth="5"
+<circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.26)" strokeWidth="5"
 strokeDasharray={2 * Math.PI * 51}
 strokeDashoffset={2 * Math.PI * 51 * (1 - Math.min(project.rang / project.total, 1))}
 strokeLinecap="round" transform="rotate(-90 55 55)"
-style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 4px ${color.light})` }} />
+style={{ transition: "stroke-dashoffset 0.6s ease" }} />
 </svg>
 {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
 style={{ position: "absolute", top: -4, right: -4, width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.34)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 140ms ease, box-shadow 180ms ease", zIndex: 10 }}>i</button>}
@@ -975,12 +980,12 @@ style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 12, posi
 {/* Cercle */}
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
 <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Global</div>
-<div style={{ position: "relative", width: 95, height: 95, animation: "kaleidoProgressBreath 3.6s ease-in-out infinite" }}>
+<div key={`progress-${currentCountIndex}-${totalRangs}`} style={{ position: "relative", width: 95, height: 95, animation: "kaleidoProgressPulse 520ms cubic-bezier(0.22, 1, 0.36, 1), kaleidoProgressBreath 3.6s ease-in-out 520ms infinite", filter: `drop-shadow(0 0 10px ${currentPartieColor.bg}33)` }}>
 <svg width="95" height="95" style={{ transform: "rotate(-90deg)" }}>
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="url(#kg)" strokeWidth="4" fill="none"
 strokeDasharray={circ_c} strokeDashoffset={circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs)}
-strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
+strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)" }} />
 <defs><linearGradient id="kg" x1="0%" y1="0%" x2="100%" y2="100%">
 <stop offset="0%" stopColor={currentPartieColor.bg} />
 <stop offset="100%" stopColor={currentPartieColor.light} />
@@ -1166,8 +1171,8 @@ return (
 <div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 16, padding: "12px 16px", boxShadow: "0 6px 20px rgba(124,58,237,0.4)", minWidth: 140 }}>
 <div style={{ color: "#F1F0EE", fontSize: 22, fontFamily: "monospace", fontWeight: 700, textAlign: "center", marginBottom: 4 }}>{formatTime(elapsedTime)}</div>
 <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-<button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 8, padding: "4px 10px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
-<button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 8, padding: "4px 10px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>RESET</button>
+<button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
+<button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>RESET</button>
 </div>
 </div>
 </div>
@@ -1199,7 +1204,7 @@ const col = KALEIDOSCOPE_COLORS[p.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isActive = currentPartie?.id === p.id;
 return (
 <button key={p.id} onClick={() => goToPartie(p.id)}
-style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 9999, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
+style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 18, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
 {p.nom}
 </button>
 );
@@ -1226,13 +1231,13 @@ style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light}
 <button
 onClick={prevRang}
 disabled={currentIndex === 0}
-style={{ background: currentIndex === 0 ? "#333" : "#1E1E32", color: currentIndex === 0 ? "#666" : currentPartieColor.light, border: "none", borderRadius: 9999, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === 0 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
+style={{ background: currentIndex === 0 ? "#333" : "#1E1E32", color: currentIndex === 0 ? "#666" : currentPartieColor.light, border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === 0 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
 ← Précédent
 </button>
 <button
 onClick={nextRang}
 disabled={currentIndex === allRangs.length - 1}
-style={{ background: currentIndex === allRangs.length - 1 ? "#333" : `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, color: currentIndex === allRangs.length - 1 ? "#666" : "#fff", border: "none", borderRadius: 9999, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === allRangs.length - 1 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
+style={{ background: currentIndex === allRangs.length - 1 ? "#333" : `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, color: currentIndex === allRangs.length - 1 ? "#666" : "#fff", border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === allRangs.length - 1 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
 Suivant →
 </button>
 </div>
@@ -1513,13 +1518,13 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
         {/* Cercle — progression globale */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: 80, flexShrink: 0 }}>
           <div style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2, fontWeight: 700 }}>Global</div>
-          <div style={{ position: "relative", width: 64, height: 64 }}>
+          <div key={`pdf-progress-${rang}-${total}`} style={{ position: "relative", width: 64, height: 64, animation: "kaleidoProgressPulse 500ms cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 10px ${color.bg}30)` }}>
             <svg width="64" height="64" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.08)" strokeWidth="3.5" fill="none" />
               <circle cx="32" cy="32" r="27" stroke="url(#pgc)" strokeWidth="3.5" fill="none"
                 strokeDasharray={2 * Math.PI * 27}
                 strokeDashoffset={2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1)}
-                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.4s ease" }} />
+                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)" }} />
               <defs><linearGradient id="pgc" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={color.bg} /><stop offset="100%" stopColor={color.light} />
               </linearGradient></defs>
@@ -1765,8 +1770,8 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
           <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project?.name}</h1>
           <div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 14, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
             <span style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "monospace", fontWeight: 700 }}>{formatTime(elapsedTime)}</span>
-            <button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 7, padding: "4px 8px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
-            <button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 7, padding: "4px 8px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>RESET</button>
+            <button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 9, padding: "5px 9px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
+            <button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 9, padding: "5px 9px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>RESET</button>
           </div>
         </div>
         {/* Carte compteur avec swipe pour ajouter compteur secondaire */}
@@ -3244,3 +3249,4 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 </div>
 );
 }
+
