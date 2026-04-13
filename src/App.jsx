@@ -39,16 +39,16 @@ const GLOBAL_MOTION_CSS = `
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes kaleidoScreenInRight {
-    from { opacity: 0; transform: translate3d(24px, 10px, 0); }
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes kaleidoScreenInLeft {
-    from { opacity: 0; transform: translate3d(-24px, 10px, 0); }
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
     to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes kaleidoScreenFade {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
   }
   @keyframes kaleidoParallaxFloat {
     0%, 100% { transform: translate3d(var(--kx, 0px), var(--ky, 0px), 0); }
@@ -61,10 +61,7 @@ const GLOBAL_MOTION_CSS = `
 `;
 
 const getViewMotionStyle = (transitionName) => {
-  if (transitionName === 'slide-in-right') return { animation: 'kaleidoScreenInRight 320ms cubic-bezier(0.22, 1, 0.36, 1) both' };
-  if (transitionName === 'slide-in') return { animation: 'kaleidoScreenInLeft 320ms cubic-bezier(0.22, 1, 0.36, 1) both' };
-  if (transitionName === 'slide-out') return { animation: 'kaleidoScreenFade 260ms ease both' };
-  return { animation: 'kaleidoScreenFade 260ms ease both' };
+  return { animation: 'none' };
 };
 
 const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
@@ -1939,7 +1936,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         ::-webkit-scrollbar { width: 0; }
         * { -webkit-tap-highlight-color: transparent; }
         input, textarea, select { font-size: 16px !important; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:1; transform:none; } to { opacity:1; transform:none; } }
         @keyframes slideInRight { from { transform: translateX(16px); } to { transform: translateX(0); } }
         @keyframes slideInLeft { from { transform: translateX(-16px); } to { transform: translateX(0); } }
       `}</style>
@@ -2321,7 +2318,7 @@ useEffect(() => {
 // ─── VUE HUB ──────────────────────────────────────────────
 const HubView = () => (
 <div data-kaleido-screen="true" style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif" }}>
-<style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } } ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; }`}</style>
+<style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} @keyframes fadeIn { from { opacity:1; transform:none; } to { opacity:1; transform:none; } } ::-webkit-scrollbar { width: 0; } * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; }`}</style>
 <div style={{ padding: "44px 20px 12px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
 {/* Header : logo + titre + boutons */}
 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
