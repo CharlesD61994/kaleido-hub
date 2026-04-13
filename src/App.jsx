@@ -3036,4 +3036,3 @@ if (currentView === VIEWS.PDF_VIEWER) return (
 );
 return HubView();
 }
-
