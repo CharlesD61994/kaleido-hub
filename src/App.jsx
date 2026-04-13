@@ -3069,9 +3069,26 @@ animation: 'splashPulse 1.8s ease-in-out infinite'
 }
 
 const viewWrapStyle = (trans) => getViewMotionStyle(trans);
+const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER;
 
-if (currentView === VIEWS.LIBRARY) return (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><style>{GLOBAL_MOTION_CSS}</style>
+return (
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A" }}>
+<style>{GLOBAL_MOTION_CSS}</style>
+
+{keepHubMounted && (
+<div
+style={{
+display: currentView === VIEWS.HUB ? "block" : "none",
+minHeight: "100vh",
+}}
+aria-hidden={currentView !== VIEWS.HUB}
+>
+{HubView()}
+</div>
+)}
+
+{currentView === VIEWS.LIBRARY && (
+<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
 <LibraryView
 database={database}
 onNavigateHub={navigateToHub}
@@ -3119,14 +3136,35 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
 />
 )}
 </div>
+)}
+
+{currentView === VIEWS.PATRON_EDITOR && (
+<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><PatronEditorView /></div>
+)}
+
+{currentView === VIEWS.ROW_COUNTER && (
+<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
+<CompteurRangsView
+project={currentProject}
+onNavigateHub={navigateToHub}
+onNavigateEditor={navigateToPatronEditor}
+onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })}
+/>
+</div>
+)}
+
+{currentView === VIEWS.PDF_VIEWER && (
+<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
+<PdfViewerView
+project={currentProject}
+onNavigateHub={navigateToHub}
+onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })}
+/>
+</div>
+)}
+
+{currentView === VIEWS.HUB && !keepHubMounted && HubView()}
+</div>
 );
-if (currentView === VIEWS.PATRON_EDITOR) return (<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><style>{GLOBAL_MOTION_CSS}</style><PatronEditorView /></div>);
-if (currentView === VIEWS.ROW_COUNTER) return (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><style>{GLOBAL_MOTION_CSS}</style><CompteurRangsView project={currentProject} onNavigateHub={navigateToHub} onNavigateEditor={navigateToPatronEditor} onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })} /></div>
-);
-if (currentView === VIEWS.PDF_VIEWER) return (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><style>{GLOBAL_MOTION_CSS}</style><PdfViewerView project={currentProject} onNavigateHub={navigateToHub} onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })} /></div>
-);
-return <div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><style>{GLOBAL_MOTION_CSS}</style>{HubView()}</div>;
 }
 
