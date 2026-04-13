@@ -302,7 +302,7 @@ const DB_KEY = ‘kaleido_database’;
 const DB_BACKUP_KEY = ‘kaleido_database_backup’;
 const PATRON_BACKUP_KEY = ‘kaleido_patron_backup’;
 const debug = (…args) => {
-if (typeof window !== “undefined” && window.KALEIDO_DEBUG) {
+if (isBrowser && window?.KALEIDO_DEBUG) {
 console.log(”[KALEIDO]”, …args);
 }
 };
@@ -473,7 +473,7 @@ const [showColors, setShowColors] = useState(false);
 return (
 <>
 <div onClick={e => { e.stopPropagation(); onClose(); }} style={{ position: "fixed", inset: 0, zIndex: 100 }} />
-<div style={{ position: "fixed", top: Math.min(position.y, window.innerHeight - 260), left: Math.min(position.x - 10, window.innerWidth - 200), zIndex: 101, background: "#1A1A2E", border: `1px solid ${color.light}44`, borderRadius: 16, padding: "8px 0", minWidth: 200, boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
+<div style={{ position: "fixed", top: Math.min(position.y, (isBrowser ? window.innerHeight : 800) - 260), left: Math.min(position.x - 10, (isBrowser ? window.innerWidth : 1024) - 200), zIndex: 101, background: "#1A1A2E", border: `1px solid ${color.light}44`, borderRadius: 16, padding: "8px 0", minWidth: 200, boxShadow: "0 8px 40px rgba(0,0,0,0.6)" }}>
 <div style={{ padding: "8px 16px 6px", borderBottom: `1px solid ${color.light}22`, marginBottom: 4 }}>
 <div style={{ color: color.light, fontSize: 11, fontFamily: "monospace", textTransform: "uppercase" }}>{project.name}</div>
 </div>
@@ -1678,15 +1678,22 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
       }
       try {
         // Charger pdf.js si pas encore chargé
-        if (!window.pdfjsLib) {
+        if (isBrowser && !window.pdfjsLib) {
           await new Promise((resolve, reject) => {
             const s = document.createElement('script');
             s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
             s.onload = resolve; s.onerror = reject;
             document.head.appendChild(s);
           });
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+              'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          }
+        }
+        if (!isBrowser || !window.pdfjsLib) {
+          setLoading(false);
+          setError('PDF.js non disponible');
+          return;
         }
         // Décoder le base64 en chunks pour éviter le crash mémoire sur gros PDFs
         const base64 = data.includes(',') ? data.split(',')[1] : data;
@@ -1706,7 +1713,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         if (cancelled) return;
         setLoading(false); // Afficher le conteneur dès que le PDF est parsé
         // Scale adapté selon le nombre de pages — moins de mémoire pour les gros PDFs
-        const dpr = window.devicePixelRatio || 2;
+        const dpr = (isBrowser && window?.devicePixelRatio) || 2;
         const scale = pdf.numPages > 30 ? 1.5 : pdf.numPages > 15 ? dpr * 1.5 : dpr * 2;
         for (let i = 1; i <= pdf.numPages; i++) {
           if (cancelled) return;
@@ -2426,7 +2433,7 @@ Sauvegarde de tes projets</h3>
 style={{ flex: 1, minHeight: 160, background: "#0D0D1A", border: "1px solid #7C3AED44", borderRadius: 10, padding: 12, color: "#A78BFA", fontSize: 11, fontFamily: "monospace", outline: "none", resize: "none" }} />
 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
 <button onClick={() => {
-if (navigator.clipboard?.writeText) {
+if (isBrowser && navigator?.clipboard?.writeText) {
 navigator.clipboard.writeText(exportData).then(() => alert("✅ Copié dans le presse-papier !")).catch(() => alert("Sélectionne le texte manuellement et copie-le."));
 } else { alert("Sélectionne le texte dans le champ et copie-le manuellement."); }
 }} style={{ flex: 1, padding: "12px", borderRadius: 12, background: "linear-gradient(135deg, #7C3AED, #A78BFA)", border: "none", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
