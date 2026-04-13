@@ -441,15 +441,57 @@ const bubbleLift = isLibrary ? 3 : 2;
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
-onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.948) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
-onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
-onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
-onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.952) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
-onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
-onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}>
+onTouchStart={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(0.92)";
+bubble.style.filter = "brightness(1.12) saturate(1.1)";
+bubble.style.boxShadow = "0 14px 30px rgba(0,0,0,0.35)";
+}
+}}
+onTouchEnd={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(1)";
+bubble.style.filter = "none";
+bubble.style.boxShadow = "";
+}
+}}
+onTouchCancel={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(1)";
+bubble.style.filter = "none";
+bubble.style.boxShadow = "";
+}
+}}
+onMouseDown={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(0.92)";
+bubble.style.filter = "brightness(1.12) saturate(1.1)";
+bubble.style.boxShadow = "0 14px 30px rgba(0,0,0,0.35)";
+}
+}}
+onMouseUp={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(1)";
+bubble.style.filter = "none";
+bubble.style.boxShadow = "";
+}
+}}
+onMouseLeave={(e) => {
+const bubble = e.currentTarget.querySelector('[data-bubble]');
+if (bubble) {
+bubble.style.transform = "translate(-50%, -50%) scale(1)";
+bubble.style.filter = "none";
+bubble.style.boxShadow = "";
+}
+}}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
 <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
-<div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
+<div data-bubble style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
 </div>
