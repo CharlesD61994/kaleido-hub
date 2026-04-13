@@ -13,12 +13,12 @@ const KALEIDOSCOPE_COLORS = [
 
 const GLOBAL_MOTION_CSS = `
   button, [data-kaleido-pressable="true"] {
-    transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 180ms ease, opacity 180ms ease;
-    will-change: transform, filter;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, filter 200ms ease, opacity 180ms ease;
+    will-change: transform, filter, box-shadow;
   }
   button:active, [data-kaleido-pressable="true"]:active {
-    transform: scale(0.94) translateY(1px);
-    filter: brightness(1.08);
+    transform: scale(0.935) translateY(1px);
+    filter: brightness(1.09);
   }
   [data-kaleido-modal-backdrop="true"] {
     animation: kaleidoFadeIn 220ms ease both;
@@ -3251,3 +3251,4 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 </div>
 );
 }
+
