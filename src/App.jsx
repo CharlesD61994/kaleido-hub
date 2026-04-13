@@ -373,9 +373,9 @@ tx.oncomplete = resolve;
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const size = "clamp(94px, 27vw, 108px)";
-const glowOpacity = 0.42;
-const glowNear = 10;
-const glowFar = 22;
+const glowOpacity = 0.45;
+const glowNear = 12;
+const glowFar = 26;
 const ringShadow = 5;
 const bubbleLift = 2;
 const pulseDuration = "3.2s";
@@ -391,7 +391,7 @@ onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate", overflow: "visible", isolation: "isolate" }}>
 {/* Glow effect */}
 <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`,  willChange: "transform, opacity, box-shadow" }} />
-<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",  transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1 }}>
+<div style={{ width: "86%", height: "86%", borderRadius: "50%", background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",  transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1 }}>
 {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
 </div>
 <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
@@ -3060,4 +3060,3 @@ if (currentView === VIEWS.PDF_VIEWER) return (
 );
 return HubView();
 }
-
