@@ -64,6 +64,11 @@ const GLOBAL_MOTION_CSS = `
     55% { transform: scale(1.085); filter: brightness(1.1); }
     100% { transform: scale(1); filter: brightness(1); }
   }
+  @keyframes kaleidoProgressArcNudge {
+    0% { stroke-dashoffset: var(--ring-final); }
+    36% { stroke-dashoffset: var(--ring-overshoot); }
+    100% { stroke-dashoffset: var(--ring-final); }
+  }
 `;
 
 const getViewMotionStyle = (transitionName) => {
@@ -1003,12 +1008,17 @@ style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 12, posi
 {/* Cercle */}
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
 <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Global</div>
-<div key={`progress-${currentCountIndex}-${totalRangs}`} style={{ position: "relative", width: 95, height: 95, animation: "kaleidoProgressPulse 520ms cubic-bezier(0.22, 1, 0.36, 1), kaleidoProgressBreath 3.6s ease-in-out 520ms infinite", filter: `drop-shadow(0 0 10px ${currentPartieColor.bg}33)` }}>
+<div key={`progress-${currentCountIndex}-${totalRangs}`} style={{ position: "relative", width: 95, height: 95, filter: `drop-shadow(0 0 10px ${currentPartieColor.bg}33)` }}>
 <svg width="95" height="95" style={{ transform: "rotate(-90deg)" }}>
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="url(#kg)" strokeWidth="4" fill="none"
 strokeDasharray={circ_c} strokeDashoffset={circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs)}
-strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)" }} />
+strokeLinecap="round" style={{
+  transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
+  "--ring-final": circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs),
+  "--ring-overshoot": circ_c * (1 - Math.min(totalRangs, Math.max(0, currentCountIndex + 1) + Math.max(1, totalRangs * 0.045)) / totalRangs),
+  animation: "kaleidoProgressArcNudge 280ms cubic-bezier(0.22, 1, 0.36, 1)"
+}} />
 <defs><linearGradient id="kg" x1="0%" y1="0%" x2="100%" y2="100%">
 <stop offset="0%" stopColor={currentPartieColor.bg} />
 <stop offset="100%" stopColor={currentPartieColor.light} />
@@ -1541,13 +1551,18 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
         {/* Cercle — progression globale */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: 80, flexShrink: 0 }}>
           <div style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2, fontWeight: 700 }}>Global</div>
-          <div key={`pdf-progress-${rang}-${total}`} style={{ position: "relative", width: 64, height: 64, animation: "kaleidoProgressPulse 500ms cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 10px ${color.bg}30)` }}>
+          <div key={`pdf-progress-${rang}-${total}`} style={{ position: "relative", width: 64, height: 64, filter: `drop-shadow(0 0 10px ${color.bg}30)` }}>
             <svg width="64" height="64" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.08)" strokeWidth="3.5" fill="none" />
               <circle cx="32" cy="32" r="27" stroke="url(#pgc)" strokeWidth="3.5" fill="none"
                 strokeDasharray={2 * Math.PI * 27}
                 strokeDashoffset={2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1)}
-                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)" }} />
+                strokeLinecap="round" style={{
+                  transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)",
+                  "--ring-final": 2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1),
+                  "--ring-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.min(total, rang + Math.max(1, total * 0.05)) / total : 1),
+                  animation: "kaleidoProgressArcNudge 260ms cubic-bezier(0.22, 1, 0.36, 1)"
+                }} />
               <defs><linearGradient id="pgc" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={color.bg} /><stop offset="100%" stopColor={color.light} />
               </linearGradient></defs>
