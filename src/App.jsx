@@ -439,12 +439,12 @@ const glowFar = isLibrary ? 16 : 22;
 const ringShadow = isLibrary ? 8 : 5;
 const bubbleLift = isLibrary ? 3 : 2;
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "pointer", transition: "transform 160ms ease, filter 180ms ease", filter: "saturate(1.02)" }}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "pointer", transition: "transform 170ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease", filter: "saturate(1.02)" }}
 onClick={() => onProjectClick && onProjectClick(project)}
-onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.948) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
+onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.94) translateY(3px)"; e.currentTarget.style.filter = "saturate(1.1) brightness(1.07)"; }}
 onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
 onTouchCancel={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
-onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.952) translateY(2px)"; e.currentTarget.style.filter = "saturate(1.08) brightness(1.06)"; }}
+onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.944) translateY(3px)"; e.currentTarget.style.filter = "saturate(1.1) brightness(1.07)"; }}
 onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
 onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}>
 <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
