@@ -328,6 +328,7 @@ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
+const DB_VERSION = 1;
 const debug = (...args) => {
 if (typeof window !== "undefined" && window.KALEIDO_DEBUG) {
 console.log("[KALEIDO]", ...args);
@@ -373,6 +374,11 @@ const clearStorageKey = (key) => {
     return false;
   }
 };
+const buildDatabaseMeta = (existingMeta = {}) => ({
+  schemaVersion: DB_VERSION,
+  updatedAt: new Date().toISOString(),
+  createdAt: existingMeta.createdAt || new Date().toISOString(),
+});
 const isValidDatabase = (data) => {
 if (!data || typeof data !== "object") return false;
 return Array.isArray(data.projectsPersonal)
@@ -382,6 +388,8 @@ return Array.isArray(data.projectsPersonal)
 && typeof data.settings === "object";
 };
 const getDefaultDatabase = () => ({
+version: DB_VERSION,
+meta: buildDatabaseMeta(),
 projectsPersonal: [
 { id: 1, name: "Écharpe hiver", rang: 42, total: 80, colorIdx: 0, image: null, type: "tricot", laine: "", outil: "", notes: "", parties: [] },
 { id: 2, name: "Tuque Noël", rang: 15, total: 30, colorIdx: 1, image: null, type: "crochet", laine: "", outil: "", notes: "", parties: [] },
@@ -391,15 +399,30 @@ projectsPro: [],
 patrons: [],
 settings: { lastProjectId: 3, lastPatronId: 0 }
 });
+const normalizeDatabase = (data) => {
+  if (!isValidDatabase(data)) return null;
+  const fallback = getDefaultDatabase();
+  return {
+    version: typeof data.version === "number" ? data.version : DB_VERSION,
+    meta: buildDatabaseMeta(data.meta || {}),
+    projectsPersonal: Array.isArray(data.projectsPersonal) ? data.projectsPersonal : fallback.projectsPersonal,
+    projectsPro: Array.isArray(data.projectsPro) ? data.projectsPro : [],
+    patrons: Array.isArray(data.patrons) ? data.patrons : [],
+    settings: {
+      ...fallback.settings,
+      ...(data.settings || {})
+    }
+  };
+};
 
 const initDatabase = () => {
 try {
 if (!canUseStorage()) return getDefaultDatabase();
-const saved = readStorageJSON(DB_KEY);
-if (isValidDatabase(saved)) return saved;
+const saved = normalizeDatabase(readStorageJSON(DB_KEY));
+if (saved) return saved;
 
-const backup = readStorageJSON(DB_BACKUP_KEY);
-if (isValidDatabase(backup)) {
+const backup = normalizeDatabase(readStorageJSON(DB_BACKUP_KEY));
+if (backup) {
   debug("Base principale invalide, restauration depuis le backup.");
   writeStorageJSON(DB_KEY, backup);
   return backup;
@@ -413,16 +436,21 @@ return getDefaultDatabase();
 const saveToDatabase = (data) => {
 try {
 if (!canUseStorage()) return false;
-if (!isValidDatabase(data)) {
+const normalized = normalizeDatabase(data);
+if (!normalized) {
 console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.", data);
 return false;
 }
+const nextRaw = JSON.stringify(normalized);
 const currentRaw = localStorage.getItem(DB_KEY);
+if (currentRaw === nextRaw) {
+  return true;
+}
 if (currentRaw) {
   const currentData = safeParseJSON(currentRaw);
   if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
 }
-writeStorageJSON(DB_KEY, data);
+localStorage.setItem(DB_KEY, nextRaw);
 return true;
 } catch(e) {
 console.warn("[KALEIDO] saveToDatabase error:", e);
@@ -2306,6 +2334,20 @@ export default function KaleidoHub() {
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
   const databaseRef = useRef(database);
+  const flushTimeoutRef = useRef(null);
+  const lastSavedSnapshotRef = useRef("");
+
+  const flushDatabaseNow = () => {
+    if (flushTimeoutRef.current) {
+      clearTimeout(flushTimeoutRef.current);
+      flushTimeoutRef.current = null;
+    }
+    const snapshot = JSON.stringify(databaseRef.current);
+    if (snapshot === lastSavedSnapshotRef.current) return;
+    if (saveToDatabase(databaseRef.current)) {
+      lastSavedSnapshotRef.current = snapshot;
+    }
+  };
   // Projets selon le mode actif
 
   useEffect(() => {
@@ -2313,27 +2355,36 @@ export default function KaleidoHub() {
   }, [database]);
 
   useEffect(() => {
-    saveToDatabase(database);
+    if (flushTimeoutRef.current) {
+      clearTimeout(flushTimeoutRef.current);
+    }
+    flushTimeoutRef.current = setTimeout(() => {
+      flushDatabaseNow();
+    }, 180);
+
+    return () => {
+      if (flushTimeoutRef.current) {
+        clearTimeout(flushTimeoutRef.current);
+        flushTimeoutRef.current = null;
+      }
+    };
   }, [database]);
 
   useEffect(() => {
-    const flushDatabase = () => {
-      saveToDatabase(databaseRef.current);
-    };
-
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
-        flushDatabase();
+        flushDatabaseNow();
       }
     };
 
-    window.addEventListener("pagehide", flushDatabase);
-    window.addEventListener("beforeunload", flushDatabase);
+    window.addEventListener("pagehide", flushDatabaseNow);
+    window.addEventListener("beforeunload", flushDatabaseNow);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      window.removeEventListener("pagehide", flushDatabase);
-      window.removeEventListener("beforeunload", flushDatabase);
+      flushDatabaseNow();
+      window.removeEventListener("pagehide", flushDatabaseNow);
+      window.removeEventListener("beforeunload", flushDatabaseNow);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
@@ -2720,13 +2771,14 @@ style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #059
 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
 <button onClick={async () => {
 try {
-const imported = JSON.parse(importText.trim());
-if (imported.projects && imported.settings) {
+const imported = normalizeDatabase(JSON.parse(importText.trim()));
+if (imported) {
 setDatabase(imported);
 saveToDatabase(imported);
 setShowDataImportModal(false);
 setShowSettingsModal(false);
-const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
+const allProjects = [...(imported.projectsPersonal || []), ...(imported.projectsPro || [])];
+const pdfCount = allProjects.filter(p => p.projectType === 'pdf').length;
 alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
 } else {
 alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
@@ -2808,9 +2860,10 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
-const { pdfs, ...dbData } = data || {};
+const { pdfs, ...rawDbData } = data || {};
+const dbData = normalizeDatabase(rawDbData);
 
-if (!isValidDatabase(dbData)) {
+if (!dbData) {
 throw new Error("Format de sauvegarde invalide.");
 }
 
