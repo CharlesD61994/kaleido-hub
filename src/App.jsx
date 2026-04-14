@@ -69,6 +69,14 @@ const GLOBAL_MOTION_CSS = `
   40% { transform: scaleX(1.006); }
   100% { transform: scaleX(1); }
 }
+@keyframes kaleidoProgressGlowSync {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  42% { filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 10px currentColor); }
+}
+@keyframes kaleidoBarGlowSync {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+  42% { box-shadow: 0 0 8px rgba(255,255,255,0.12), 0 0 14px currentColor; }
+}
 @keyframes kaleidoProgressArcNudge {
     0% { stroke-dashoffset: var(--ring-final); }
     44% { stroke-dashoffset: var(--ring-overshoot); }
@@ -1022,7 +1030,8 @@ strokeLinecap="round" style={{
   transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
   "--ring-final": circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs),
   "--ring-overshoot": circ_c * (1 - Math.min(totalRangs, Math.max(0, currentCountIndex + 1) + Math.max(1, totalRangs * 0.012)) / totalRangs),
-  animation: "kaleidoProgressArcNudge 360ms cubic-bezier(0.25, 0.9, 0.35, 1)"
+  animation: "kaleidoProgressArcNudge 360ms cubic-bezier(0.25, 0.9, 0.35, 1), kaleidoProgressGlowSync 360ms cubic-bezier(0.25, 0.9, 0.35, 1)",
+  color: currentPartieColor.light
 }} />
 <defs><linearGradient id="kg" x1="0%" y1="0%" x2="100%" y2="100%">
 <stop offset="0%" stopColor={currentPartieColor.bg} />
@@ -1566,7 +1575,8 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
                   transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)",
                   "--ring-final": 2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1),
                   "--ring-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.min(total, rang + Math.max(1, total * 0.012)) / total : 1),
-                  animation: "kaleidoProgressArcNudge 340ms cubic-bezier(0.25, 0.9, 0.35, 1)"
+                  animation: "kaleidoProgressArcNudge 340ms cubic-bezier(0.25, 0.9, 0.35, 1), kaleidoProgressGlowSync 340ms cubic-bezier(0.25, 0.9, 0.35, 1)",
+                  color: color.light
                 }} />
               <defs><linearGradient id="pgc" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={color.bg} /><stop offset="100%" stopColor={color.light} />
