@@ -341,7 +341,13 @@ const canUseStorage = () => {
   }
 };
 const safeParseJSON = (value) => {
-try { return value ? JSON.parse(value) : null; } catch (e) { return null; }
+  try {
+    if (!value || typeof value !== "string") return null;
+    return JSON.parse(value);
+  } catch (e) {
+    console.warn("[KALEIDO] JSON parse error:", e);
+    return null;
+  }
 };
 const readStorageJSON = (key) => {
   if (!canUseStorage()) return null;
@@ -408,7 +414,7 @@ const saveToDatabase = (data) => {
 try {
 if (!canUseStorage()) return false;
 if (!isValidDatabase(data)) {
-console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
+console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.", data);
 return false;
 }
 const currentRaw = localStorage.getItem(DB_KEY);
@@ -2802,14 +2808,20 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
+const { pdfs, ...dbData } = data || {};
+
+if (!isValidDatabase(dbData)) {
+throw new Error("Format de sauvegarde invalide.");
+}
+
 // Restaurer les PDFs dans IndexedDB
-if (data.pdfs) {
-for (const [pdfId, pdfData] of Object.entries(data.pdfs)) {
+if (pdfs && typeof pdfs === "object") {
+for (const [pdfId, pdfData] of Object.entries(pdfs)) {
 await savePdf(pdfId, pdfData);
 }
 }
+
 // Restaurer la base de données
-const { pdfs, ...dbData } = data;
 setDatabase(dbData);
 saveToDatabase(dbData);
 setShowSettingsModal(false);
@@ -2817,6 +2829,7 @@ alert('✅ Données restaurées avec succès !');
 } catch(e) {
 alert('Erreur import : ' + e.message);
 }
+e.target.value = "";
 }} />
 </label>
 </div>
