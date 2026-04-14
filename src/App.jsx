@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer' };
 const KALEIDOSCOPE_COLORS = [
-{ bg: "#7C3AED", light: "#A78BFA" },
-{ bg: "#DB2777", light: "#F472B6" },
-{ bg: "#EA580C", light: "#FB923C" },
-{ bg: "#0891B2", light: "#22D3EE" },
-{ bg: "#059669", light: "#34D399" },
-{ bg: "#D97706", light: "#FCD34D" },
-{ bg: "#7C3AED", light: "#C4B5FD" },
-{ bg: "#BE185D", light: "#F9A8D4" },
+{ bg: "#7C3AED", light: "#A78BFA" }, // violet
+{ bg: "#EC4899", light: "#F9A8D4" }, // rose vif
+{ bg: "#F97316", light: "#FDBA74" }, // orange vif
+{ bg: "#06B6D4", light: "#67E8F9" }, // cyan
+{ bg: "#10B981", light: "#6EE7B7" }, // vert menthe
+{ bg: "#EAB308", light: "#FDE68A" }, // jaune doré
+{ bg: "#3B82F6", light: "#93C5FD" }, // bleu clair
+{ bg: "#EF4444", light: "#FCA5A5" }, // corail rouge
 ];
 
 const GLOBAL_MOTION_CSS = `
