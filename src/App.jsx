@@ -69,11 +69,6 @@ const GLOBAL_MOTION_CSS = `
     44% { stroke-dashoffset: var(--ring-overshoot); }
     100% { stroke-dashoffset: var(--ring-final); }
   }
-  @keyframes kaleidoProgressArcNudgeBack {
-    0% { stroke-dashoffset: var(--ring-final); }
-    44% { stroke-dashoffset: var(--ring-back-overshoot); }
-    100% { stroke-dashoffset: var(--ring-final); }
-  }
 `;
 
 const getViewMotionStyle = (transitionName) => {
@@ -1022,8 +1017,7 @@ strokeLinecap="round" style={{
   transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
   "--ring-final": circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs),
   "--ring-overshoot": circ_c * (1 - Math.min(totalRangs, Math.max(0, currentCountIndex + 1) + Math.max(1, totalRangs * 0.014)) / totalRangs),
-  "--ring-back-overshoot": circ_c * (1 - Math.max(0, Math.max(0, currentCountIndex + 1) - Math.max(1, totalRangs * 0.014)) / totalRangs),
-  animation: `kaleidoProgress${progressDirection === "back" ? "ArcNudgeBack" : "ArcNudge"} 360ms cubic-bezier(0.25, 0.9, 0.35, 1)`
+  animation: "kaleidoProgressArcNudge 360ms cubic-bezier(0.25, 0.9, 0.35, 1)"
 }} />
 <defs><linearGradient id="kg" x1="0%" y1="0%" x2="100%" y2="100%">
 <stop offset="0%" stopColor={currentPartieColor.bg} />
@@ -1074,7 +1068,6 @@ const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime ||
 const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
 const [isTimerRunning, setIsTimerRunning] = useState(true);
 const [counters, setCounters] = useState([]);
-const [progressDirection, setProgressDirection] = useState("forward");
 useEffect(() => {
 if (!isTimerRunning) return;
 const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
@@ -1131,7 +1124,7 @@ if (currentIndex >= allRangs.length - 1) return;
 if (isLastRangOfPartie()) {
 setShowNextPartieModal(true);
 } else {
-setProgressDirection("forward"); setCurrentRangId(allRangs[currentIndex + 1].globalId);
+setCurrentRangId(allRangs[currentIndex + 1].globalId);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
@@ -1148,12 +1141,12 @@ if (currentIndex <= 0) return;
 if (isFirstRangOfPartie()) {
 setShowPrevPartieModal(true);
 } else {
-setProgressDirection("back"); setCurrentRangId(allRangs[currentIndex - 1].globalId);
+setCurrentRangId(allRangs[currentIndex - 1].globalId);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmPrevPartie = () => {
-setProgressDirection("back"); setCurrentRangId(allRangs[currentIndex - 1].globalId);
+setCurrentRangId(allRangs[currentIndex - 1].globalId);
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 if (navigator.vibrate) navigator.vibrate(20);
@@ -1568,8 +1561,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
                   transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)",
                   "--ring-final": 2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1),
                   "--ring-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.min(total, rang + Math.max(1, total * 0.014)) / total : 1),
-                  "--ring-back-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.max(0, rang - Math.max(1, total * 0.014)) / total : 1),
-                  animation: `kaleidoProgress${progressDirection === "back" ? "ArcNudgeBack" : "ArcNudge"} 340ms cubic-bezier(0.25, 0.9, 0.35, 1)`
+                  animation: "kaleidoProgressArcNudge 340ms cubic-bezier(0.25, 0.9, 0.35, 1)"
                 }} />
               <defs><linearGradient id="pgc" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={color.bg} /><stop offset="100%" stopColor={color.light} />
@@ -1629,7 +1621,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const hasParties = pdfParties.length > 0;
   const [currentPartieIdx, setCurrentPartieIdx] = useState(0);
   const [rang, setRang] = useState(project?.rang || 0);
-  const [progressDirection, setProgressDirection] = useState("forward");
   const [counters, setCounters] = useState([]);
   const countersRef = useRef([]);
   const stableAddCounter = () => {
@@ -1670,8 +1661,6 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     // Bloquer si on est au maximum global
     if (total > 0 && rang >= total) return;
     const newRang = rang + 1;
-    setProgressDirection("forward");
-    setProgressDirection("back");
     setRang(newRang);
     if (hasParties && currentPartie) {
       let offset = 0;
