@@ -737,7 +737,6 @@ const [isEditing, setIsEditing] = useState(false);
 const [tempInstruction, setTempInstruction] = useState(rang.instruction);
 const [tempMailles, setTempMailles] = useState(rang.mailles || "");
 const [isSwipedOpen, setIsSwipedOpen] = useState(false);
-const [progressDirection, setProgressDirection] = useState("forward");
 const [swipeStartX, setSwipeStartX] = useState(0);
 const [swipeCurrentX, setSwipeCurrentX] = useState(0);
 const isNote = rang.isNote === true;
@@ -1075,6 +1074,7 @@ const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime ||
 const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
 const [isTimerRunning, setIsTimerRunning] = useState(true);
 const [counters, setCounters] = useState([]);
+const [progressDirection, setProgressDirection] = useState("forward");
 useEffect(() => {
 if (!isTimerRunning) return;
 const interval = setInterval(() => setElapsedTime(Date.now() - startTime), 1000);
@@ -1131,7 +1131,7 @@ if (currentIndex >= allRangs.length - 1) return;
 if (isLastRangOfPartie()) {
 setShowNextPartieModal(true);
 } else {
-setCurrentRangId(allRangs[currentIndex + 1].globalId);
+setProgressDirection("forward"); setCurrentRangId(allRangs[currentIndex + 1].globalId);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
@@ -1148,12 +1148,12 @@ if (currentIndex <= 0) return;
 if (isFirstRangOfPartie()) {
 setShowPrevPartieModal(true);
 } else {
-setCurrentRangId(allRangs[currentIndex - 1].globalId);
+setProgressDirection("back"); setCurrentRangId(allRangs[currentIndex - 1].globalId);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmPrevPartie = () => {
-setCurrentRangId(allRangs[currentIndex - 1].globalId);
+setProgressDirection("back"); setCurrentRangId(allRangs[currentIndex - 1].globalId);
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 if (navigator.vibrate) navigator.vibrate(20);
@@ -1629,6 +1629,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const hasParties = pdfParties.length > 0;
   const [currentPartieIdx, setCurrentPartieIdx] = useState(0);
   const [rang, setRang] = useState(project?.rang || 0);
+  const [progressDirection, setProgressDirection] = useState("forward");
   const [counters, setCounters] = useState([]);
   const countersRef = useRef([]);
   const stableAddCounter = () => {
@@ -1669,6 +1670,8 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     // Bloquer si on est au maximum global
     if (total > 0 && rang >= total) return;
     const newRang = rang + 1;
+    setProgressDirection("forward");
+    setProgressDirection("back");
     setRang(newRang);
     if (hasParties && currentPartie) {
       let offset = 0;
