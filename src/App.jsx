@@ -1141,6 +1141,8 @@ const allRangsForCount = allRangs.filter(r => !r.isNote);
 const totalRangsForCount = allRangsForCount.length;
 const savedIndex = Math.max(0, Math.min((project?.rang || 1) - 1, allRangs.length - 1));
 const [currentRangId, setCurrentRangId] = useState(allRangs[savedIndex]?.globalId ?? null);
+const currentRangIdRef = useRef(allRangs[savedIndex]?.globalId ?? null);
+const currentIndexRef = useRef(savedIndex);
 const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime || 0));
 const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
 const [isTimerRunning, setIsTimerRunning] = useState(true);
@@ -1159,6 +1161,10 @@ const resetTimer = () => { setStartTime(Date.now()); setElapsedTime(0); setIsTim
 const [showNextPartieModal, setShowNextPartieModal] = useState(false);
 const [showPrevPartieModal, setShowPrevPartieModal] = useState(false);
 const currentIndex = allRangs.findIndex(r => r.globalId === currentRangId);
+useEffect(() => {
+  currentRangIdRef.current = currentRangId;
+  currentIndexRef.current = currentIndex;
+}, [currentRangId, currentIndex]);
 const currentRang = allRangs[currentIndex];
 const totalRangs = allRangsForCount.length;
 const currentCountIndex = currentRang?.isNote
@@ -1197,43 +1203,72 @@ const prevR = allRangs[currentIndex - 1];
 return prevR && prevR.partieId !== currentPartie.id;
 };
 const nextRang = () => {
-if (currentIndex >= allRangs.length - 1) return;
-if (isLastRangOfPartie()) {
+const liveIndex = currentIndexRef.current;
+if (liveIndex >= allRangs.length - 1) return;
+const liveCurrent = allRangs[liveIndex];
+const liveNext = allRangs[liveIndex + 1];
+const liveIsLastOfPartie = !!liveCurrent && !!liveNext && liveNext.partieId !== liveCurrent.partieId;
+if (liveIsLastOfPartie) {
 setShowNextPartieModal(true);
 } else {
-setCurrentRangId(allRangs[currentIndex + 1].globalId);
-    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex + 2).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+currentRangIdRef.current = liveNext.globalId;
+currentIndexRef.current = liveIndex + 1;
+setCurrentRangId(liveNext.globalId);
+if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex + 2).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmNextPartie = () => {
-const nextPartieId = allRangs[currentIndex + 1]?.partieId;
-const targetGlobalId = getPartieFirstCountableGlobalId(nextPartieId) || allRangs[currentIndex + 1]?.globalId || null;
-if (targetGlobalId) setCurrentRangId(targetGlobalId);
+const liveIndex = currentIndexRef.current;
+const nextPartieId = allRangs[liveIndex + 1]?.partieId;
+const targetGlobalId = getPartieFirstCountableGlobalId(nextPartieId) || allRangs[liveIndex + 1]?.globalId || null;
+if (targetGlobalId) {
+  currentRangIdRef.current = targetGlobalId;
+  currentIndexRef.current = allRangs.findIndex(r => r.globalId === targetGlobalId);
+  setCurrentRangId(targetGlobalId);
+  if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, Math.max(0, currentIndexRef.current) + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+}
 setShowNextPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 if (navigator.vibrate) navigator.vibrate(20);
 };
 const prevRang = () => {
-if (currentIndex <= 0) return;
-if (isFirstRangOfPartie()) {
+const liveIndex = currentIndexRef.current;
+if (liveIndex <= 0) return;
+const liveCurrent = allRangs[liveIndex];
+const livePrev = allRangs[liveIndex - 1];
+const liveIsFirstOfPartie = !!liveCurrent && !!livePrev && livePrev.partieId !== liveCurrent.partieId;
+if (liveIsFirstOfPartie) {
 setShowPrevPartieModal(true);
 } else {
-setCurrentRangId(allRangs[currentIndex - 1].globalId);
-    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+currentRangIdRef.current = livePrev.globalId;
+currentIndexRef.current = liveIndex - 1;
+setCurrentRangId(livePrev.globalId);
+if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmPrevPartie = () => {
-setCurrentRangId(allRangs[currentIndex - 1].globalId);
-    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+const liveIndex = currentIndexRef.current;
+const target = allRangs[liveIndex - 1];
+if (target) {
+  currentRangIdRef.current = target.globalId;
+  currentIndexRef.current = liveIndex - 1;
+  setCurrentRangId(target.globalId);
+  if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+}
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 if (navigator.vibrate) navigator.vibrate(20);
 };
 const goToPartie = (partieId) => {
 const targetGlobalId = getPartieFirstCountableGlobalId(partieId);
-if (targetGlobalId) setCurrentRangId(targetGlobalId);
+if (targetGlobalId) {
+  currentRangIdRef.current = targetGlobalId;
+  currentIndexRef.current = allRangs.findIndex(r => r.globalId === targetGlobalId);
+  setCurrentRangId(targetGlobalId);
+  if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, Math.max(0, currentIndexRef.current) + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+}
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 };
 const addCounter = () => setCounters(prev => [...prev, { id: Date.now(), name: `Compteur ${prev.length + 1}`, value: 1, maxRepeats: 4, syncWithGlobal: false, colorIdx: Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length) }]);
@@ -1276,7 +1311,7 @@ return (
 {/* Header */}
 <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, Math.max(0, currentIndexRef.current) + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <div style={{ flex: 1 }}>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>{patron.technique}{patron.outil ? ` • ${patron.outil}` : ""}</div>
@@ -1701,6 +1736,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const hasParties = pdfParties.length > 0;
   const [currentPartieIdx, setCurrentPartieIdx] = useState(0);
   const [rang, setRang] = useState(project?.rang || 0);
+  const rangRef = useRef(project?.rang || 0);
   const [counters, setCounters] = useState([]);
   const countersRef = useRef([]);
   const stableAddCounter = () => {
@@ -1711,6 +1747,9 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const addCounter = stableAddCounter;
   const updateCounter = (id, updates) => { countersRef.current = countersRef.current.map(c => c.id === id ? { ...c, ...updates } : c); setCounters([...countersRef.current]); };
   const deleteCounter = (id) => { countersRef.current = countersRef.current.filter(c => c.id !== id); setCounters([...countersRef.current]); };
+  useEffect(() => {
+    rangRef.current = rang;
+  }, [rang]);
   const currentPartie = hasParties ? pdfParties[currentPartieIdx] : null;
   const rangDansPartie = hasParties ? (() => {
     let offset = 0;
@@ -1738,9 +1777,12 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const resetTimer = () => { setStartTime(Date.now()); setElapsedTime(0); setIsTimerRunning(true); };
   // Incrémenter rang et changer de partie si nécessaire
   const incrementRang = () => {
+    const liveRang = rangRef.current;
     // Bloquer si on est au maximum global
-    if (total > 0 && rang >= total) return;
-    const newRang = rang + 1;
+    if (total > 0 && liveRang >= total) return;
+    const newRang = liveRang + 1;
+    rangRef.current = newRang;
+    rangRef.current = newRang;
     setRang(newRang);
     if (typeof onSaveProgress === "function") onSaveProgress(newRang, total);
     if (hasParties && currentPartie) {
@@ -1759,8 +1801,9 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     }
   };
   const decrementRang = () => {
-    if (rang <= 0) return;
-    const newRang = rang - 1;
+    const liveRang = rangRef.current;
+    if (liveRang <= 0) return;
+    const newRang = liveRang - 1;
     // Détecter si on revient à la partie précédente
     if (hasParties && currentPartieIdx > 0) {
       let offset = 0;
@@ -1778,7 +1821,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
   const [showFinModal, setShowFinModal] = useState(false);
   // Sauvegarde en quittant
   const handleBack = () => {
-    onSaveProgress(rang, project?.total || 0, elapsedTime);
+    onSaveProgress(rangRef.current, project?.total || 0, elapsedTime);
     onNavigateHub();
   };
   // Chargement PDF — rendu page par page progressif
