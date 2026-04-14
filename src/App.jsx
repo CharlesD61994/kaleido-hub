@@ -2296,17 +2296,41 @@ export default function KaleidoHub() {
 const projectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
 const projects = database[projectsKey] || [];
 const updateProject = (projectId, updates) => {
-const newDb = { ...database, [projectsKey]: projects.map(p => p.id === projectId ? { ...p, ...updates } : p) };
-setDatabase(newDb); saveToDatabase(newDb);
+setDatabase(prev => {
+  const prevProjectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
+  const nextDb = {
+    ...prev,
+    [prevProjectsKey]: (prev[prevProjectsKey] || []).map(p => p.id === projectId ? { ...p, ...updates } : p)
+  };
+  saveToDatabase(nextDb);
+  return nextDb;
+});
 };
 const deleteProjectFromDB = (projectId) => {
-const newDb = { ...database, [projectsKey]: projects.filter(p => p.id !== projectId) };
-setDatabase(newDb); saveToDatabase(newDb);
+setDatabase(prev => {
+  const prevProjectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
+  const nextDb = {
+    ...prev,
+    [prevProjectsKey]: (prev[prevProjectsKey] || []).filter(p => p.id !== projectId)
+  };
+  saveToDatabase(nextDb);
+  return nextDb;
+});
 };
 const addProjectToDB = (project) => {
-const newDb = { ...database, [projectsKey]: [...projects, project], settings: { ...database.settings, lastProjectId: project.id } };
-setDatabase(newDb); saveToDatabase(newDb);
-return newDb;
+let createdDb = null;
+setDatabase(prev => {
+  const prevProjectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
+  const nextDb = {
+    ...prev,
+    [prevProjectsKey]: [...(prev[prevProjectsKey] || []), project],
+    settings: { ...prev.settings, lastProjectId: project.id }
+  };
+  createdDb = nextDb;
+  saveToDatabase(nextDb);
+  return nextDb;
+});
+return createdDb;
 };
 const filtered = projects.filter(p => {
 if (!p.name.toLowerCase().includes(search.toLowerCase())) return false;
