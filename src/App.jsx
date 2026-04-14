@@ -1139,9 +1139,11 @@ const hasParties = patron.parties.length > 0 && patron.parties.some(p => p.rangs
 const allRangs = patron.parties.flatMap((p, pi) => p.rangs.map((r, ri) => ({ ...r, partieId: p.id, globalId: `${pi}-${ri}` })));
 const allRangsForCount = allRangs.filter(r => !r.isNote);
 const totalRangsForCount = allRangsForCount.length;
-const savedIndex = Math.max(0, Math.min((project?.rang || 1) - 1, allRangs.length - 1));
-const [currentRangId, setCurrentRangId] = useState(allRangs[savedIndex]?.globalId ?? null);
-const currentRangIdRef = useRef(allRangs[savedIndex]?.globalId ?? null);
+const savedCountableIndex = Math.max(0, Math.min((project?.rang || 1) - 1, Math.max(0, allRangsForCount.length - 1)));
+const savedGlobalId = allRangsForCount[savedCountableIndex]?.globalId || allRangs[0]?.globalId || null;
+const savedIndex = Math.max(0, allRangs.findIndex(r => r.globalId === savedGlobalId));
+const [currentRangId, setCurrentRangId] = useState(savedGlobalId);
+const currentRangIdRef = useRef(savedGlobalId);
 const currentIndexRef = useRef(savedIndex);
 const [startTime, setStartTime] = useState(Date.now() - (project?.elapsedTime || 0));
 const [elapsedTime, setElapsedTime] = useState(project?.elapsedTime || 0);
