@@ -66,7 +66,7 @@ const GLOBAL_MOTION_CSS = `
   }
   @keyframes kaleidoProgressArcNudge {
     0% { stroke-dashoffset: var(--ring-final); }
-    36% { stroke-dashoffset: var(--ring-overshoot); }
+    42% { stroke-dashoffset: var(--ring-overshoot); }
     100% { stroke-dashoffset: var(--ring-final); }
   }
 `;
@@ -1016,8 +1016,8 @@ strokeDasharray={circ_c} strokeDashoffset={circ_c * (1 - Math.max(0, currentCoun
 strokeLinecap="round" style={{
   transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
   "--ring-final": circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs),
-  "--ring-overshoot": circ_c * (1 - Math.min(totalRangs, Math.max(0, currentCountIndex + 1) + Math.max(1, totalRangs * 0.045)) / totalRangs),
-  animation: "kaleidoProgressArcNudge 280ms cubic-bezier(0.22, 1, 0.36, 1)"
+  "--ring-overshoot": circ_c * (1 - Math.min(totalRangs, Math.max(0, currentCountIndex + 1) + Math.max(1, totalRangs * 0.018)) / totalRangs),
+  animation: "kaleidoProgressArcNudge 340ms cubic-bezier(0.25, 0.9, 0.35, 1)"
 }} />
 <defs><linearGradient id="kg" x1="0%" y1="0%" x2="100%" y2="100%">
 <stop offset="0%" stopColor={currentPartieColor.bg} />
@@ -1560,8 +1560,8 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
                 strokeLinecap="round" style={{
                   transition: "stroke-dashoffset 0.52s cubic-bezier(0.22, 1, 0.36, 1)",
                   "--ring-final": 2 * Math.PI * 27 * (total > 0 ? 1 - rang / total : 1),
-                  "--ring-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.min(total, rang + Math.max(1, total * 0.05)) / total : 1),
-                  animation: "kaleidoProgressArcNudge 260ms cubic-bezier(0.22, 1, 0.36, 1)"
+                  "--ring-overshoot": 2 * Math.PI * 27 * (total > 0 ? 1 - Math.min(total, rang + Math.max(1, total * 0.018)) / total : 1),
+                  animation: "kaleidoProgressArcNudge 320ms cubic-bezier(0.25, 0.9, 0.35, 1)"
                 }} />
               <defs><linearGradient id="pgc" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor={color.bg} /><stop offset="100%" stopColor={color.light} />
