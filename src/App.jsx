@@ -1127,6 +1127,8 @@ style={{ background: "#059669", border: "none", borderRadius: 8, padding: "10px 
 );
 }
 function CompteurRangsView({ project, onNavigateHub, onNavigateEditor, onSaveProgress }) {
+const goBackToHub = () => { if (typeof onNavigateHub === "function") { onNavigateHub(); } };
+
 const patron = {
 nom: project?.name || "Projet",
 technique: project?.type || "crochet",
@@ -1237,7 +1239,7 @@ const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id))
 if (!hasParties) return (
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#F1F0EE", maxWidth: 430, margin: "0 auto", padding: 20 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
-<button data-kaleido-back-button="true" onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={goBackToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 </div>
 <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
@@ -1271,7 +1273,7 @@ return (
 {/* Header */}
 <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); saveToDatabase(databaseRef.current || database); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <div style={{ flex: 1 }}>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>{patron.technique}{patron.outil ? ` • ${patron.outil}` : ""}</div>
@@ -2062,7 +2064,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       {/* Header */}
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <button data-kaleido-back-button="true" onClick={onNavigateHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
+          <button data-kaleido-back-button="true" onClick={goBackToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
           <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={26} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
