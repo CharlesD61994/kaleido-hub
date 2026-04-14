@@ -333,8 +333,39 @@ if (typeof window !== "undefined" && window.KALEIDO_DEBUG) {
 console.log("[KALEIDO]", ...args);
 }
 };
+const canUseStorage = () => {
+  try {
+    return typeof window !== "undefined" && typeof localStorage !== "undefined";
+  } catch (e) {
+    return false;
+  }
+};
 const safeParseJSON = (value) => {
 try { return value ? JSON.parse(value) : null; } catch (e) { return null; }
+};
+const readStorageJSON = (key) => {
+  if (!canUseStorage()) return null;
+  return safeParseJSON(localStorage.getItem(key));
+};
+const writeStorageJSON = (key, value) => {
+  if (!canUseStorage()) return false;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.warn("[KALEIDO] writeStorageJSON error:", e);
+    return false;
+  }
+};
+const clearStorageKey = (key) => {
+  if (!canUseStorage()) return false;
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (e) {
+    console.warn("[KALEIDO] clearStorageKey error:", e);
+    return false;
+  }
 };
 const isValidDatabase = (data) => {
 if (!data || typeof data !== "object") return false;
@@ -357,13 +388,14 @@ settings: { lastProjectId: 3, lastPatronId: 0 }
 
 const initDatabase = () => {
 try {
-const saved = safeParseJSON(localStorage.getItem(DB_KEY));
+if (!canUseStorage()) return getDefaultDatabase();
+const saved = readStorageJSON(DB_KEY);
 if (isValidDatabase(saved)) return saved;
 
-const backup = safeParseJSON(localStorage.getItem(DB_BACKUP_KEY));
+const backup = readStorageJSON(DB_BACKUP_KEY);
 if (isValidDatabase(backup)) {
   debug("Base principale invalide, restauration depuis le backup.");
-  localStorage.setItem(DB_KEY, JSON.stringify(backup));
+  writeStorageJSON(DB_KEY, backup);
   return backup;
 }
 
@@ -374,18 +406,45 @@ return getDefaultDatabase();
 };
 const saveToDatabase = (data) => {
 try {
+if (!canUseStorage()) return false;
 if (!isValidDatabase(data)) {
 console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
 return false;
 }
 const currentRaw = localStorage.getItem(DB_KEY);
-if (currentRaw) localStorage.setItem(DB_BACKUP_KEY, currentRaw);
-localStorage.setItem(DB_KEY, JSON.stringify(data));
+if (currentRaw) {
+  const currentData = safeParseJSON(currentRaw);
+  if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
+}
+writeStorageJSON(DB_KEY, data);
 return true;
 } catch(e) {
 console.warn("[KALEIDO] saveToDatabase error:", e);
 return false;
 }
+};
+const loadPatronDraft = ({ sourceId, mode }) => {
+  const payload = readStorageJSON(PATRON_BACKUP_KEY);
+  if (!payload || typeof payload !== "object") return null;
+  if ((payload.mode || null) !== mode) return null;
+  if ((payload.sourceId ?? null) !== (sourceId ?? null)) return null;
+  return payload.patron && typeof payload.patron === "object" ? payload.patron : null;
+};
+const savePatronDraft = ({ label, mode, sourceId, patron }) => {
+  return writeStorageJSON(PATRON_BACKUP_KEY, {
+    label,
+    savedAt: new Date().toISOString(),
+    mode,
+    sourceId,
+    patron
+  });
+};
+const clearPatronDraft = ({ sourceId, mode }) => {
+  const payload = readStorageJSON(PATRON_BACKUP_KEY);
+  if (!payload || typeof payload !== "object") return false;
+  if ((payload.mode || null) !== mode) return false;
+  if ((payload.sourceId ?? null) !== (sourceId ?? null)) return false;
+  return clearStorageKey(PATRON_BACKUP_KEY);
 };
 // ═══════════════════════════════════════════════════════════════
 // STOCKAGE PDFs — IndexedDB
@@ -1212,7 +1271,7 @@ return (
 {/* Header */}
 <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); saveToDatabase(databaseRef.current || database); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <div style={{ flex: 1 }}>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>{patron.technique}{patron.outil ? ` • ${patron.outil}` : ""}</div>
@@ -2188,7 +2247,38 @@ export default function KaleidoHub() {
   const [photoTarget, setPhotoTarget] = useState(null); // { id, context: "project"|"patron" }
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
+  const databaseRef = useRef(database);
   // Projets selon le mode actif
+
+  useEffect(() => {
+    databaseRef.current = database;
+  }, [database]);
+
+  useEffect(() => {
+    saveToDatabase(database);
+  }, [database]);
+
+  useEffect(() => {
+    const flushDatabase = () => {
+      saveToDatabase(databaseRef.current);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushDatabase();
+      }
+    };
+
+    window.addEventListener("pagehide", flushDatabase);
+    window.addEventListener("beforeunload", flushDatabase);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pagehide", flushDatabase);
+      window.removeEventListener("beforeunload", flushDatabase);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
   // Splash screen effect
   useEffect(() => {
     const t1 = setTimeout(() => setSplashFading(true), 1800);
@@ -2763,14 +2853,19 @@ const PatronEditorView = () => {
 // Source : patron de bibliothèque OU projet
 const source = currentPatron || currentProject;
 const isPatronMode = !!currentPatron;
-const [patron, setPatron] = useState(() => ({
+const draftMode = isPatronMode ? "patron" : "project";
+const [patron, setPatron] = useState(() => {
+const sourceSnapshot = {
 nom: source?.name || "Nouveau patron",
 laine: source?.laine || "",
 technique: source?.type || "crochet",
 outil: source?.outil || "",
 notes: source?.notes || "",
 parties: source?.parties || [],
-}));
+};
+const restoredDraft = loadPatronDraft({ sourceId: source?.id ?? null, mode: draftMode });
+return restoredDraft && typeof restoredDraft === "object" ? { ...sourceSnapshot, ...restoredDraft } : sourceSnapshot;
+});
 const [isEditingNom, setIsEditingNom] = useState(false);
 const [tempNom, setTempNom] = useState(patron.nom);
 const totalRangsPatron = patron.parties.reduce(
@@ -2795,6 +2890,7 @@ return;
 
   setPatron(normalizedPatron);
   backupPatronState("handleSave", normalizedPatron);
+  clearPatronDraft({ sourceId: source?.id ?? null, mode: draftMode });
 
   if (isPatronMode) {
     updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized });
@@ -2864,15 +2960,18 @@ useEffect(() => {
   });
 }, []);
 
+useEffect(() => {
+  backupPatronState("autosave", patron);
+}, [patron]);
+
 const backupPatronState = (label, state) => {
   try {
-    localStorage.setItem(PATRON_BACKUP_KEY, JSON.stringify({
+    savePatronDraft({
       label,
-      savedAt: new Date().toISOString(),
-      mode: isPatronMode ? "patron" : "project",
+      mode: draftMode,
       sourceId: source?.id ?? null,
       patron: state
-    }));
+    });
   } catch (e) {
     console.warn("[KALEIDO] backupPatronState error:", e);
   }
