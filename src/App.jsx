@@ -1202,6 +1202,7 @@ if (isLastRangOfPartie()) {
 setShowNextPartieModal(true);
 } else {
 setCurrentRangId(allRangs[currentIndex + 1].globalId);
+    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex + 2).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
@@ -1219,11 +1220,13 @@ if (isFirstRangOfPartie()) {
 setShowPrevPartieModal(true);
 } else {
 setCurrentRangId(allRangs[currentIndex - 1].globalId);
+    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
 if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmPrevPartie = () => {
 setCurrentRangId(allRangs[currentIndex - 1].globalId);
+    if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, currentIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
 if (navigator.vibrate) navigator.vibrate(20);
@@ -1239,7 +1242,7 @@ const deleteCounter = (id) => setCounters(prev => prev.filter(c => c.id !== id))
 if (!hasParties) return (
 <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", color: "#F1F0EE", maxWidth: 430, margin: "0 auto", padding: 20 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 30 }}>
-<button data-kaleido-back-button="true" onClick={goBackToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
+<button data-kaleido-back-button="true" onClick={() => { if (typeof onSaveProgress === "function") { try { onSaveProgress(typeof rang !== "undefined" ? rang : allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, typeof total !== "undefined" ? total : totalRangsForCount, typeof elapsedTime !== "undefined" ? elapsedTime : undefined); } catch (e) {} } goBackToHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
 <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
 </div>
 <div style={{ textAlign: "center", padding: "60px 20px", color: "#6B6A7A" }}>
@@ -1739,6 +1742,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
     if (total > 0 && rang >= total) return;
     const newRang = rang + 1;
     setRang(newRang);
+    if (typeof onSaveProgress === "function") onSaveProgress(newRang, total);
     if (hasParties && currentPartie) {
       let offset = 0;
       for (let i = 0; i < currentPartieIdx; i++) offset += pdfParties[i].totalRangs;
@@ -1767,6 +1771,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
       }
     }
     setRang(newRang);
+    if (typeof onSaveProgress === "function") onSaveProgress(newRang, total);
   };
   const [showNextPartieModal, setShowNextPartieModal] = useState(false);
   const [showPrevPartieModal, setShowPrevPartieModal] = useState(false);
@@ -2064,7 +2069,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       {/* Header */}
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <button data-kaleido-back-button="true" onClick={goBackToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
+          <button data-kaleido-back-button="true" onClick={() => { if (typeof onSaveProgress === "function") { try { onSaveProgress(typeof rang !== "undefined" ? rang : allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, typeof total !== "undefined" ? total : totalRangsForCount, typeof elapsedTime !== "undefined" ? elapsedTime : undefined); } catch (e) {} } goBackToHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
           <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={26} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
