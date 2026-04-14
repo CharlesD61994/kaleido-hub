@@ -452,7 +452,7 @@ const handleProjectOpen = () => {
   }, 95);
 };
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "pointer", transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease", transform: isPressed ? "scale(0.97)" : "scale(1)", filter: isPressed ? "saturate(1.06) brightness(1.03)" : "saturate(1.02)" }}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "pointer", transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease", transform: isPressed ? "scale(0.985)" : "scale(1)", filter: isPressed ? "saturate(1.06) brightness(1.03)" : "saturate(1.02)" }}
 onClick={handleProjectOpen}
 onTouchStart={() => setIsPressed(true)}
 onTouchEnd={() => setIsPressed(false)}
@@ -464,20 +464,20 @@ onMouseLeave={() => setIsPressed(false)}>
 <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
 <div data-bubble style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isPressed
 ? (isLibrary
-  ? "0 18px 34px rgba(0,0,0,0.34), 0 0 0 1.5px rgba(255,255,255,0.20), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -18px 26px rgba(0,0,0,0.12)"
+  ? "0 18px 34px rgba(0,0,0,0.34), 0 0 0 1.5px rgba(255,255,255,0.20), inset 0 1px 0 rgba(255,255,255,0.40), inset 0 -18px 26px rgba(0,0,0,0.12)"
   : `0 16px 30px rgba(0,0,0,0.32), 0 0 0 1px ${color.light}44, inset 0 1px 2px rgba(255,255,255,0.12)`)
 : (isLibrary
   ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)`
-  : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`), display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: isPressed ? "translate(-50%, -50%) scale(0.9)" : "translate(-50%, -50%) scale(1)", transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 180ms ease", willChange: "transform, box-shadow, filter", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none", filter: isPressed ? "brightness(1.11) saturate(1.08)" : "none" }}>
+  : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`), display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: isPressed ? "translate(-50%, -50%) scale(0.968)" : "translate(-50%, -50%) scale(1)", transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 180ms ease", willChange: "transform, box-shadow, filter", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none", filter: isPressed ? "brightness(1.04) saturate(1.03)" : "none" }}>
   {isPressed && (
     <div
       style={{
         position: "absolute",
         inset: 0,
         borderRadius: "50%",
-        background: "rgba(255,255,255,0.32)",
+        background: "rgba(255,255,255,0.40)",
         pointerEvents: "none",
-        animation: "bubbleFlash 90ms ease-out"
+        animation: "bubbleFlash 70ms ease-out"
       }}
     />
   )}
