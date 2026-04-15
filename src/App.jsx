@@ -11,14 +11,20 @@ const KALEIDOSCOPE_COLORS = [
 { bg: "#EF4444", light: "#FCA5A5" }, // corail rouge
 ];
 
+const KALEIDO_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const KALEIDO_TIMING_FAST = "180ms";
+const KALEIDO_TIMING_BASE = "220ms";
+const KALEIDO_TIMING_SCREEN = "260ms";
+const KALEIDO_TIMING_SLOW = "560ms";
+
 const GLOBAL_MOTION_CSS = `
   button, [data-kaleido-pressable="true"] {
     -webkit-tap-highlight-color: transparent;
     transition:
-      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-      filter 180ms ease,
-      opacity 180ms ease;
+      transform ${KALEIDO_TIMING_FAST} ${KALEIDO_EASE},
+      box-shadow ${KALEIDO_TIMING_BASE} ${KALEIDO_EASE},
+      filter ${KALEIDO_TIMING_FAST} ease,
+      opacity ${KALEIDO_TIMING_FAST} ease;
     will-change: transform, filter, box-shadow;
     transform: translateZ(0);
     backface-visibility: hidden;
@@ -33,11 +39,11 @@ const GLOBAL_MOTION_CSS = `
     filter: brightness(1.04) saturate(1.03);
   }
   [data-kaleido-modal-backdrop="true"] {
-    animation: kaleidoFadeIn 220ms ease both;
+    animation: kaleidoFadeIn ${KALEIDO_TIMING_BASE} ease both;
     backdrop-filter: blur(3px);
   }
   [data-kaleido-modal-card="true"] {
-    animation: kaleidoModalIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: kaleidoModalIn ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both;
     transform-origin: center center;
   }
   [data-kaleido-screen="true"] {
@@ -52,16 +58,16 @@ const GLOBAL_MOTION_CSS = `
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes kaleidoScreenInRight {
-    from { opacity: 1; transform: translate3d(0, 0, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
+    from { opacity: 0.72; transform: translate3d(20px, 0, 0) scale(0.992); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
   }
   @keyframes kaleidoScreenInLeft {
-    from { opacity: 1; transform: translate3d(0, 0, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
+    from { opacity: 0.78; transform: translate3d(-18px, 0, 0) scale(0.995); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
   }
   @keyframes kaleidoScreenFade {
-    from { opacity: 1; transform: translate3d(0, 0, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
+    from { opacity: 0.74; transform: translate3d(0, 10px, 0) scale(0.996); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
   }
   @keyframes kaleidoParallaxFloat {
     0%, 100% { transform: translate3d(var(--kx, 0px), var(--ky, 0px), 0); }
@@ -100,7 +106,16 @@ const GLOBAL_MOTION_CSS = `
 `;
 
 const getViewMotionStyle = (transitionName) => {
-  return { animation: 'none' };
+  if (transitionName === "slide-in-right") {
+    return { animation: `kaleidoScreenInRight ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
+  }
+  if (transitionName === "slide-out" || transitionName === "slide-in") {
+    return { animation: `kaleidoScreenInLeft ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
+  }
+  if (transitionName === "fade") {
+    return { animation: `kaleidoScreenFade ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
+  }
+  return { animation: "none" };
 };
 
 const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
@@ -534,7 +549,7 @@ return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "default" }}>
   <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
     <div
-      style={{ position: "absolute", inset: 0, transition: "transform 170ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease", filter: "saturate(1.02)" }}
+      style={{ position: "absolute", inset: 0, transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", filter: "saturate(1.02)" }}
       onClick={() => onProjectClick && onProjectClick(project)}
       onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.94) translateY(3px)"; e.currentTarget.style.filter = "saturate(1.1) brightness(1.07)"; }}
       onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
@@ -545,7 +560,7 @@ return (
     >
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
-        <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 160ms ease, box-shadow 200ms ease", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
+        <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
           {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
@@ -556,13 +571,13 @@ return (
               strokeDasharray={2 * Math.PI * 51}
               strokeDashoffset={2 * Math.PI * 51 * (1 - Math.min(project.rang / project.total, 1))}
               strokeLinecap="round" transform="rotate(-90 55 55)"
-              style={{ transition: "stroke-dashoffset 0.6s ease", filter: `drop-shadow(0 0 4px ${color.light})` }} />
+              style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 4px ${color.light})` }} />
           </svg>
         )}
       </div>
     </div>
     {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-      style={{ position: "absolute", top: isLibrary ? -6 : -8, right: isLibrary ? -6 : -8, transform: "translate(25%, -25%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 160ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms ease, filter 180ms ease", zIndex: 10 }}
+      style={{ position: "absolute", top: isLibrary ? -6 : -8, right: isLibrary ? -6 : -8, transform: "translate(25%, -25%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", zIndex: 10 }}
       onTouchStart={(e) => { e.stopPropagation(); e.currentTarget.style.transform = "translate(25%, -25%) scale(0.92)"; e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.30)"; e.currentTarget.style.filter = "brightness(1.04)"; }}
       onTouchEnd={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
       onTouchCancel={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
@@ -571,7 +586,7 @@ return (
       onMouseLeave={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}>i</button>}
   </div>
   <div
-    style={{ textAlign: "center", width: size, maxWidth: 112, transition: "transform 170ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease", filter: "saturate(1.02)" }}
+    style={{ textAlign: "center", width: size, maxWidth: 112, transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", filter: "saturate(1.02)" }}
     onClick={() => onProjectClick && onProjectClick(project)}
     onTouchStart={(e) => { e.currentTarget.style.transform = "scale(0.94) translateY(3px)"; e.currentTarget.style.filter = "saturate(1.1) brightness(1.07)"; }}
     onTouchEnd={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
@@ -923,7 +938,7 @@ onTouchMove={e => setSwipeCurrentX(e.touches[0].clientX)}
 onTouchEnd={() => { const d = swipeStartX - swipeCurrentX; if (d > 50) setIsSwipedOpen(true); else if (d < -50) setIsSwipedOpen(false); }}
 onClick={() => { if (isSwipedOpen) setIsSwipedOpen(false); }}
 style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
-<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
+<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
 <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
 <Icon name="note" size={16} color="#FCD34D" />
 </div>
@@ -949,7 +964,7 @@ style={{ width: "100%", background: "#0D0D1A", border: "1px solid #D9770644", bo
 <button onClick={e => { e.stopPropagation(); onMoveDown(rang.id); }} disabled={isLast} style={{ background: isLast ? "#333" : "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: isLast ? "not-allowed" : "pointer" }}>↓</button>
 </div>
 </div>
-<div style={{ position: "absolute", top: 12, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 0.3s ease", zIndex: 10 }}>
+<div style={{ position: "absolute", top: 12, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
 <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}><Icon name="undo" size={16} color="#fff" /></button>
 <button onClick={e => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
 </div>
@@ -963,7 +978,7 @@ onTouchMove={e => { if (!isEditing) setSwipeCurrentX(e.touches[0].clientX); }}
 onTouchEnd={() => { if (!isEditing) { const d = swipeStartX - swipeCurrentX; if (d > 50) setIsSwipedOpen(true); else if (d < -50) setIsSwipedOpen(false); } }}
 onClick={() => { if (isSwipedOpen && !isEditing) setIsSwipedOpen(false); }}
 style={{ background: "#13131F", border: isSwipedOpen ? "1px solid #7C3AED44" : "1px solid #ffffff0A", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
-<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-76px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
+<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-76px)" : "translateX(0)", transition: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
 <div style={{ background: "#7C3AED22", borderRadius: 8, padding: "8px 12px", minWidth: 40, textAlign: "center", flexShrink: 0 }}>
 <span style={{ color: "#A78BFA", fontFamily: "monospace", fontSize: 14, fontWeight: 700 }}>{rangIndex + 1}</span>
 </div>
@@ -992,7 +1007,7 @@ style={{ background: "#0D0D1A", border: "1px solid #A78BFA44", borderRadius: 8, 
 <button onClick={(e) => { e.stopPropagation(); onMoveDown(rang.id); }} disabled={isLast} style={{ background: isLast ? "#333" : "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: isLast ? "not-allowed" : "pointer" }}>↓</button>
 </div>
 </div>
-<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 72 }}>
+<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 72 }}>
 <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}><Icon name="note" size={15} color="#fff" /></button>
 <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
 <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
@@ -1125,7 +1140,7 @@ return (
 <div onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}
 onClick={e => { if (isSwipedOpen && !isEditing && !isEditingMax) { e.stopPropagation(); setIsSwipedOpen(false); } }}
 style={{ background: "rgba(30,30,50,0.8)", backdropFilter: "blur(10px)", border: `1px solid ${col.light}44`, borderRadius: 12, padding: 12, textAlign: "center", position: "relative", overflow: "hidden" }}>
-<div style={{ transform: isSwipedOpen ? "translateX(-95px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
+<div style={{ transform: isSwipedOpen ? "translateX(-95px)" : "translateX(0)", transition: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
 <div style={{ marginBottom: 8 }}>
 {isEditing
 ? <input value={tempName} onChange={e => setTempName(e.target.value)}
@@ -1145,7 +1160,7 @@ style={{ background: counter.syncWithGlobal ? "#333" : col.bg, border: "none", b
 {counter.syncWithGlobal && <div style={{ color: "#666", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Sync • Reset après {counter.maxRepeats || 4}</div>}
 </div>
 {/* Actions swipe — stopPropagation sur chaque bouton */}
-<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 6 : -95, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 0.3s ease", zIndex: 10, width: 85 }}>
+<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 6 : -95, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 85 }}>
 <button onClick={e => doAction(e, () => onUpdate({ syncWithGlobal: !counter.syncWithGlobal }))}
 style={{ background: counter.syncWithGlobal ? col.bg : "#666", border: "none", borderRadius: 6, padding: "4px 5px", color: "#fff", fontSize: 9, cursor: "pointer", fontWeight: 600, height: 28 }}>SYNC</button>
 {isEditingMax
@@ -1180,7 +1195,7 @@ onTouchMove={e => { if (startX - e.touches[0].clientX > 40) setSwiped(true); }}
 onTouchEnd={e => { if (startX - e.changedTouches[0].clientX < -40) setSwiped(false); }}
 onClick={() => swiped && setSwiped(false)}
 style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 12, position: "relative", overflow: "hidden" }}>
-<div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, transform: swiped ? "translateX(-110px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
+<div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1, transform: swiped ? "translateX(-110px)" : "translateX(0)", transition: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
 {/* Cercle */}
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
 <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Global</div>
@@ -1219,7 +1234,7 @@ strokeLinecap="round" style={{
 </div>
 </div>
 {/* Bouton swipe */}
-<div style={{ position: "absolute", top: "50%", right: swiped ? 0 : -120, transform: "translateY(-60%)", transition: "right 0.3s ease", zIndex: 10 }}>
+<div style={{ position: "absolute", top: "50%", right: swiped ? 0 : -120, transform: "translateY(-60%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
 <button onClick={e => { e.stopPropagation(); onAddCounter(); setSwiped(false); }}
 style={{ background: "#059669", border: "none", borderRadius: 8, padding: "10px 14px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>+ Compteur</button>
 </div>
@@ -1455,7 +1470,7 @@ const col = KALEIDOSCOPE_COLORS[p.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isActive = currentPartie?.id === p.id;
 return (
 <button key={p.id} onClick={() => goToPartie(p.id)}
-style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 18, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
+style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 18, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 220ms cubic-bezier(0.22, 1, 0.36, 1)", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
 {p.nom}
 </button>
 );
@@ -1482,13 +1497,13 @@ style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light}
 <button
 onClick={prevRang}
 disabled={currentIndex === 0}
-style={{ background: currentIndex === 0 ? "#333" : "#1E1E32", color: currentIndex === 0 ? "#666" : currentPartieColor.light, border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === 0 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
+style={{ background: currentIndex === 0 ? "#333" : "#1E1E32", color: currentIndex === 0 ? "#666" : currentPartieColor.light, border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === 0 ? "not-allowed" : "pointer", transition: "all 220ms cubic-bezier(0.22, 1, 0.36, 1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
 ← Précédent
 </button>
 <button
 onClick={nextRang}
 disabled={currentIndex === allRangs.length - 1}
-style={{ background: currentIndex === allRangs.length - 1 ? "#333" : `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, color: currentIndex === allRangs.length - 1 ? "#666" : "#fff", border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === allRangs.length - 1 ? "not-allowed" : "pointer", transition: "all 0.15s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
+style={{ background: currentIndex === allRangs.length - 1 ? "#333" : `linear-gradient(135deg, ${currentPartieColor.bg}, ${currentPartieColor.light})`, color: currentIndex === allRangs.length - 1 ? "#666" : "#fff", border: "none", borderRadius: 20, padding: "16px 28px", fontSize: 16, minWidth: 140, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: currentIndex === allRangs.length - 1 ? "not-allowed" : "pointer", transition: "all 220ms cubic-bezier(0.22, 1, 0.36, 1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
 Suivant →
 </button>
 </div>
@@ -1765,7 +1780,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
       onClick={() => swiped && setSwiped(false)}
       style={{ background: "#1A1A2E", borderRadius: 14, border: `1px solid ${color.light}22`, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, position: "relative", overflow: "hidden" }}>
       {/* Contenu principal */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, transform: swiped ? "translateX(-100px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, transform: swiped ? "translateX(-100px)" : "translateX(0)", transition: "transform 260ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
         {/* Cercle — progression globale */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: 80, flexShrink: 0 }}>
           <div style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2, fontWeight: 700 }}>Global</div>
@@ -1800,7 +1815,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
               <span style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>{rangDansPartie}/{totalPartieCourante}</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 6, height: 4, overflow: "hidden", marginTop: 2, marginBottom: 16 }}>
-              <div style={{ background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, width: `${totalPartieCourante > 0 ? Math.round(rangDansPartie / totalPartieCourante * 100) : 0}%`, height: "100%", transition: "width 0.4s ease" }} />
+              <div style={{ background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, width: `${totalPartieCourante > 0 ? Math.round(rangDansPartie / totalPartieCourante * 100) : 0}%`, height: "100%", transition: "width 260ms cubic-bezier(0.22, 1, 0.36, 1)" }} />
             </div>
           </>) : total > 0 ? (<>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1808,7 +1823,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
               <span style={{ color: "#6B6A7A", fontSize: 10, fontFamily: "monospace" }}>{rang}/{total}</span>
             </div>
             <div style={{ background: "rgba(255,255,255,0.08)", borderRadius: 6, height: 4, overflow: "hidden", marginTop: 2, marginBottom: 16 }}>
-              <div style={{ background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, width: `${pct}%`, height: "100%", transition: "width 0.4s ease" }} />
+              <div style={{ background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, width: `${pct}%`, height: "100%", transition: "width 260ms cubic-bezier(0.22, 1, 0.36, 1)" }} />
             </div>
           </>) : <div style={{ marginBottom: 16 }} />}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transform: "translateX(-16px)" }}>
@@ -1819,7 +1834,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
         </div>
       </div>
       {/* Menu swipe */}
-      <div style={{ position: "absolute", top: "50%", right: swiped ? 10 : -110, transform: "translateY(-50%)", transition: "right 0.3s ease", zIndex: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ position: "absolute", top: "50%", right: swiped ? 10 : -110, transform: "translateY(-50%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, display: "flex", flexDirection: "column", gap: 6 }}>
         <button onClick={e => { e.stopPropagation(); addCounter(); setSwiped(false); }}
           style={{ background: "#059669", border: "none", borderRadius: 8, padding: "8px 12px", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>+ Compteur</button>
         <button onClick={e => { e.stopPropagation(); resetRang(); setSwiped(false); }}
@@ -2641,12 +2656,12 @@ setDatabase(newDb); saveToDatabase(newDb);
 const navigateToHub = () => {
 setPrevView(currentView);
 setViewTransition('slide-out');
-setTimeout(() => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setViewTransition('slide-in'); setTimeout(() => setViewTransition('none'), 350); }, 0);
+setTimeout(() => { setCurrentView(VIEWS.HUB); setCurrentProject(null); setViewTransition('slide-in'); setTimeout(() => setViewTransition('none'), 260); }, 0);
 };
 const navigateToLibrary = () => {
 setPrevView(currentView);
 setViewTransition('slide-in-right');
-setTimeout(() => setViewTransition('none'), 350);
+setTimeout(() => setViewTransition('none'), 260);
 setCurrentView(VIEWS.LIBRARY);
 };
 const navigateToPatronEditor = (project) => {
@@ -2656,7 +2671,7 @@ return;
 }
 setPrevView(currentView);
 setViewTransition('slide-in-right');
-setTimeout(() => setViewTransition('none'), 350);
+setTimeout(() => setViewTransition('none'), 260);
 setCurrentProject(project); setCurrentView(VIEWS.PATRON_EDITOR);
 };
 const navigateToRowCounter = (project) => {
@@ -2666,7 +2681,7 @@ return;
 }
 setPrevView(currentView);
 setViewTransition('slide-in-right');
-setTimeout(() => setViewTransition('none'), 350);
+setTimeout(() => setViewTransition('none'), 260);
 setCurrentProject(project); setCurrentView(VIEWS.ROW_COUNTER);
 };
 const navigateToPdfViewer = async (project) => {
@@ -2938,7 +2953,7 @@ const HubView = () => (
 {/* Toggle Personnel / Professionnel */}
 <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
 {["personal", "pro"].map(m => (
-<button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 0.2s ease" }}>
+<button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "all 220ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
 {m === "personal" ? "Personnel" : "Professionnel"}
 </button>
 ))}
@@ -3685,7 +3700,7 @@ const viewWrapStyle = (trans) => getViewMotionStyle(trans);
 const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
 const activeScreenInteractiveStyle = interactiveBackPreview ? {
 transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
-transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+transition: edgeSwipeDragging ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1), filter 260ms ease",
 willChange: "transform",
 position: "relative",
 zIndex: 2,
@@ -3700,7 +3715,7 @@ zIndex: 0,
 transform: `translate3d(${(-12 + edgeSwipeProgress * 12).toFixed(2)}px, 0, 0) scale(${(0.985 + edgeSwipeProgress * 0.015).toFixed(4)})`,
 transformOrigin: "left center",
 opacity: Math.min(1, 0.92 + edgeSwipeProgress * 0.08),
-transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease",
+transition: edgeSwipeDragging ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, filter 260ms ease",
 pointerEvents: "none"
 } : {
 display: currentView === VIEWS.HUB ? "block" : "none",
