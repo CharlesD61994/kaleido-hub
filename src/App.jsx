@@ -2769,12 +2769,30 @@ useEffect(() => {
   };
 
   const onTouchEnd = () => {
+    cancelAnimationFrame(rafId);
+
     if (!consumed) {
-      resetPreview(true);
+      const shouldCompleteByDistance = lastDx >= TRIGGER_DX * 0.56;
+      const shouldCompleteByFlick = lastDx >= FLICK_MIN_DX && releaseVelocityX >= FLICK_VELOCITY;
+
+      if (gestureLocked && activeScreen && (shouldCompleteByDistance || shouldCompleteByFlick)) {
+        consumed = true;
+        activeScreen.style.transition = 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1)';
+        activeScreen.style.transform = 'translate3d(24px, 0, 0)';
+        window.setTimeout(() => {
+          const backButton = findVisibleBackButton();
+          if (backButton) backButton.click();
+        }, 28);
+      } else {
+        clearPreview(previewing);
+      }
     }
+
     tracking = false;
-    gestureLocked = false;
     consumed = false;
+    gestureLocked = false;
+    releaseVelocityX = 0;
+    lastDx = 0;
   };
 
   window.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -3680,3 +3698,4 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 </div>
 );
 }
+
