@@ -328,7 +328,6 @@ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
-const DB_VERSION = 1;
 const debug = (...args) => {
 if (typeof window !== "undefined" && window.KALEIDO_DEBUG) {
 console.log("[KALEIDO]", ...args);
@@ -342,13 +341,7 @@ const canUseStorage = () => {
   }
 };
 const safeParseJSON = (value) => {
-  try {
-    if (!value || typeof value !== "string") return null;
-    return JSON.parse(value);
-  } catch (e) {
-    console.warn("[KALEIDO] JSON parse error:", e);
-    return null;
-  }
+try { return value ? JSON.parse(value) : null; } catch (e) { return null; }
 };
 const readStorageJSON = (key) => {
   if (!canUseStorage()) return null;
@@ -374,11 +367,6 @@ const clearStorageKey = (key) => {
     return false;
   }
 };
-const buildDatabaseMeta = (existingMeta = {}) => ({
-  schemaVersion: DB_VERSION,
-  updatedAt: new Date().toISOString(),
-  createdAt: existingMeta.createdAt || new Date().toISOString(),
-});
 const isValidDatabase = (data) => {
 if (!data || typeof data !== "object") return false;
 return Array.isArray(data.projectsPersonal)
@@ -388,8 +376,6 @@ return Array.isArray(data.projectsPersonal)
 && typeof data.settings === "object";
 };
 const getDefaultDatabase = () => ({
-version: DB_VERSION,
-meta: buildDatabaseMeta(),
 projectsPersonal: [
 { id: 1, name: "Écharpe hiver", rang: 42, total: 80, colorIdx: 0, image: null, type: "tricot", laine: "", outil: "", notes: "", parties: [] },
 { id: 2, name: "Tuque Noël", rang: 15, total: 30, colorIdx: 1, image: null, type: "crochet", laine: "", outil: "", notes: "", parties: [] },
@@ -399,30 +385,15 @@ projectsPro: [],
 patrons: [],
 settings: { lastProjectId: 3, lastPatronId: 0 }
 });
-const normalizeDatabase = (data) => {
-  if (!isValidDatabase(data)) return null;
-  const fallback = getDefaultDatabase();
-  return {
-    version: typeof data.version === "number" ? data.version : DB_VERSION,
-    meta: buildDatabaseMeta(data.meta || {}),
-    projectsPersonal: Array.isArray(data.projectsPersonal) ? data.projectsPersonal : fallback.projectsPersonal,
-    projectsPro: Array.isArray(data.projectsPro) ? data.projectsPro : [],
-    patrons: Array.isArray(data.patrons) ? data.patrons : [],
-    settings: {
-      ...fallback.settings,
-      ...(data.settings || {})
-    }
-  };
-};
 
 const initDatabase = () => {
 try {
 if (!canUseStorage()) return getDefaultDatabase();
-const saved = normalizeDatabase(readStorageJSON(DB_KEY));
-if (saved) return saved;
+const saved = readStorageJSON(DB_KEY);
+if (isValidDatabase(saved)) return saved;
 
-const backup = normalizeDatabase(readStorageJSON(DB_BACKUP_KEY));
-if (backup) {
+const backup = readStorageJSON(DB_BACKUP_KEY);
+if (isValidDatabase(backup)) {
   debug("Base principale invalide, restauration depuis le backup.");
   writeStorageJSON(DB_KEY, backup);
   return backup;
@@ -436,21 +407,16 @@ return getDefaultDatabase();
 const saveToDatabase = (data) => {
 try {
 if (!canUseStorage()) return false;
-const normalized = normalizeDatabase(data);
-if (!normalized) {
-console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.", data);
+if (!isValidDatabase(data)) {
+console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
 return false;
 }
-const nextRaw = JSON.stringify(normalized);
 const currentRaw = localStorage.getItem(DB_KEY);
-if (currentRaw === nextRaw) {
-  return true;
-}
 if (currentRaw) {
   const currentData = safeParseJSON(currentRaw);
   if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
 }
-localStorage.setItem(DB_KEY, nextRaw);
+writeStorageJSON(DB_KEY, data);
 return true;
 } catch(e) {
 console.warn("[KALEIDO] saveToDatabase error:", e);
@@ -2334,20 +2300,6 @@ export default function KaleidoHub() {
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
   const databaseRef = useRef(database);
-  const flushTimeoutRef = useRef(null);
-  const lastSavedSnapshotRef = useRef("");
-
-  const flushDatabaseNow = () => {
-    if (flushTimeoutRef.current) {
-      clearTimeout(flushTimeoutRef.current);
-      flushTimeoutRef.current = null;
-    }
-    const snapshot = JSON.stringify(databaseRef.current);
-    if (snapshot === lastSavedSnapshotRef.current) return;
-    if (saveToDatabase(databaseRef.current)) {
-      lastSavedSnapshotRef.current = snapshot;
-    }
-  };
   // Projets selon le mode actif
 
   useEffect(() => {
@@ -2355,36 +2307,27 @@ export default function KaleidoHub() {
   }, [database]);
 
   useEffect(() => {
-    if (flushTimeoutRef.current) {
-      clearTimeout(flushTimeoutRef.current);
-    }
-    flushTimeoutRef.current = setTimeout(() => {
-      flushDatabaseNow();
-    }, 180);
-
-    return () => {
-      if (flushTimeoutRef.current) {
-        clearTimeout(flushTimeoutRef.current);
-        flushTimeoutRef.current = null;
-      }
-    };
+    saveToDatabase(database);
   }, [database]);
 
   useEffect(() => {
+    const flushDatabase = () => {
+      saveToDatabase(databaseRef.current);
+    };
+
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
-        flushDatabaseNow();
+        flushDatabase();
       }
     };
 
-    window.addEventListener("pagehide", flushDatabaseNow);
-    window.addEventListener("beforeunload", flushDatabaseNow);
+    window.addEventListener("pagehide", flushDatabase);
+    window.addEventListener("beforeunload", flushDatabase);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      flushDatabaseNow();
-      window.removeEventListener("pagehide", flushDatabaseNow);
-      window.removeEventListener("beforeunload", flushDatabaseNow);
+      window.removeEventListener("pagehide", flushDatabase);
+      window.removeEventListener("beforeunload", flushDatabase);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
@@ -2464,7 +2407,7 @@ const computeCustomTotal = (patron) => Math.max(
 );
 
 const syncProjectFromPatron = (project) => {
-  if (project.patronId !== patronId || !updatedPatron) return project;
+  if (project.patronId !== patronId || !updatedPatron || project.linkMode === 'detached') return project;
 
   if (updatedPatron.projectType === 'custom') {
     return {
@@ -2504,7 +2447,20 @@ setDatabase(newDb); saveToDatabase(newDb);
 
 };
 const deletePatronFromDB = (patronId) => {
-const newDb = { ...database, patrons: (database.patrons || []).filter(p => p.id !== patronId) };
+const detachProjectFromPatron = (project) => {
+  if (project.patronId !== patronId) return project;
+  return {
+    ...project,
+    patronId: null,
+    linkMode: 'detached',
+  };
+};
+const newDb = {
+  ...database,
+  patrons: (database.patrons || []).filter(p => p.id !== patronId),
+  projectsPersonal: (database.projectsPersonal || []).map(detachProjectFromPatron),
+  projectsPro: (database.projectsPro || []).map(detachProjectFromPatron),
+};
 setDatabase(newDb); saveToDatabase(newDb);
 };
 const navigateToHub = () => {
@@ -2771,14 +2727,13 @@ style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #059
 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
 <button onClick={async () => {
 try {
-const imported = normalizeDatabase(JSON.parse(importText.trim()));
-if (imported) {
+const imported = JSON.parse(importText.trim());
+if (imported.projects && imported.settings) {
 setDatabase(imported);
 saveToDatabase(imported);
 setShowDataImportModal(false);
 setShowSettingsModal(false);
-const allProjects = [...(imported.projectsPersonal || []), ...(imported.projectsPro || [])];
-const pdfCount = allProjects.filter(p => p.projectType === 'pdf').length;
+const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
 alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
 } else {
 alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
@@ -2860,21 +2815,14 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
-const { pdfs, ...rawDbData } = data || {};
-const dbData = normalizeDatabase(rawDbData);
-
-if (!dbData) {
-throw new Error("Format de sauvegarde invalide.");
-}
-
 // Restaurer les PDFs dans IndexedDB
-if (pdfs && typeof pdfs === "object") {
-for (const [pdfId, pdfData] of Object.entries(pdfs)) {
+if (data.pdfs) {
+for (const [pdfId, pdfData] of Object.entries(data.pdfs)) {
 await savePdf(pdfId, pdfData);
 }
 }
-
 // Restaurer la base de données
+const { pdfs, ...dbData } = data;
 setDatabase(dbData);
 saveToDatabase(dbData);
 setShowSettingsModal(false);
@@ -2882,7 +2830,6 @@ alert('✅ Données restaurées avec succès !');
 } catch(e) {
 alert('Erreur import : ' + e.message);
 }
-e.target.value = "";
 }} />
 </label>
 </div>
@@ -2943,7 +2890,7 @@ const newProject = {
 id: newId, name: patron.name, rang: 0,
 total: patron.total || 0,
 colorIdx: patron.colorIdx, image: patron.image || null, // image synced via updatePatron
-projectType: patron.projectType, patronId: patron.id,
+projectType: patron.projectType, patronId: patron.id, linkMode: 'mirror',
 ...(patron.projectType === 'custom'
 ? { type: patron.type, laine: patron.laine, outil: patron.outil, notes: patron.notes, parties: patron.parties }
 : { pdfId: patron.pdfId, pdfParties: patron.pdfParties }),
