@@ -615,8 +615,10 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 }
 function RenameModal({ project, onConfirm, onClose }) {
 const [val, setVal] = useState(project?.name || "");
-const [keyboardOffset, setKeyboardOffset] = useState(0);
+const [cardTop, setCardTop] = useState(null);
 const inputRef = useRef(null);
+const cardRef = useRef(null);
+
 useEffect(() => {
   if (!project) return;
   setVal(project?.name || "");
@@ -628,31 +630,69 @@ useEffect(() => {
   }, 60);
   return () => clearTimeout(timer);
 }, [project]);
+
 useEffect(() => {
   if (!project) return;
-  const updateKeyboardOffset = () => {
-    const vv = window.visualViewport;
-    if (!vv) {
-      setKeyboardOffset(0);
-      return;
-    }
-    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    setKeyboardOffset(keyboardHeight > 0 ? keyboardHeight : 0);
+
+  let rafId = 0;
+
+  const updateCardTop = () => {
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const vv = window.visualViewport;
+      const viewportTop = vv ? vv.offsetTop : 0;
+      const viewportHeight = vv ? vv.height : window.innerHeight;
+      const cardHeight = cardRef.current?.offsetHeight || 0;
+      const sideMargin = 24;
+
+      if (!cardHeight) {
+        setCardTop(viewportTop + Math.max(sideMargin, viewportHeight * 0.18));
+        return;
+      }
+
+      const centeredTop = viewportTop + Math.max(sideMargin, (viewportHeight - cardHeight) / 2);
+      const maxAllowedTop = viewportTop + viewportHeight - cardHeight - sideMargin;
+      const resolvedTop = Math.max(sideMargin, Math.min(centeredTop, maxAllowedTop));
+
+      setCardTop(resolvedTop);
+    });
   };
-  updateKeyboardOffset();
+
+  updateCardTop();
+
   const vv = window.visualViewport;
-  vv?.addEventListener("resize", updateKeyboardOffset);
-  vv?.addEventListener("scroll", updateKeyboardOffset);
+  vv?.addEventListener("resize", updateCardTop);
+  vv?.addEventListener("scroll", updateCardTop);
+  window.addEventListener("resize", updateCardTop);
+
   return () => {
-    vv?.removeEventListener("resize", updateKeyboardOffset);
-    vv?.removeEventListener("scroll", updateKeyboardOffset);
+    cancelAnimationFrame(rafId);
+    vv?.removeEventListener("resize", updateCardTop);
+    vv?.removeEventListener("scroll", updateCardTop);
+    window.removeEventListener("resize", updateCardTop);
   };
-}, [project]);
+}, [project, val]);
+
 if (!project) return null;
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 return (
-<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
-<div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, transform: `translateY(-${keyboardOffset}px)` }}>
+<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)" }} onClick={onClose}>
+<div
+  ref={cardRef}
+  onClick={e => e.stopPropagation()}
+  data-kaleido-modal-card="true"
+  style={{
+    position: "fixed",
+    top: cardTop ?? "18vh",
+    left: "50%",
+    transform: "translateX(-50%)",
+    background: "#1A1A2E",
+    borderRadius: 18,
+    padding: 24,
+    width: "calc(100% - 40px)",
+    maxWidth: 340
+  }}
+>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 16px" }}>Renommer le projet</h3>
 <input ref={inputRef} autoFocus value={val} onFocus={e => e.target.select()} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
@@ -664,6 +704,7 @@ style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px sol
 </div>
 );
 }
+
 function DeleteModal({ project, onConfirm, onClose }) {
 if (!project) return null;
 return (
