@@ -686,19 +686,25 @@ const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length]
 return (
 <div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)" }} onClick={onClose}>
 <div
-  ref={cardRef}
-  onClick={e => e.stopPropagation()}
-  data-kaleido-modal-card="true"
   style={{
     position: "fixed",
     top: cardTop ?? "18vh",
     left: "50%",
     transform: "translateX(-50%)",
+    width: "calc(100% - 40px)",
+    maxWidth: 340
+  }}
+>
+<div
+  ref={cardRef}
+  onClick={e => e.stopPropagation()}
+  data-kaleido-modal-card="true"
+  style={{
     background: "#1A1A2E",
     borderRadius: 18,
     padding: 24,
-    width: "calc(100% - 40px)",
-    maxWidth: 340
+    width: "100%",
+    boxSizing: "border-box"
   }}
 >
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 16px" }}>Renommer le projet</h3>
@@ -707,6 +713,7 @@ style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px sol
 <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end", flexWrap: "wrap" }}>
 <button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
 <button onClick={() => onConfirm(val)} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
+</div>
 </div>
 </div>
 </div>
