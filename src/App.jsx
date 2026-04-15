@@ -2385,6 +2385,9 @@ export default function KaleidoHub() {
   const [showNewMenu, setShowNewMenu] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showLibraryImportModal, setShowLibraryImportModal] = useState(false);
+  const [edgeSwipeActive, setEdgeSwipeActive] = useState(false);
+  const [edgeSwipeProgress, setEdgeSwipeProgress] = useState(0);
+  const [edgeSwipeDragging, setEdgeSwipeDragging] = useState(false);
   const [photoTarget, setPhotoTarget] = useState(null); // { id, context: "project"|"patron" }
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
@@ -2568,6 +2571,7 @@ if (!project) {
 console.warn("[KALEIDO] navigateToPatronEditor ignoré: projet manquant.");
 return;
 }
+setPrevView(currentView);
 setViewTransition('slide-in-right');
 setTimeout(() => setViewTransition('none'), 350);
 setCurrentProject(project); setCurrentView(VIEWS.PATRON_EDITOR);
@@ -2577,6 +2581,7 @@ if (!project) {
 console.warn("[KALEIDO] navigateToRowCounter ignoré: projet manquant.");
 return;
 }
+setPrevView(currentView);
 setViewTransition('slide-in-right');
 setTimeout(() => setViewTransition('none'), 350);
 setCurrentProject(project); setCurrentView(VIEWS.ROW_COUNTER);
@@ -2595,6 +2600,7 @@ if (!data) {
 alert("Impossible d'ouvrir ce PDF. Le fichier semble manquant ou corrompu.");
 return;
 }
+setPrevView(currentView);
 setCurrentProject(project);
 setCurrentView(VIEWS.PDF_VIEWER);
 };
@@ -2650,19 +2656,14 @@ useEffect(() => {
   let startX = 0;
   let startY = 0;
   let tracking = false;
-  let consumed = false;
-  let previewing = false;
   let gestureLocked = false;
-  let activeScreen = null;
-  let rafId = 0;
+  let consumed = false;
 
-  const PREVIEW_DEAD_ZONE = 8;
-  const PREVIEW_MAX = 18;
-  const TRIGGER_DX = 84;
-  const LOCK_DX = 14;
-  const LOCK_DY = 10;
-  const MAX_DY = 30;
   const EDGE_ZONE = 22;
+  const LOCK_DX = 12;
+  const LOCK_DY = 10;
+  const MAX_DY = 28;
+  const COMPLETE_THRESHOLD = 0.32;
 
   const isInteractiveTarget = (target) => {
     if (!(target instanceof Element)) return false;
@@ -2684,41 +2685,16 @@ useEffect(() => {
     }) || null;
   };
 
-  const findGestureScreen = (target) => {
-    if (target instanceof Element) {
-      const closest = target.closest('[data-kaleido-screen="true"]');
-      if (closest) return closest;
+  const resetPreview = (animated = true) => {
+    setEdgeSwipeDragging(false);
+    setEdgeSwipeProgress(0);
+    if (!animated) {
+      setEdgeSwipeActive(false);
+      return;
     }
-    const screens = Array.from(document.querySelectorAll('[data-kaleido-screen="true"]'));
-    const visible = screens.filter((screen) => {
-      const style = window.getComputedStyle(screen);
-      const rect = screen.getBoundingClientRect();
-      return style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && rect.width > 0
-        && rect.height > 0;
-    });
-    return visible.length ? visible[visible.length - 1] : null;
-  };
-
-  const clearPreview = (withAnimation = true) => {
-    if (!activeScreen) return;
-    activeScreen.style.willChange = '';
-    activeScreen.style.transition = withAnimation
-      ? 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)'
-      : 'none';
-    activeScreen.style.transform = 'translate3d(0px, 0, 0)';
-    previewing = false;
-    gestureLocked = false;
-    const screenToClean = activeScreen;
-    if (withAnimation) {
-      window.setTimeout(() => {
-        if (!screenToClean) return;
-        screenToClean.style.transition = '';
-      }, 220);
-    } else {
-      screenToClean.style.transition = '';
-    }
+    window.setTimeout(() => {
+      setEdgeSwipeActive(false);
+    }, 220);
   };
 
   const onTouchStart = (e) => {
@@ -2731,29 +2707,28 @@ useEffect(() => {
     startX = touch.clientX;
     startY = touch.clientY;
     tracking = true;
-    consumed = false;
-    previewing = false;
     gestureLocked = false;
-    activeScreen = findGestureScreen(e.target);
-    if (activeScreen) {
-      activeScreen.style.willChange = 'transform';
-      activeScreen.style.transition = 'none';
-    }
+    consumed = false;
+    setEdgeSwipeActive(false);
+    setEdgeSwipeDragging(false);
+    setEdgeSwipeProgress(0);
   };
 
   const onTouchMove = (e) => {
     if (!tracking || !e.touches || e.touches.length !== 1) return;
 
     const touch = e.touches[0];
-    const dx = touch.clientX - startX;
+    const dx = Math.max(0, touch.clientX - startX);
     const dy = Math.abs(touch.clientY - startY);
 
     if (!gestureLocked) {
       if (dx > LOCK_DX && dy < LOCK_DY) {
         gestureLocked = true;
+        setEdgeSwipeActive(true);
+        setEdgeSwipeDragging(true);
       } else if (dy > LOCK_DY && dy > dx) {
         tracking = false;
-        clearPreview(false);
+        resetPreview(false);
         return;
       }
     }
@@ -2764,45 +2739,42 @@ useEffect(() => {
 
     if (dy > 44) {
       tracking = false;
-      clearPreview(true);
+      resetPreview(true);
       return;
     }
 
-    if (dx <= 0 || !activeScreen) return;
+    const width = Math.max(window.innerWidth || 1, 1);
+    const rawProgress = dx / width;
+    const easedProgress = rawProgress < 0.16
+      ? rawProgress * 0.7
+      : 0.112 + (rawProgress - 0.16) * 0.9;
+    const nextProgress = Math.max(0, Math.min(1, easedProgress));
 
-    const previewDx = Math.max(0, dx - PREVIEW_DEAD_ZONE);
-    const resisted = previewDx < 20
-      ? previewDx * 0.18
-      : 20 * 0.18 + (previewDx - 20) * 0.08;
-    const previewOffset = Math.min(PREVIEW_MAX, resisted);
+    setEdgeSwipeProgress(nextProgress);
 
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(() => {
-      if (!activeScreen) return;
-      activeScreen.style.transform = `translate3d(${previewOffset}px, 0, 0)`;
-    });
-    previewing = previewOffset > 0;
-
-    if (dx > TRIGGER_DX && dy < MAX_DY && !consumed) {
+    if (nextProgress >= COMPLETE_THRESHOLD && dy < MAX_DY && !consumed) {
       const backButton = findVisibleBackButton();
       if (backButton) {
         consumed = true;
         tracking = false;
-        activeScreen.style.transition = 'transform 140ms cubic-bezier(0.22, 1, 0.36, 1)';
-        activeScreen.style.transform = 'translate3d(20px, 0, 0)';
+        setEdgeSwipeDragging(false);
+        setEdgeSwipeProgress(1);
         window.setTimeout(() => {
           backButton.click();
-        }, 24);
+          setEdgeSwipeActive(false);
+          setEdgeSwipeProgress(0);
+        }, 180);
       }
     }
   };
 
   const onTouchEnd = () => {
-    cancelAnimationFrame(rafId);
-    if (!consumed) clearPreview(previewing);
+    if (!consumed) {
+      resetPreview(true);
+    }
     tracking = false;
-    consumed = false;
     gestureLocked = false;
+    consumed = false;
   };
 
   window.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -2811,13 +2783,17 @@ useEffect(() => {
   window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
   return () => {
-    cancelAnimationFrame(rafId);
-    clearPreview(false);
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('touchend', onTouchEnd);
     window.removeEventListener('touchcancel', onTouchEnd);
   };
+}, [currentView]);
+
+useEffect(() => {
+  setEdgeSwipeActive(false);
+  setEdgeSwipeProgress(0);
+  setEdgeSwipeDragging(false);
 }, [currentView]);
 // ─── VUE HUB ──────────────────────────────────────────────
 const HubView = () => (
@@ -3582,18 +3558,42 @@ animation: 'splashPulse 1.8s ease-in-out infinite'
 }
 
 const viewWrapStyle = (trans) => getViewMotionStyle(trans);
-const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER;
+const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
+const activeScreenInteractiveStyle = interactiveBackPreview ? {
+transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
+transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+willChange: "transform",
+position: "relative",
+zIndex: 2,
+boxShadow: "-18px 0 36px rgba(0,0,0,0.26)"
+} : {};
+const previewHubStyle = interactiveBackPreview ? {
+display: "block",
+position: "absolute",
+inset: 0,
+minHeight: "100vh",
+zIndex: 0,
+transform: `translate3d(${(-12 + edgeSwipeProgress * 12).toFixed(2)}px, 0, 0) scale(${(0.985 + edgeSwipeProgress * 0.015).toFixed(4)})`,
+transformOrigin: "left center",
+opacity: Math.min(1, 0.92 + edgeSwipeProgress * 0.08),
+transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease",
+pointerEvents: "none"
+} : {
+display: currentView === VIEWS.HUB ? "block" : "none",
+minHeight: "100vh",
+position: currentView === VIEWS.HUB ? "relative" : "absolute",
+inset: 0,
+zIndex: 0
+};
+const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || interactiveBackPreview;
 
 return (
-<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A" }}>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A", overflowX: "hidden" }}>
 <style>{GLOBAL_MOTION_CSS}</style>
 
 {keepHubMounted && (
 <div
-style={{
-display: currentView === VIEWS.HUB ? "block" : "none",
-minHeight: "100vh",
-}}
+style={previewHubStyle}
 aria-hidden={currentView !== VIEWS.HUB}
 >
 {HubView()}
@@ -3601,7 +3601,7 @@ aria-hidden={currentView !== VIEWS.HUB}
 )}
 
 {currentView === VIEWS.LIBRARY && (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
 <LibraryView
 database={database}
 onNavigateHub={navigateToHub}
@@ -3652,11 +3652,11 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
 )}
 
 {currentView === VIEWS.PATRON_EDITOR && (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}><PatronEditorView /></div>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}><PatronEditorView /></div>
 )}
 
 {currentView === VIEWS.ROW_COUNTER && (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
 <CompteurRangsView
 project={currentProject}
 onNavigateHub={navigateToHub}
@@ -3667,7 +3667,7 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 )}
 
 {currentView === VIEWS.PDF_VIEWER && (
-<div data-kaleido-screen="true" style={viewWrapStyle(viewTransition)}>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
 <PdfViewerView
 project={currentProject}
 onNavigateHub={navigateToHub}
@@ -3680,3 +3680,4 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 </div>
 );
 }
+
