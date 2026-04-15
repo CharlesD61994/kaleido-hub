@@ -106,15 +106,6 @@ const GLOBAL_MOTION_CSS = `
 `;
 
 const getViewMotionStyle = (transitionName) => {
-  if (transitionName === "slide-in-right") {
-    return { animation: `kaleidoScreenInRight ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
-  }
-  if (transitionName === "slide-out" || transitionName === "slide-in") {
-    return { animation: `kaleidoScreenInLeft ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
-  }
-  if (transitionName === "fade") {
-    return { animation: `kaleidoScreenFade ${KALEIDO_TIMING_SCREEN} ${KALEIDO_EASE} both` };
-  }
   return { animation: "none" };
 };
 
@@ -3700,11 +3691,12 @@ const viewWrapStyle = (trans) => getViewMotionStyle(trans);
 const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
 const activeScreenInteractiveStyle = interactiveBackPreview ? {
 transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
-transition: edgeSwipeDragging ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1), filter 260ms ease",
-willChange: "transform",
+transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, filter 240ms ease",
+willChange: "transform, box-shadow, filter",
 position: "relative",
 zIndex: 2,
-boxShadow: "-18px 0 36px rgba(0,0,0,0.26)"
+boxShadow: `-30px 0 60px rgba(0,0,0,${(0.20 + edgeSwipeProgress * 0.22).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.05).toFixed(3)})`,
+filter: `brightness(${(1 - edgeSwipeProgress * 0.02).toFixed(3)}) saturate(${(1 + edgeSwipeProgress * 0.04).toFixed(3)})`
 } : {};
 const previewHubStyle = interactiveBackPreview ? {
 display: "block",
@@ -3712,10 +3704,11 @@ position: "absolute",
 inset: 0,
 minHeight: "100vh",
 zIndex: 0,
-transform: `translate3d(${(-12 + edgeSwipeProgress * 12).toFixed(2)}px, 0, 0) scale(${(0.985 + edgeSwipeProgress * 0.015).toFixed(4)})`,
+transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
 transformOrigin: "left center",
-opacity: Math.min(1, 0.92 + edgeSwipeProgress * 0.08),
-transition: edgeSwipeDragging ? "none" : "transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, filter 260ms ease",
+opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
+filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
+transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
 pointerEvents: "none"
 } : {
 display: currentView === VIEWS.HUB ? "block" : "none",
@@ -3724,6 +3717,15 @@ position: currentView === VIEWS.HUB ? "relative" : "absolute",
 inset: 0,
 zIndex: 0
 };
+const previewBackdropStyle = interactiveBackPreview ? {
+position: "absolute",
+inset: 0,
+zIndex: 1,
+pointerEvents: "none",
+background: `linear-gradient(90deg, rgba(13,13,26,${(0.18 + edgeSwipeProgress * 0.10).toFixed(3)}) 0%, rgba(13,13,26,${(0.04 + edgeSwipeProgress * 0.06).toFixed(3)}) 38%, rgba(13,13,26,0) 74%)`,
+opacity: Math.min(1, 0.55 + edgeSwipeProgress * 0.35),
+transition: edgeSwipeDragging ? "none" : "opacity 240ms ease, background 240ms ease"
+} : null;
 const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || interactiveBackPreview;
 
 return (
@@ -3738,6 +3740,7 @@ aria-hidden={currentView !== VIEWS.HUB}
 {HubView()}
 </div>
 )}
+{previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
 
 {currentView === VIEWS.LIBRARY && (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
