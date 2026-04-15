@@ -2655,6 +2655,10 @@ useEffect(() => {
 
   let startX = 0;
   let startY = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let lastDx = 0;
+  let releaseVelocityX = 0;
   let tracking = false;
   let gestureLocked = false;
   let consumed = false;
@@ -2664,6 +2668,8 @@ useEffect(() => {
   const LOCK_DY = 24;
   const MAX_DY = 64;
   const COMPLETE_THRESHOLD = 0.56;
+  const FLICK_MIN_DX = 18;
+  const FLICK_VELOCITY = 0.18;
 
   const isInteractiveTarget = (target) => {
     if (!(target instanceof Element)) return false;
@@ -2697,6 +2703,25 @@ useEffect(() => {
     }, 220);
   };
 
+  const completeBack = () => {
+    const backButton = findVisibleBackButton();
+    if (!backButton) {
+      resetPreview(true);
+      return;
+    }
+
+    consumed = true;
+    tracking = false;
+    setEdgeSwipeDragging(false);
+    setEdgeSwipeProgress(1);
+
+    window.setTimeout(() => {
+      backButton.click();
+      setEdgeSwipeActive(false);
+      setEdgeSwipeProgress(0);
+    }, 180);
+  };
+
   const onTouchStart = (e) => {
     if (!e.touches || e.touches.length !== 1) return;
     if (isInteractiveTarget(e.target)) return;
@@ -2706,6 +2731,10 @@ useEffect(() => {
 
     startX = touch.clientX;
     startY = touch.clientY;
+    lastX = touch.clientX;
+    lastTime = performance.now();
+    lastDx = 0;
+    releaseVelocityX = 0;
     tracking = true;
     gestureLocked = false;
     consumed = false;
@@ -2718,7 +2747,14 @@ useEffect(() => {
     if (!tracking || !e.touches || e.touches.length !== 1) return;
 
     const touch = e.touches[0];
+    const now = performance.now();
+    const dt = Math.max(1, now - lastTime);
+    releaseVelocityX = (touch.clientX - lastX) / dt;
+    lastX = touch.clientX;
+    lastTime = now;
+
     const dx = Math.max(0, touch.clientX - startX);
+    lastDx = dx;
     const dy = Math.abs(touch.clientY - startY);
 
     if (!gestureLocked) {
@@ -2753,38 +2789,25 @@ useEffect(() => {
     setEdgeSwipeProgress(nextProgress);
 
     if (nextProgress >= COMPLETE_THRESHOLD && dy < MAX_DY && !consumed) {
-      const backButton = findVisibleBackButton();
-      if (backButton) {
-        consumed = true;
-        tracking = false;
-        setEdgeSwipeDragging(false);
-        setEdgeSwipeProgress(1);
-        window.setTimeout(() => {
-          backButton.click();
-          setEdgeSwipeActive(false);
-          setEdgeSwipeProgress(0);
-        }, 180);
-      }
+      completeBack();
     }
   };
 
   const onTouchEnd = () => {
-    cancelAnimationFrame(rafId);
+    if (!gestureLocked) {
+      tracking = false;
+      consumed = false;
+      return;
+    }
 
     if (!consumed) {
-      const shouldCompleteByDistance = lastDx >= TRIGGER_DX * 0.56;
+      const shouldCompleteByDistance = lastDx >= window.innerWidth * 0.24;
       const shouldCompleteByFlick = lastDx >= FLICK_MIN_DX && releaseVelocityX >= FLICK_VELOCITY;
 
-      if (gestureLocked && activeScreen && (shouldCompleteByDistance || shouldCompleteByFlick)) {
-        consumed = true;
-        activeScreen.style.transition = 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1)';
-        activeScreen.style.transform = 'translate3d(24px, 0, 0)';
-        window.setTimeout(() => {
-          const backButton = findVisibleBackButton();
-          if (backButton) backButton.click();
-        }, 28);
+      if (shouldCompleteByDistance || shouldCompleteByFlick) {
+        completeBack();
       } else {
-        clearPreview(previewing);
+        resetPreview(true);
       }
     }
 
