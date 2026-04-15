@@ -615,6 +615,7 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 }
 function RenameModal({ project, onConfirm, onClose }) {
 const [val, setVal] = useState(project?.name || "");
+const [keyboardOffset, setKeyboardOffset] = useState(0);
 const inputRef = useRef(null);
 useEffect(() => {
   if (!project) return;
@@ -627,11 +628,31 @@ useEffect(() => {
   }, 60);
   return () => clearTimeout(timer);
 }, [project]);
+useEffect(() => {
+  if (!project) return;
+  const updateKeyboardOffset = () => {
+    const vv = window.visualViewport;
+    if (!vv) {
+      setKeyboardOffset(0);
+      return;
+    }
+    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    setKeyboardOffset(keyboardHeight > 0 ? keyboardHeight : 0);
+  };
+  updateKeyboardOffset();
+  const vv = window.visualViewport;
+  vv?.addEventListener("resize", updateKeyboardOffset);
+  vv?.addEventListener("scroll", updateKeyboardOffset);
+  return () => {
+    vv?.removeEventListener("resize", updateKeyboardOffset);
+    vv?.removeEventListener("scroll", updateKeyboardOffset);
+  };
+}, [project]);
 if (!project) return null;
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 return (
-<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: "max(28px, 4vh)" }} onClick={onClose}>
-<div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 340 }}>
+<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: 20, paddingTop: "max(28px, 4vh)" }} onClick={onClose}>
+<div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, transform: `translateY(-${keyboardOffset}px)` }}>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 16px" }}>Renommer le projet</h3>
 <input ref={inputRef} autoFocus value={val} onFocus={e => e.target.select()} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
