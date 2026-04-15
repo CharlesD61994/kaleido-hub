@@ -3723,6 +3723,8 @@ animation: 'splashPulse 1.8s ease-in-out infinite'
 
 const viewWrapStyle = (trans) => getViewMotionStyle(trans);
 const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
+const previewUsesLibrary = interactiveBackPreview && currentView === VIEWS.PATRON_EDITOR;
+const previewUsesHub = interactiveBackPreview && currentView !== VIEWS.PATRON_EDITOR;
 const activeScreenInteractiveStyle = interactiveBackPreview ? {
 transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
 transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, filter 240ms ease",
@@ -3732,7 +3734,7 @@ zIndex: 2,
 boxShadow: `-30px 0 60px rgba(0,0,0,${(0.20 + edgeSwipeProgress * 0.22).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.05).toFixed(3)})`,
 filter: `brightness(${(1 - edgeSwipeProgress * 0.02).toFixed(3)}) saturate(${(1 + edgeSwipeProgress * 0.04).toFixed(3)})`
 } : {};
-const previewHubStyle = interactiveBackPreview ? {
+const previewHubStyle = previewUsesHub ? {
 display: "block",
 position: "absolute",
 inset: 0,
@@ -3751,6 +3753,25 @@ position: currentView === VIEWS.HUB ? "relative" : "absolute",
 inset: 0,
 zIndex: 0
 };
+const previewLibraryStyle = previewUsesLibrary ? {
+display: "block",
+position: "absolute",
+inset: 0,
+minHeight: "100vh",
+zIndex: 0,
+transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
+transformOrigin: "left center",
+opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
+filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
+transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
+pointerEvents: "none"
+} : {
+display: "none",
+position: "absolute",
+inset: 0,
+minHeight: "100vh",
+zIndex: 0
+};
 const previewBackdropStyle = interactiveBackPreview ? {
 position: "absolute",
 inset: 0,
@@ -3760,7 +3781,8 @@ background: `linear-gradient(90deg, rgba(13,13,26,${(0.18 + edgeSwipeProgress * 
 opacity: Math.min(1, 0.55 + edgeSwipeProgress * 0.35),
 transition: edgeSwipeDragging ? "none" : "opacity 240ms ease, background 240ms ease"
 } : null;
-const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || interactiveBackPreview;
+const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || previewUsesHub;
+const keepLibraryMountedForPreview = previewUsesLibrary;
 
 return (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A", overflowX: "hidden" }}>
@@ -3772,6 +3794,27 @@ style={previewHubStyle}
 aria-hidden={currentView !== VIEWS.HUB}
 >
 {HubView()}
+</div>
+)}
+{keepLibraryMountedForPreview && (
+<div
+style={previewLibraryStyle}
+aria-hidden="true"
+>
+<LibraryView
+database={database}
+onNavigateHub={navigateToHub}
+onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
+onNewCustomPatron={handleNewCustomPatron}
+onNewPdfPatron={handleNewPdfPatron}
+onDeletePatron={(id) => { deletePatronFromDB(id); }}
+onRenamePatron={(id, name) => updatePatron(id, { name })}
+onChangePatronColor={(id, idx) => updatePatron(id, { colorIdx: idx })}
+onUpdatePatron={(id, updates) => updatePatron(id, updates)}
+onChangePatronPhoto={(id) => setPhotoTarget({ id, context: "patron" })}
+editingPdfPatron={null}
+setEditingPdfPatron={() => {}}
+/>
 </div>
 )}
 {previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
