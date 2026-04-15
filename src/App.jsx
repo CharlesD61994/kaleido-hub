@@ -2652,13 +2652,17 @@ useEffect(() => {
   let tracking = false;
   let consumed = false;
   let previewing = false;
+  let gestureLocked = false;
   let activeScreen = null;
   let rafId = 0;
 
-  const PREVIEW_DEAD_ZONE = 6;
-  const PREVIEW_MAX = 22;
-  const TRIGGER_DX = 78;
-  const MAX_DY = 34;
+  const PREVIEW_DEAD_ZONE = 8;
+  const PREVIEW_MAX = 18;
+  const TRIGGER_DX = 84;
+  const LOCK_DX = 14;
+  const LOCK_DY = 10;
+  const MAX_DY = 30;
+  const EDGE_ZONE = 22;
 
   const isInteractiveTarget = (target) => {
     if (!(target instanceof Element)) return false;
@@ -2680,32 +2684,38 @@ useEffect(() => {
     }) || null;
   };
 
-  const findVisibleScreen = () => {
+  const findGestureScreen = (target) => {
+    if (target instanceof Element) {
+      const closest = target.closest('[data-kaleido-screen="true"]');
+      if (closest) return closest;
+    }
     const screens = Array.from(document.querySelectorAll('[data-kaleido-screen="true"]'));
-    return screens.find((screen) => {
+    const visible = screens.filter((screen) => {
       const style = window.getComputedStyle(screen);
       const rect = screen.getBoundingClientRect();
       return style.display !== 'none'
         && style.visibility !== 'hidden'
         && rect.width > 0
         && rect.height > 0;
-    }) || null;
+    });
+    return visible.length ? visible[visible.length - 1] : null;
   };
 
   const clearPreview = (withAnimation = true) => {
     if (!activeScreen) return;
     activeScreen.style.willChange = '';
     activeScreen.style.transition = withAnimation
-      ? 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)'
+      ? 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)'
       : 'none';
     activeScreen.style.transform = 'translate3d(0px, 0, 0)';
     previewing = false;
+    gestureLocked = false;
     const screenToClean = activeScreen;
     if (withAnimation) {
       window.setTimeout(() => {
         if (!screenToClean) return;
         screenToClean.style.transition = '';
-      }, 240);
+      }, 220);
     } else {
       screenToClean.style.transition = '';
     }
@@ -2716,14 +2726,15 @@ useEffect(() => {
     if (isInteractiveTarget(e.target)) return;
 
     const touch = e.touches[0];
-    if (touch.clientX > 24) return;
+    if (touch.clientX > EDGE_ZONE) return;
 
     startX = touch.clientX;
     startY = touch.clientY;
     tracking = true;
     consumed = false;
     previewing = false;
-    activeScreen = findVisibleScreen();
+    gestureLocked = false;
+    activeScreen = findGestureScreen(e.target);
     if (activeScreen) {
       activeScreen.style.willChange = 'transform';
       activeScreen.style.transition = 'none';
@@ -2737,7 +2748,21 @@ useEffect(() => {
     const dx = touch.clientX - startX;
     const dy = Math.abs(touch.clientY - startY);
 
-    if (dy > 54) {
+    if (!gestureLocked) {
+      if (dx > LOCK_DX && dy < LOCK_DY) {
+        gestureLocked = true;
+      } else if (dy > LOCK_DY && dy > dx) {
+        tracking = false;
+        clearPreview(false);
+        return;
+      }
+    }
+
+    if (!gestureLocked) return;
+
+    e.preventDefault();
+
+    if (dy > 44) {
       tracking = false;
       clearPreview(true);
       return;
@@ -2746,9 +2771,9 @@ useEffect(() => {
     if (dx <= 0 || !activeScreen) return;
 
     const previewDx = Math.max(0, dx - PREVIEW_DEAD_ZONE);
-    const resisted = previewDx < 18
-      ? previewDx * 0.22
-      : 18 * 0.22 + (previewDx - 18) * 0.12;
+    const resisted = previewDx < 20
+      ? previewDx * 0.18
+      : 20 * 0.18 + (previewDx - 20) * 0.08;
     const previewOffset = Math.min(PREVIEW_MAX, resisted);
 
     cancelAnimationFrame(rafId);
@@ -2763,11 +2788,11 @@ useEffect(() => {
       if (backButton) {
         consumed = true;
         tracking = false;
-        activeScreen.style.transition = 'transform 160ms cubic-bezier(0.22, 1, 0.36, 1)';
-        activeScreen.style.transform = 'translate3d(28px, 0, 0)';
+        activeScreen.style.transition = 'transform 140ms cubic-bezier(0.22, 1, 0.36, 1)';
+        activeScreen.style.transform = 'translate3d(20px, 0, 0)';
         window.setTimeout(() => {
           backButton.click();
-        }, 35);
+        }, 24);
       }
     }
   };
@@ -2777,10 +2802,11 @@ useEffect(() => {
     if (!consumed) clearPreview(previewing);
     tracking = false;
     consumed = false;
+    gestureLocked = false;
   };
 
   window.addEventListener('touchstart', onTouchStart, { passive: true });
-  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('touchend', onTouchEnd, { passive: true });
   window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
