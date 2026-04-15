@@ -615,15 +615,27 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 }
 function RenameModal({ project, onConfirm, onClose }) {
 const [val, setVal] = useState(project?.name || "");
+const inputRef = useRef(null);
+useEffect(() => {
+  if (!project) return;
+  setVal(project?.name || "");
+  const timer = setTimeout(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, 60);
+  return () => clearTimeout(timer);
+}, [project]);
 if (!project) return null;
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 return (
-<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
+<div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "stretch", justifyContent: "flex-start", padding: 20, paddingTop: "max(84px, 12vh)" }} onClick={onClose}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 340 }}>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 16px" }}>Renommer le projet</h3>
-<input autoFocus value={val} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
+<input ref={inputRef} autoFocus value={val} onFocus={e => e.target.select()} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
-<div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end" }}>
+<div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end", flexWrap: "wrap" }}>
 <button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
 <button onClick={() => onConfirm(val)} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
 </div>
@@ -829,7 +841,7 @@ style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12
 <div style={{ flex: 1 }}>
 {isEditing ? (
 <div>
-<textarea value={tempInstruction} onChange={e => setTempInstruction(e.target.value)} rows={3} autoFocus
+<textarea value={tempInstruction} onChange={e => setTempInstruction(e.target.value)} onFocus={e => e.target.select()} rows={3} autoFocus
 style={{ width: "100%", background: "#0D0D1A", border: "1px solid #D9770644", borderRadius: 8, padding: 12, color: "#F1F0EE", fontSize: 16, outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 8 }} />
 <div style={{ display: "flex", gap: 8 }}>
 <button onClick={handleSave} style={{ background: "#D97706", border: "none", borderRadius: 8, padding: "8px 16px", color: "#fff", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>Sauvegarder</button>
@@ -869,7 +881,7 @@ style={{ background: "#13131F", border: isSwipedOpen ? "1px solid #7C3AED44" : "
 <div style={{ flex: 1 }}>
 {isEditing ? (
 <div style={{ width: "100%" }}>
-<textarea value={tempInstruction} onChange={e => setTempInstruction(e.target.value)} placeholder="Instruction du rang..." rows={3} autoFocus
+<textarea value={tempInstruction} onChange={e => setTempInstruction(e.target.value)} onFocus={e => e.target.select()} placeholder="Instruction du rang..." rows={3} autoFocus
 style={{ width: "100%", background: "#0D0D1A", border: "1px solid #A78BFA44", borderRadius: 8, padding: "12px", color: "#F1F0EE", fontSize: 16, fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", boxSizing: "border-box", marginBottom: 10 }} />
 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
 <input value={tempMailles} onChange={e => setTempMailles(e.target.value)} placeholder="Nb mailles" type="number"
@@ -950,7 +962,7 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
 <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
 {isEditingNom
-? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => e.stopPropagation()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
+? <input value={tempNom} onChange={e => { const nextNom = e.target.value; setTempNom(nextNom); setDisplayNom(nextNom || "Nouvelle partie"); }} onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") handleSaveNom(); if (e.key === "Escape") { const fallbackNom = partie.nom || "Nouvelle partie"; setTempNom(fallbackNom); setDisplayNom(fallbackNom); setIsEditingNom(false); } }} onBlur={handleSaveNom} onClick={e => e.stopPropagation()} onFocus={e => { e.stopPropagation(); e.target.select(); }} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textAlign: "center", width: "100%" }} />
 : <h3 onClick={handleStartEditNom} style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", cursor: "pointer", textAlign: "center", wordBreak: "break-word" }}>{displayNom}</h3>
 }
 </div>
@@ -1030,7 +1042,7 @@ style={{ background: "rgba(30,30,50,0.8)", backdropFilter: "blur(10px)", border:
 ? <input value={tempName} onChange={e => setTempName(e.target.value)}
 onKeyDown={e => e.key === "Enter" && (onUpdate({ name: tempName }), setIsEditing(false))}
 onBlur={() => (onUpdate({ name: tempName }), setIsEditing(false))}
-autoFocus style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${col.light}44`, borderRadius: 6, padding: "4px 8px", color: "#F1F0EE", fontSize: 16, outline: "none", textAlign: "center", fontFamily: "'DM Sans', sans-serif", width: "100%", fontWeight: 600 }} />
+onFocus={e => e.target.select()} autoFocus style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${col.light}44`, borderRadius: 6, padding: "4px 8px", color: "#F1F0EE", fontSize: 16, outline: "none", textAlign: "center", fontFamily: "'DM Sans', sans-serif", width: "100%", fontWeight: 600 }} />
 : <div onClick={e => { e.stopPropagation(); setIsEditing(true); }} style={{ color: col.light, fontSize: 13, textTransform: "uppercase", letterSpacing: 1, cursor: "pointer", fontWeight: 600 }}>{counter.name}</div>
 }
 </div>
@@ -1051,7 +1063,7 @@ style={{ background: counter.syncWithGlobal ? col.bg : "#666", border: "none", b
 ? <input value={tempMax} onChange={e => setTempMax(e.target.value)}
 onKeyDown={e => { if (e.key === "Enter") { onUpdate({ maxRepeats: Math.max(2, Math.min(20, parseInt(tempMax) || 4)) }); setIsEditingMax(false); setTempMax(""); setIsSwipedOpen(false); } }}
 onBlur={() => { onUpdate({ maxRepeats: Math.max(2, Math.min(20, parseInt(tempMax) || 4)) }); setIsEditingMax(false); setTempMax(""); }}
-autoFocus type="number" min="2" max="20"
+onFocus={e => e.target.select()} autoFocus type="number" min="2" max="20"
 onClick={e => e.stopPropagation()}
 style={{ background: "#333", border: `1px solid ${col.light}44`, borderRadius: 6, padding: "4px 5px", color: "#F1F0EE", fontSize: 16, outline: "none", textAlign: "center", width: "100%", height: 28 }} />
 : <button onClick={e => doAction(e, () => { setTempMax(String(counter.maxRepeats || 4)); setIsEditingMax(true); })}
@@ -2716,12 +2728,12 @@ setPhotoTarget(null);
 )}
 {/* Modale import */}
 {showDataImportModal && (
-<div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+<div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "stretch", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 22, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
 Importer tes projets</h3>
 <p style={{ color: "#6B6A7A", fontSize: 12, margin: "0 0 12px" }}>Colle ici le texte copié depuis l'export. <span style={{ color: "#F87171" }}>Attention : tes projets actuels seront remplacés.</span></p>
-<textarea value={importText} onChange={e => setImportText(e.target.value)}
+<textarea value={importText} onFocus={e => e.target.select()} onChange={e => setImportText(e.target.value)}
 placeholder="Colle ton texte de sauvegarde ici..."
 style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #05966944", borderRadius: 10, padding: 12, color: "#F1F0EE", fontSize: 13, fontFamily: "monospace", outline: "none", resize: "none" }} />
 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
@@ -2749,7 +2761,7 @@ style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, background: "#33
 )}
 {/* Modale données export */}
 {showExportData && (
-<div onClick={() => setShowExportData(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+<div onClick={() => setShowExportData(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "stretch", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 22, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", margin: "0 0 6px", fontSize: 16 }}>
 Sauvegarde de tes projets</h3>
@@ -3301,7 +3313,7 @@ return (
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <button data-kaleido-back-button="true" onClick={isPatronMode ? navigateToLibrary : navigateToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
         {isEditingNom
-          ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSaveNom()} onBlur={handleSaveNom} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 18, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1 }} />
+          ? <input value={tempNom} onChange={e => setTempNom(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSaveNom()} onBlur={handleSaveNom} onFocus={e => e.target.select()} autoFocus style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", fontSize: 18, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1 }} />
           : <h1 onClick={() => setIsEditingNom(true)} style={{ color: "#F1F0EE", margin: 0, fontSize: 18, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1, cursor: "pointer" }}>{patron.nom}</h1>
         }
         <button onClick={handleSave} style={{ background: "linear-gradient(135deg, #059669, #34D399)", border: "none", borderRadius: 10, padding: "8px 16px", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Sauvegarder</button>
