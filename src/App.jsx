@@ -2825,7 +2825,7 @@ useEffect(() => {
   };
 
   const completeBack = () => {
-    const backButton = findVisibleBackButton();
+    const backButton = currentView === VIEWS.PATRON_EDITOR ? null : findVisibleBackButton();
 
     consumed = true;
     tracking = false;
@@ -2833,7 +2833,9 @@ useEffect(() => {
     setEdgeSwipeProgress(1);
 
     completeTimer = window.setTimeout(() => {
-      if (backButton) {
+      if (currentView === VIEWS.PATRON_EDITOR) {
+        navigateToLibrary();
+      } else if (backButton) {
         backButton.click();
       } else {
         runFallbackBack();
