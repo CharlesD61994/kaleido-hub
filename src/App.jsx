@@ -2726,7 +2726,7 @@ useEffect(() => {
         gestureLocked = true;
         setEdgeSwipeActive(true);
         setEdgeSwipeDragging(true);
-      } else if (dy > LOCK_DY && dy > dx * 1.45) {
+      } else if (dy > LOCK_DY && dy > dx * 2.2) {
         tracking = false;
         resetPreview(false);
         return;
@@ -2737,7 +2737,7 @@ useEffect(() => {
 
     e.preventDefault();
 
-    if (dy > 92) {
+    if (dy > 140) {
       tracking = false;
       resetPreview(true);
       return;
