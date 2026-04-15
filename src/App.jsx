@@ -635,7 +635,7 @@ function DeleteModal({ project, onConfirm, onClose }) {
 if (!project) return null;
 return (
 <div data-kaleido-modal-backdrop="true" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={onClose}>
-<div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 9999, padding: 24, width: "100%", maxWidth: 340 }}>
+<div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 24, padding: 24, width: "100%", maxWidth: 340 }}>
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 10px" }}>Supprimer "{project.name}" ?</h3>
 <p style={{ color: "#999", fontSize: 13, margin: "0 0 20px" }}>Cette action est irréversible.</p>
 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
@@ -2114,7 +2114,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
       {/* Header */}
       <div style={{ padding: "52px 20px 16px", background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <button data-kaleido-back-button="true" onClick={() => { if (typeof onSaveProgress === "function") { try { onSaveProgress(typeof rang !== "undefined" ? rang : allRangs.slice(0, currentIndex + 1).filter(r => !r.isNote).length, typeof total !== "undefined" ? total : totalRangsForCount, typeof elapsedTime !== "undefined" ? elapsedTime : undefined); } catch (e) {} } goBackToHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
+          <button data-kaleido-back-button="true" onClick={() => { if (typeof onNavigateHub === "function") onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
           <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, background: "linear-gradient(135deg, #A78BFA, #F472B6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Icon name="library" size={26} color="#A78BFA" />Bibliothèque</span></span>
           <div style={{ flex: 1 }} />
           <div style={{ background: "#1E1E3288", borderRadius: 10, padding: "6px 12px" }}>
