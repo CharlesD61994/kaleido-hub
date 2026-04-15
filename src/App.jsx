@@ -2410,6 +2410,7 @@ export default function KaleidoHub() {
   const [showSelectPatronModal, setShowSelectPatronModal] = useState(false);
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
   const databaseRef = useRef(database);
+  const edgeSwipeHandlersRef = useRef({ start: null, move: null, end: null });
   // Projets selon le mode actif
 
   useEffect(() => {
@@ -2740,7 +2741,10 @@ useEffect(() => {
 }, [currentView]);
 
 useEffect(() => {
-  if (currentView === VIEWS.HUB) return undefined;
+  if (currentView === VIEWS.HUB) {
+    edgeSwipeHandlersRef.current = { start: null, move: null, end: null };
+    return undefined;
+  }
 
   let startX = 0;
   let startY = 0;
@@ -2840,6 +2844,7 @@ useEffect(() => {
   };
 
   const onTouchStart = (e) => {
+    if (currentView === VIEWS.PATRON_EDITOR) return;
     if (!e.touches || e.touches.length !== 1) return;
     if (isInteractiveTarget(e.target)) return;
 
@@ -2938,12 +2943,19 @@ useEffect(() => {
     lastDx = 0;
   };
 
+  edgeSwipeHandlersRef.current = {
+    start: onTouchStart,
+    move: onTouchMove,
+    end: finishGesture
+  };
+
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('touchend', finishGesture, { passive: true });
   window.addEventListener('touchcancel', finishGesture, { passive: true });
 
   return () => {
+    edgeSwipeHandlersRef.current = { start: null, move: null, end: null };
     window.clearTimeout(resetTimer);
     window.clearTimeout(completeTimer);
     hardResetPreview();
@@ -3870,6 +3882,38 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
 </div>
 )}
 
+{currentView === VIEWS.PATRON_EDITOR && (
+<div
+  aria-hidden="true"
+  data-kaleido-no-edge-back="true"
+  style={{
+    position: "fixed",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 28,
+    zIndex: 9999,
+    touchAction: "none",
+    background: "transparent"
+  }}
+  onTouchStart={(e) => {
+    e.stopPropagation();
+    edgeSwipeHandlersRef.current.start?.(e);
+  }}
+  onTouchMove={(e) => {
+    e.stopPropagation();
+    edgeSwipeHandlersRef.current.move?.(e);
+  }}
+  onTouchEnd={(e) => {
+    e.stopPropagation();
+    edgeSwipeHandlersRef.current.end?.(e);
+  }}
+  onTouchCancel={(e) => {
+    e.stopPropagation();
+    edgeSwipeHandlersRef.current.end?.(e);
+  }}
+/>
+)}
 {currentView === VIEWS.PATRON_EDITOR && (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}><PatronEditorView /></div>
 )}
