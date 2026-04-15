@@ -13,12 +13,24 @@ const KALEIDOSCOPE_COLORS = [
 
 const GLOBAL_MOTION_CSS = `
   button, [data-kaleido-pressable="true"] {
-    transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, filter 180ms ease, opacity 180ms ease;
-    will-change: transform, filter;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 180ms ease,
+      opacity 180ms ease;
+    will-change: transform, filter, box-shadow;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  button[data-kaleido-pressed="true"], [data-kaleido-pressable="true"][data-kaleido-pressed="true"] {
+    transform: scale(0.955) translateY(1.5px);
+    filter: brightness(1.04) saturate(1.03);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 8px 20px rgba(0,0,0,0.16);
   }
   button:active, [data-kaleido-pressable="true"]:active {
-    transform: scale(0.94) translateY(1px);
-    filter: brightness(1.08);
+    transform: scale(0.955) translateY(1.5px);
+    filter: brightness(1.04) saturate(1.03);
   }
   [data-kaleido-modal-backdrop="true"] {
     animation: kaleidoFadeIn 220ms ease both;
@@ -325,17 +337,6 @@ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
 );
 };
 
-const triggerHaptic = (ms = 10) => {
-  try {
-    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
-      navigator.vibrate(ms);
-    }
-  } catch (e) {}
-};
-const hapticTap = () => triggerHaptic(8);
-const hapticLight = () => triggerHaptic(12);
-const hapticMedium = () => triggerHaptic(18);
-
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
@@ -600,7 +601,7 @@ return (
 { icon: <Icon name="edit" size={21} color="#E2E0DC" />, label: "Renommer", action: onRename },
 { icon: <Icon name="image" size={21} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
 ].map(item => (
-<button key={item.label} onClick={() => { hapticTap(); item.action(); }} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+<button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
 <span>{item.icon}</span><span>{item.label}</span>
 </button>
 ))}
@@ -617,7 +618,7 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 ))}
 </div>
 )}
-<button onClick={() => { hapticMedium(); onDelete(); }} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+<button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
 <span><Icon name="trash" size={21} color="#F87171" /></span><span>Supprimer</span>
 </button>
 </div>
@@ -722,8 +723,8 @@ return (
 <input ref={inputRef} autoFocus value={val} onFocus={e => e.target.select()} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
 <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end", flexWrap: "wrap" }}>
-<button onClick={() => { hapticTap(); onClose(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
-<button onClick={() => { hapticLight(); onConfirm(val); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
+<button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
+<button onClick={() => onConfirm(val)} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
 </div>
 </div>
 </div>
@@ -739,8 +740,8 @@ return (
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 10px" }}>Supprimer "{project.name}" ?</h3>
 <p style={{ color: "#999", fontSize: 13, margin: "0 0 20px" }}>Cette action est irréversible.</p>
 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-<button onClick={() => { hapticTap(); onClose(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
-<button onClick={() => { hapticMedium(); onConfirm(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "#EF4444", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Supprimer</button>
+<button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
+<button onClick={onConfirm} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "#EF4444", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Supprimer</button>
 </div>
 </div>
 </div>
@@ -2406,6 +2407,77 @@ export default function KaleidoHub() {
   // Projets selon le mode actif
 
   useEffect(() => {
+    const selector = 'button, [data-kaleido-pressable="true"]';
+    let activeEl = null;
+    let clearTimer = 0;
+
+    const clearPressed = (el) => {
+      if (!el) return;
+      el.removeAttribute('data-kaleido-pressed');
+    };
+
+    const setPressedFromTarget = (target) => {
+      if (!(target instanceof Element)) return null;
+      const el = target.closest(selector);
+      if (!el) return null;
+      if (activeEl && activeEl !== el) {
+        clearPressed(activeEl);
+      }
+      activeEl = el;
+      activeEl.setAttribute('data-kaleido-pressed', 'true');
+      return activeEl;
+    };
+
+    const releasePressed = () => {
+      window.clearTimeout(clearTimer);
+      const el = activeEl;
+      if (!el) return;
+      clearTimer = window.setTimeout(() => {
+        clearPressed(el);
+        if (activeEl === el) activeEl = null;
+      }, 110);
+    };
+
+    const onPointerDown = (e) => {
+      setPressedFromTarget(e.target);
+    };
+
+    const onPointerUp = () => {
+      releasePressed();
+    };
+
+    const onPointerCancel = () => {
+      if (activeEl) {
+        clearPressed(activeEl);
+        activeEl = null;
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden' && activeEl) {
+        clearPressed(activeEl);
+        activeEl = null;
+      }
+    };
+
+    document.addEventListener('pointerdown', onPointerDown, true);
+    window.addEventListener('pointerup', onPointerUp, true);
+    window.addEventListener('pointercancel', onPointerCancel, true);
+    window.addEventListener('blur', onPointerCancel);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      window.clearTimeout(clearTimer);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      window.removeEventListener('pointerup', onPointerUp, true);
+      window.removeEventListener('pointercancel', onPointerCancel, true);
+      window.removeEventListener('blur', onPointerCancel);
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (activeEl) clearPressed(activeEl);
+    };
+  }, []);
+
+  useEffect(() => {
     databaseRef.current = database;
   }, [database]);
 
@@ -2723,7 +2795,6 @@ useEffect(() => {
 
     consumed = true;
     tracking = false;
-    hapticMedium();
     setEdgeSwipeDragging(false);
     setEdgeSwipeProgress(1);
 
@@ -2772,7 +2843,6 @@ useEffect(() => {
     if (!gestureLocked) {
       if (dx > LOCK_DX && dy < LOCK_DY) {
         gestureLocked = true;
-        hapticLight();
         setEdgeSwipeActive(true);
         setEdgeSwipeDragging(true);
       } else if (dy > LOCK_DY && dy > dx * 2.2) {
@@ -3615,12 +3685,11 @@ const viewWrapStyle = (trans) => getViewMotionStyle(trans);
 const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
 const activeScreenInteractiveStyle = interactiveBackPreview ? {
 transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
-transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, filter 240ms ease",
-willChange: "transform, box-shadow, filter",
+transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+willChange: "transform",
 position: "relative",
 zIndex: 2,
-boxShadow: `-30px 0 60px rgba(0,0,0,${(0.20 + edgeSwipeProgress * 0.22).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.05).toFixed(3)})`,
-filter: `brightness(${(1 - edgeSwipeProgress * 0.02).toFixed(3)}) saturate(${(1 + edgeSwipeProgress * 0.04).toFixed(3)})`
+boxShadow: "-18px 0 36px rgba(0,0,0,0.26)"
 } : {};
 const previewHubStyle = interactiveBackPreview ? {
 display: "block",
@@ -3628,11 +3697,10 @@ position: "absolute",
 inset: 0,
 minHeight: "100vh",
 zIndex: 0,
-transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
+transform: `translate3d(${(-12 + edgeSwipeProgress * 12).toFixed(2)}px, 0, 0) scale(${(0.985 + edgeSwipeProgress * 0.015).toFixed(4)})`,
 transformOrigin: "left center",
-opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
-filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
-transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
+opacity: Math.min(1, 0.92 + edgeSwipeProgress * 0.08),
+transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease",
 pointerEvents: "none"
 } : {
 display: currentView === VIEWS.HUB ? "block" : "none",
@@ -3641,15 +3709,6 @@ position: currentView === VIEWS.HUB ? "relative" : "absolute",
 inset: 0,
 zIndex: 0
 };
-const previewBackdropStyle = interactiveBackPreview ? {
-position: "absolute",
-inset: 0,
-zIndex: 1,
-pointerEvents: "none",
-background: `linear-gradient(90deg, rgba(13,13,26,${(0.18 + edgeSwipeProgress * 0.10).toFixed(3)}) 0%, rgba(13,13,26,${(0.04 + edgeSwipeProgress * 0.06).toFixed(3)}) 38%, rgba(13,13,26,0) 74%)`,
-opacity: Math.min(1, 0.55 + edgeSwipeProgress * 0.35),
-transition: edgeSwipeDragging ? "none" : "opacity 240ms ease, background 240ms ease"
-} : null;
 const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || interactiveBackPreview;
 
 return (
@@ -3664,7 +3723,6 @@ aria-hidden={currentView !== VIEWS.HUB}
 {HubView()}
 </div>
 )}
-{previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
 
 {currentView === VIEWS.LIBRARY && (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
