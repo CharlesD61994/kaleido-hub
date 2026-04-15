@@ -642,17 +642,25 @@ useEffect(() => {
       const vv = window.visualViewport;
       const viewportTop = vv ? vv.offsetTop : 0;
       const viewportHeight = vv ? vv.height : window.innerHeight;
+      const viewportWidth = vv ? vv.width : window.innerWidth;
       const cardHeight = cardRef.current?.offsetHeight || 0;
-      const sideMargin = 24;
+      const keyboardHeight = Math.max(0, window.innerHeight - viewportHeight - viewportTop);
+      const isKeyboardOpen = keyboardHeight > 120;
+      const topMargin = 24;
+      const bottomMargin = 16;
 
       if (!cardHeight) {
-        setCardTop(viewportTop + Math.max(sideMargin, viewportHeight * 0.18));
+        setCardTop(viewportTop + (isKeyboardOpen ? 40 : Math.max(topMargin, viewportHeight * 0.18)));
         return;
       }
 
-      const centeredTop = viewportTop + Math.max(sideMargin, (viewportHeight - cardHeight) / 2);
-      const maxAllowedTop = viewportTop + viewportHeight - cardHeight - sideMargin;
-      const resolvedTop = Math.max(sideMargin, Math.min(centeredTop, maxAllowedTop));
+      const centeredTop = viewportTop + Math.max(topMargin, (viewportHeight - cardHeight) / 2);
+      const bottomAnchoredTop = viewportTop + viewportHeight - cardHeight - bottomMargin;
+      const maxAllowedTop = viewportTop + viewportHeight - cardHeight - bottomMargin;
+
+      const resolvedTop = isKeyboardOpen
+        ? Math.max(topMargin, Math.min(bottomAnchoredTop, maxAllowedTop))
+        : Math.max(topMargin, Math.min(centeredTop, maxAllowedTop));
 
       setCardTop(resolvedTop);
     });
