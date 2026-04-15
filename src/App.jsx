@@ -91,11 +91,6 @@ const getViewMotionStyle = (transitionName) => {
   return { animation: 'none' };
 };
 
-const canUseHaptics = () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
-const hapticTap = () => { if (canUseHaptics()) navigator.vibrate(8); };
-const hapticLight = () => { if (canUseHaptics()) navigator.vibrate(10); };
-const hapticMedium = () => { if (canUseHaptics()) navigator.vibrate(18); };
-
 const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
 const common = {
 width: size,
@@ -329,6 +324,17 @@ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
 </div>
 );
 };
+
+const triggerHaptic = (ms = 10) => {
+  try {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      navigator.vibrate(ms);
+    }
+  } catch (e) {}
+};
+const hapticTap = () => triggerHaptic(8);
+const hapticLight = () => triggerHaptic(12);
+const hapticMedium = () => triggerHaptic(18);
 
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
@@ -594,7 +600,7 @@ return (
 { icon: <Icon name="edit" size={21} color="#E2E0DC" />, label: "Renommer", action: onRename },
 { icon: <Icon name="image" size={21} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
 ].map(item => (
-<button key={item.label} onClick={item.action} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+<button key={item.label} onClick={() => { hapticTap(); item.action(); }} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#E2E0DC", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
 <span>{item.icon}</span><span>{item.label}</span>
 </button>
 ))}
@@ -611,7 +617,7 @@ style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradien
 ))}
 </div>
 )}
-<button onClick={onDelete} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
+<button onClick={() => { hapticMedium(); onDelete(); }} style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "12px 16px", background: "none", border: "none", cursor: "pointer", color: "#F87171", fontSize: 14, fontFamily: "'DM Sans', sans-serif", textAlign: "left" }}>
 <span><Icon name="trash" size={21} color="#F87171" /></span><span>Supprimer</span>
 </button>
 </div>
@@ -717,7 +723,7 @@ return (
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
 <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end", flexWrap: "wrap" }}>
 <button onClick={() => { hapticTap(); onClose(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
-<button onClick={() => { hapticTap(); onConfirm(val); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
+<button onClick={() => { hapticLight(); onConfirm(val); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
 </div>
 </div>
 </div>
@@ -1311,7 +1317,7 @@ currentRangIdRef.current = liveNext.globalId;
 currentIndexRef.current = liveIndex + 1;
 setCurrentRangId(liveNext.globalId);
 if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex + 2).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
-hapticLight();
+if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmNextPartie = () => {
@@ -1326,7 +1332,7 @@ if (targetGlobalId) {
 }
 setShowNextPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
-hapticMedium();
+if (navigator.vibrate) navigator.vibrate(20);
 };
 const prevRang = () => {
 const liveIndex = currentIndexRef.current;
@@ -1341,7 +1347,7 @@ currentRangIdRef.current = livePrev.globalId;
 currentIndexRef.current = liveIndex - 1;
 setCurrentRangId(livePrev.globalId);
 if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
-hapticLight();
+if (navigator.vibrate) navigator.vibrate(15);
 }
 };
 const confirmPrevPartie = () => {
@@ -1355,7 +1361,7 @@ if (target) {
 }
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
-hapticMedium();
+if (navigator.vibrate) navigator.vibrate(20);
 };
 const goToPartie = (partieId) => {
 const targetGlobalId = getPartieFirstCountableGlobalId(partieId);
@@ -2715,9 +2721,9 @@ useEffect(() => {
       return;
     }
 
-    hapticMedium();
     consumed = true;
     tracking = false;
+    hapticMedium();
     setEdgeSwipeDragging(false);
     setEdgeSwipeProgress(1);
 
@@ -3609,11 +3615,12 @@ const viewWrapStyle = (trans) => getViewMotionStyle(trans);
 const interactiveBackPreview = edgeSwipeActive && currentView !== VIEWS.HUB;
 const activeScreenInteractiveStyle = interactiveBackPreview ? {
 transform: `translate3d(${(edgeSwipeProgress * 100).toFixed(3)}vw, 0, 0)`,
-transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
-willChange: "transform",
+transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, filter 240ms ease",
+willChange: "transform, box-shadow, filter",
 position: "relative",
 zIndex: 2,
-boxShadow: `-24px 0 48px rgba(0,0,0,${(0.12 + edgeSwipeProgress * 0.20).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.04).toFixed(3)})`
+boxShadow: `-30px 0 60px rgba(0,0,0,${(0.20 + edgeSwipeProgress * 0.22).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.05).toFixed(3)})`,
+filter: `brightness(${(1 - edgeSwipeProgress * 0.02).toFixed(3)}) saturate(${(1 + edgeSwipeProgress * 0.04).toFixed(3)})`
 } : {};
 const previewHubStyle = interactiveBackPreview ? {
 display: "block",
@@ -3621,11 +3628,11 @@ position: "absolute",
 inset: 0,
 minHeight: "100vh",
 zIndex: 0,
-transform: `translate3d(${(-14 + edgeSwipeProgress * 14).toFixed(2)}px, 0, 0) scale(${(0.972 + edgeSwipeProgress * 0.028).toFixed(4)})`,
+transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
 transformOrigin: "left center",
-opacity: Math.min(1, 0.88 + edgeSwipeProgress * 0.12),
-filter: `brightness(${(0.94 + edgeSwipeProgress * 0.06).toFixed(3)})`,
-transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, filter 220ms ease",
+opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
+filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
+transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
 pointerEvents: "none"
 } : {
 display: currentView === VIEWS.HUB ? "block" : "none",
@@ -3634,6 +3641,15 @@ position: currentView === VIEWS.HUB ? "relative" : "absolute",
 inset: 0,
 zIndex: 0
 };
+const previewBackdropStyle = interactiveBackPreview ? {
+position: "absolute",
+inset: 0,
+zIndex: 1,
+pointerEvents: "none",
+background: `linear-gradient(90deg, rgba(13,13,26,${(0.18 + edgeSwipeProgress * 0.10).toFixed(3)}) 0%, rgba(13,13,26,${(0.04 + edgeSwipeProgress * 0.06).toFixed(3)}) 38%, rgba(13,13,26,0) 74%)`,
+opacity: Math.min(1, 0.55 + edgeSwipeProgress * 0.35),
+transition: edgeSwipeDragging ? "none" : "opacity 240ms ease, background 240ms ease"
+} : null;
 const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || interactiveBackPreview;
 
 return (
@@ -3648,6 +3664,7 @@ aria-hidden={currentView !== VIEWS.HUB}
 {HubView()}
 </div>
 )}
+{previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
 
 {currentView === VIEWS.LIBRARY && (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
