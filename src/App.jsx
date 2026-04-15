@@ -2661,8 +2661,8 @@ useEffect(() => {
 
   const EDGE_ZONE = 22;
   const LOCK_DX = 12;
-  const LOCK_DY = 18;
-  const MAX_DY = 46;
+  const LOCK_DY = 24;
+  const MAX_DY = 64;
   const COMPLETE_THRESHOLD = 0.56;
 
   const isInteractiveTarget = (target) => {
@@ -2726,7 +2726,7 @@ useEffect(() => {
         gestureLocked = true;
         setEdgeSwipeActive(true);
         setEdgeSwipeDragging(true);
-      } else if (dy > LOCK_DY && dy > dx * 1.15) {
+      } else if (dy > LOCK_DY && dy > dx * 1.45) {
         tracking = false;
         resetPreview(false);
         return;
@@ -2737,7 +2737,7 @@ useEffect(() => {
 
     e.preventDefault();
 
-    if (dy > 72) {
+    if (dy > 92) {
       tracking = false;
       resetPreview(true);
       return;
