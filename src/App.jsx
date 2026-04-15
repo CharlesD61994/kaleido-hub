@@ -3772,20 +3772,28 @@ zIndex: 0
 };
 const previewLibraryStyle = previewUsesLibrary ? {
 display: "block",
-position: "absolute",
-inset: 0,
+position: "fixed",
+left: 0,
+top: 0,
+right: 0,
+bottom: 0,
+height: "100vh",
 minHeight: "100vh",
 zIndex: 0,
-transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
-transformOrigin: "left center",
-opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
-filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
-transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
+overflow: "hidden",
+transform: "translate3d(0, 0, 0)",
+transformOrigin: "left top",
+opacity: 1,
+transition: "none",
 pointerEvents: "none"
 } : {
 display: "none",
-position: "absolute",
-inset: 0,
+position: "fixed",
+left: 0,
+top: 0,
+right: 0,
+bottom: 0,
+height: "100vh",
 minHeight: "100vh",
 zIndex: 0
 };
@@ -3818,20 +3826,34 @@ aria-hidden={currentView !== VIEWS.HUB}
 style={previewLibraryStyle}
 aria-hidden="true"
 >
-<LibraryView
-database={database}
-onNavigateHub={navigateToHub}
-onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
-onNewCustomPatron={handleNewCustomPatron}
-onNewPdfPatron={handleNewPdfPatron}
-onDeletePatron={(id) => { deletePatronFromDB(id); }}
-onRenamePatron={(id, name) => updatePatron(id, { name })}
-onChangePatronColor={(id, idx) => updatePatron(id, { colorIdx: idx })}
-onUpdatePatron={(id, updates) => updatePatron(id, updates)}
-onChangePatronPhoto={(id) => setPhotoTarget({ id, context: "patron" })}
-editingPdfPatron={null}
-setEditingPdfPatron={() => {}}
-/>
+  <div
+    style={{
+      position: "absolute",
+      inset: 0,
+      minHeight: "100vh",
+      transform: `translate3d(${(-26 + edgeSwipeProgress * 26).toFixed(2)}px, 0, 0) scale(${(0.95 + edgeSwipeProgress * 0.05).toFixed(4)})`,
+      transformOrigin: "left top",
+      opacity: Math.min(1, 0.78 + edgeSwipeProgress * 0.22),
+      filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${(0.90 + edgeSwipeProgress * 0.10).toFixed(3)}) blur(${(8 - edgeSwipeProgress * 8).toFixed(2)}px)`,
+      transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
+      willChange: "transform, opacity, filter"
+    }}
+  >
+    <LibraryView
+    database={database}
+    onNavigateHub={navigateToHub}
+    onEditPatron={(patron) => { setCurrentPatron(patron); setCurrentView(VIEWS.PATRON_EDITOR); }}
+    onNewCustomPatron={handleNewCustomPatron}
+    onNewPdfPatron={handleNewPdfPatron}
+    onDeletePatron={(id) => { deletePatronFromDB(id); }}
+    onRenamePatron={(id, name) => updatePatron(id, { name })}
+    onChangePatronColor={(id, idx) => updatePatron(id, { colorIdx: idx })}
+    onUpdatePatron={(id, updates) => updatePatron(id, updates)}
+    onChangePatronPhoto={(id) => setPhotoTarget({ id, context: "patron" })}
+    editingPdfPatron={null}
+    setEditingPdfPatron={() => {}}
+    />
+  </div>
 </div>
 )}
 {previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
