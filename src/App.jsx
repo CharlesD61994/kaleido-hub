@@ -2751,6 +2751,8 @@ useEffect(() => {
   let tracking = false;
   let gestureLocked = false;
   let consumed = false;
+  let resetTimer = 0;
+  let completeTimer = 0;
 
   const EDGE_ZONE = 22;
   const LOCK_DX = 12;
@@ -2780,32 +2782,58 @@ useEffect(() => {
     }) || null;
   };
 
+  const runFallbackBack = () => {
+    if (currentView === VIEWS.PATRON_EDITOR) {
+      navigateToLibrary();
+      return true;
+    }
+    if (currentView === VIEWS.ROW_COUNTER || currentView === VIEWS.PDF_VIEWER) {
+      navigateToHub();
+      return true;
+    }
+    if (currentView === VIEWS.LIBRARY) {
+      navigateToHub();
+      return true;
+    }
+    return false;
+  };
+
+  const hardResetPreview = () => {
+    window.clearTimeout(resetTimer);
+    window.clearTimeout(completeTimer);
+    setEdgeSwipeDragging(false);
+    setEdgeSwipeProgress(0);
+    setEdgeSwipeActive(false);
+  };
+
   const resetPreview = (animated = true) => {
+    window.clearTimeout(resetTimer);
+    window.clearTimeout(completeTimer);
     setEdgeSwipeDragging(false);
     setEdgeSwipeProgress(0);
     if (!animated) {
       setEdgeSwipeActive(false);
       return;
     }
-    window.setTimeout(() => {
+    resetTimer = window.setTimeout(() => {
       setEdgeSwipeActive(false);
     }, 220);
   };
 
   const completeBack = () => {
     const backButton = findVisibleBackButton();
-    if (!backButton) {
-      resetPreview(true);
-      return;
-    }
 
     consumed = true;
     tracking = false;
     setEdgeSwipeDragging(false);
     setEdgeSwipeProgress(1);
 
-    window.setTimeout(() => {
-      backButton.click();
+    completeTimer = window.setTimeout(() => {
+      if (backButton) {
+        backButton.click();
+      } else {
+        runFallbackBack();
+      }
       setEdgeSwipeActive(false);
       setEdgeSwipeProgress(0);
     }, 180);
@@ -2817,6 +2845,9 @@ useEffect(() => {
 
     const touch = e.touches[0];
     if (touch.clientX > EDGE_ZONE) return;
+
+    window.clearTimeout(resetTimer);
+    window.clearTimeout(completeTimer);
 
     startX = touch.clientX;
     startY = touch.clientY;
@@ -2882,7 +2913,7 @@ useEffect(() => {
     }
   };
 
-  const onTouchEnd = () => {
+  const finishGesture = () => {
     if (!gestureLocked) {
       tracking = false;
       consumed = false;
@@ -2909,14 +2940,17 @@ useEffect(() => {
 
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
-  window.addEventListener('touchend', onTouchEnd, { passive: true });
-  window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+  window.addEventListener('touchend', finishGesture, { passive: true });
+  window.addEventListener('touchcancel', finishGesture, { passive: true });
 
   return () => {
+    window.clearTimeout(resetTimer);
+    window.clearTimeout(completeTimer);
+    hardResetPreview();
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend', onTouchEnd);
-    window.removeEventListener('touchcancel', onTouchEnd);
+    window.removeEventListener('touchend', finishGesture);
+    window.removeEventListener('touchcancel', finishGesture);
   };
 }, [currentView]);
 
