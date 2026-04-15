@@ -898,47 +898,20 @@ const [tempMailles, setTempMailles] = useState(rang.mailles || "");
 const [isSwipedOpen, setIsSwipedOpen] = useState(false);
 const [swipeStartX, setSwipeStartX] = useState(0);
 const [swipeCurrentX, setSwipeCurrentX] = useState(0);
-const [dragX, setDragX] = useState(0);
-const [isDraggingSwipe, setIsDraggingSwipe] = useState(false);
 const isNote = rang.isNote === true;
 const handleSave = (e) => { e.preventDefault(); e.stopPropagation(); onUpdate(rang.id, { instruction: tempInstruction, mailles: tempMailles ? parseInt(tempMailles) : null }); setIsEditing(false); };
 const handleCancel = (e) => { e.preventDefault(); e.stopPropagation(); setTempInstruction(rang.instruction); setTempMailles(rang.mailles || ""); setIsEditing(false); };
 const handleEditClick = (e) => { if (isEditing || isSwipedOpen) return; e.preventDefault(); e.stopPropagation(); setIsEditing(true); };
-const handleActionClick = (e, action) => { e.preventDefault(); e.stopPropagation(); setIsSwipedOpen(false); setDragX(0); action(); };
-const getSwipePreview = (delta, maxOpen) => {
-  const clamped = Math.max(0, delta);
-  if (clamped <= 12) return clamped * 0.18;
-  if (clamped <= 28) return 2.2 + (clamped - 12) * 0.36;
-  if (clamped <= 80) return 8 + (clamped - 28) * 0.72;
-  return Math.min(maxOpen, 45.44 + (clamped - 80) * 0.32);
-};
-const startSwipe = (clientX) => {
-  setSwipeStartX(clientX);
-  setSwipeCurrentX(clientX);
-  setIsDraggingSwipe(true);
-};
-const moveSwipe = (clientX, maxOpen) => {
-  setSwipeCurrentX(clientX);
-  const delta = swipeStartX - clientX;
-  setDragX(Math.min(maxOpen, getSwipePreview(delta, maxOpen)));
-};
-const endSwipe = (maxOpen) => {
-  const shouldOpen = dragX > 44 || (swipeStartX - swipeCurrentX) > 62;
-  setIsDraggingSwipe(false);
-  setIsSwipedOpen(shouldOpen);
-  setDragX(shouldOpen ? maxOpen : 0);
-};
+const handleActionClick = (e, action) => { e.preventDefault(); e.stopPropagation(); setIsSwipedOpen(false); action(); };
 // Carte note/texte
 if (isNote) {
-const noteOffset = isDraggingSwipe ? dragX : (isSwipedOpen ? 80 : 0);
 return (
-<div onTouchStart={e => { if (isEditing) return; startSwipe(e.touches[0].clientX); }}
-onTouchMove={e => { if (isEditing || !isDraggingSwipe) return; moveSwipe(e.touches[0].clientX, 80); }}
-onTouchEnd={() => { if (isEditing) return; endSwipe(80); }}
-onTouchCancel={() => { setIsDraggingSwipe(false); setDragX(isSwipedOpen ? 80 : 0); }}
-onClick={() => { if (isSwipedOpen && !isEditing) { setIsSwipedOpen(false); setDragX(0); } }}
+<div onTouchStart={e => { setSwipeStartX(e.touches[0].clientX); setSwipeCurrentX(e.touches[0].clientX); }}
+onTouchMove={e => setSwipeCurrentX(e.touches[0].clientX)}
+onTouchEnd={() => { const d = swipeStartX - swipeCurrentX; if (d > 50) setIsSwipedOpen(true); else if (d < -50) setIsSwipedOpen(false); }}
+onClick={() => { if (isSwipedOpen) setIsSwipedOpen(false); }}
 style={{ background: "#1A1A2E", border: "1px dashed #D9770644", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
-<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: `translateX(-${noteOffset}px)`, transition: isDraggingSwipe ? "none" : "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)" }}>
+<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-80px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
 <div style={{ background: "#D9770622", borderRadius: 8, padding: "8px 10px", flexShrink: 0 }}>
 <Icon name="note" size={16} color="#FCD34D" />
 </div>
@@ -972,15 +945,13 @@ style={{ width: "100%", background: "#0D0D1A", border: "1px solid #D9770644", bo
 );
 }
 // Carte rang normal
-const rowOffset = isDraggingSwipe ? dragX : (isSwipedOpen ? 76 : 0);
 return (
-<div onTouchStart={e => { if (!isEditing) startSwipe(e.touches[0].clientX); }}
-onTouchMove={e => { if (!isEditing && isDraggingSwipe) moveSwipe(e.touches[0].clientX, 76); }}
-onTouchEnd={() => { if (!isEditing) endSwipe(76); }}
-onTouchCancel={() => { setIsDraggingSwipe(false); setDragX(isSwipedOpen ? 76 : 0); }}
-onClick={() => { if (isSwipedOpen && !isEditing) { setIsSwipedOpen(false); setDragX(0); } }}
+<div onTouchStart={e => { if (!isEditing) { setSwipeStartX(e.touches[0].clientX); setSwipeCurrentX(e.touches[0].clientX); } }}
+onTouchMove={e => { if (!isEditing) setSwipeCurrentX(e.touches[0].clientX); }}
+onTouchEnd={() => { if (!isEditing) { const d = swipeStartX - swipeCurrentX; if (d > 50) setIsSwipedOpen(true); else if (d < -50) setIsSwipedOpen(false); } }}
+onClick={() => { if (isSwipedOpen && !isEditing) setIsSwipedOpen(false); }}
 style={{ background: "#13131F", border: isSwipedOpen ? "1px solid #7C3AED44" : "1px solid #ffffff0A", borderRadius: 12, padding: 12, marginBottom: 8, position: "relative", overflow: "hidden" }}>
-<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: `translateX(-${rowOffset}px)`, transition: isDraggingSwipe ? "none" : "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)" }}>
+<div style={{ display: "flex", alignItems: "flex-start", gap: 12, transform: isSwipedOpen ? "translateX(-76px)" : "translateX(0)", transition: "transform 0.3s ease" }}>
 <div style={{ background: "#7C3AED22", borderRadius: 8, padding: "8px 12px", minWidth: 40, textAlign: "center", flexShrink: 0 }}>
 <span style={{ color: "#A78BFA", fontFamily: "monospace", fontSize: 14, fontWeight: 700 }}>{rangIndex + 1}</span>
 </div>
@@ -2680,6 +2651,14 @@ useEffect(() => {
   let startY = 0;
   let tracking = false;
   let consumed = false;
+  let previewing = false;
+  let activeScreen = null;
+  let rafId = 0;
+
+  const PREVIEW_DEAD_ZONE = 6;
+  const PREVIEW_MAX = 22;
+  const TRIGGER_DX = 78;
+  const MAX_DY = 34;
 
   const isInteractiveTarget = (target) => {
     if (!(target instanceof Element)) return false;
@@ -2701,17 +2680,54 @@ useEffect(() => {
     }) || null;
   };
 
+  const findVisibleScreen = () => {
+    const screens = Array.from(document.querySelectorAll('[data-kaleido-screen="true"]'));
+    return screens.find((screen) => {
+      const style = window.getComputedStyle(screen);
+      const rect = screen.getBoundingClientRect();
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && rect.width > 0
+        && rect.height > 0;
+    }) || null;
+  };
+
+  const clearPreview = (withAnimation = true) => {
+    if (!activeScreen) return;
+    activeScreen.style.willChange = '';
+    activeScreen.style.transition = withAnimation
+      ? 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1)'
+      : 'none';
+    activeScreen.style.transform = 'translate3d(0px, 0, 0)';
+    previewing = false;
+    const screenToClean = activeScreen;
+    if (withAnimation) {
+      window.setTimeout(() => {
+        if (!screenToClean) return;
+        screenToClean.style.transition = '';
+      }, 240);
+    } else {
+      screenToClean.style.transition = '';
+    }
+  };
+
   const onTouchStart = (e) => {
     if (!e.touches || e.touches.length !== 1) return;
     if (isInteractiveTarget(e.target)) return;
 
     const touch = e.touches[0];
-    if (touch.clientX > 26) return;
+    if (touch.clientX > 24) return;
 
     startX = touch.clientX;
     startY = touch.clientY;
     tracking = true;
     consumed = false;
+    previewing = false;
+    activeScreen = findVisibleScreen();
+    if (activeScreen) {
+      activeScreen.style.willChange = 'transform';
+      activeScreen.style.transition = 'none';
+    }
   };
 
   const onTouchMove = (e) => {
@@ -2721,17 +2737,44 @@ useEffect(() => {
     const dx = touch.clientX - startX;
     const dy = Math.abs(touch.clientY - startY);
 
-    if (dx > 56 && dy < 42 && !consumed) {
+    if (dy > 54) {
+      tracking = false;
+      clearPreview(true);
+      return;
+    }
+
+    if (dx <= 0 || !activeScreen) return;
+
+    const previewDx = Math.max(0, dx - PREVIEW_DEAD_ZONE);
+    const resisted = previewDx < 18
+      ? previewDx * 0.22
+      : 18 * 0.22 + (previewDx - 18) * 0.12;
+    const previewOffset = Math.min(PREVIEW_MAX, resisted);
+
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      if (!activeScreen) return;
+      activeScreen.style.transform = `translate3d(${previewOffset}px, 0, 0)`;
+    });
+    previewing = previewOffset > 0;
+
+    if (dx > TRIGGER_DX && dy < MAX_DY && !consumed) {
       const backButton = findVisibleBackButton();
       if (backButton) {
         consumed = true;
         tracking = false;
-        backButton.click();
+        activeScreen.style.transition = 'transform 160ms cubic-bezier(0.22, 1, 0.36, 1)';
+        activeScreen.style.transform = 'translate3d(28px, 0, 0)';
+        window.setTimeout(() => {
+          backButton.click();
+        }, 35);
       }
     }
   };
 
   const onTouchEnd = () => {
+    cancelAnimationFrame(rafId);
+    if (!consumed) clearPreview(previewing);
     tracking = false;
     consumed = false;
   };
@@ -2742,6 +2785,8 @@ useEffect(() => {
   window.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
   return () => {
+    cancelAnimationFrame(rafId);
+    clearPreview(false);
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('touchend', onTouchEnd);
