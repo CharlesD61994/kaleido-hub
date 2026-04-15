@@ -2844,9 +2844,12 @@ useEffect(() => {
   };
 
   const onTouchStart = (e) => {
-    if (currentView === VIEWS.PATRON_EDITOR) return;
+    const forcedEdgeZone = e?.target instanceof Element
+      && Boolean(e.target.closest('[data-kaleido-edge-zone="true"]'));
+
+    if (currentView === VIEWS.PATRON_EDITOR && !forcedEdgeZone) return;
     if (!e.touches || e.touches.length !== 1) return;
-    if (isInteractiveTarget(e.target)) return;
+    if (!forcedEdgeZone && isInteractiveTarget(e.target)) return;
 
     const touch = e.touches[0];
     if (touch.clientX > EDGE_ZONE) return;
@@ -3886,6 +3889,7 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
 <div
   aria-hidden="true"
   data-kaleido-no-edge-back="true"
+  data-kaleido-edge-zone="true"
   style={{
     position: "fixed",
     left: 0,
