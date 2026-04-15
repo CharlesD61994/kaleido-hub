@@ -91,6 +91,11 @@ const getViewMotionStyle = (transitionName) => {
   return { animation: 'none' };
 };
 
+const canUseHaptics = () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
+const hapticTap = () => { if (canUseHaptics()) navigator.vibrate(8); };
+const hapticLight = () => { if (canUseHaptics()) navigator.vibrate(10); };
+const hapticMedium = () => { if (canUseHaptics()) navigator.vibrate(18); };
+
 const Icon = ({ name, size = 20, stroke = 1.9, color = "currentColor", style = {} }) => {
 const common = {
 width: size,
@@ -711,8 +716,8 @@ return (
 <input ref={inputRef} autoFocus value={val} onFocus={e => e.target.select()} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === "Enter" && onConfirm(val)}
 style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${color.light}44`, background: "#0D0D1A", color: "#F1F0EE", fontSize: 16, outline: "none", boxSizing: "border-box" }} />
 <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end", flexWrap: "wrap" }}>
-<button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
-<button onClick={() => onConfirm(val)} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
+<button onClick={() => { hapticTap(); onClose(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
+<button onClick={() => { hapticTap(); onConfirm(val); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Confirmer</button>
 </div>
 </div>
 </div>
@@ -728,8 +733,8 @@ return (
 <h3 style={{ color: "#F1F0EE", fontFamily: "'DM Sans', sans-serif", margin: "0 0 10px" }}>Supprimer "{project.name}" ?</h3>
 <p style={{ color: "#999", fontSize: 13, margin: "0 0 20px" }}>Cette action est irréversible.</p>
 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-<button onClick={onClose} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
-<button onClick={onConfirm} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "#EF4444", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Supprimer</button>
+<button onClick={() => { hapticTap(); onClose(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "none", color: "#999", cursor: "pointer", fontSize: 15 }}>Annuler</button>
+<button onClick={() => { hapticMedium(); onConfirm(); }} style={{ padding: "12px 20px", minHeight: 44, borderRadius: 12, border: "none", background: "#EF4444", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 15 }}>Supprimer</button>
 </div>
 </div>
 </div>
@@ -1306,7 +1311,7 @@ currentRangIdRef.current = liveNext.globalId;
 currentIndexRef.current = liveIndex + 1;
 setCurrentRangId(liveNext.globalId);
 if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex + 2).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
-if (navigator.vibrate) navigator.vibrate(15);
+hapticLight();
 }
 };
 const confirmNextPartie = () => {
@@ -1321,7 +1326,7 @@ if (targetGlobalId) {
 }
 setShowNextPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
-if (navigator.vibrate) navigator.vibrate(20);
+hapticMedium();
 };
 const prevRang = () => {
 const liveIndex = currentIndexRef.current;
@@ -1336,7 +1341,7 @@ currentRangIdRef.current = livePrev.globalId;
 currentIndexRef.current = liveIndex - 1;
 setCurrentRangId(livePrev.globalId);
 if (typeof onSaveProgress === "function") onSaveProgress(allRangs.slice(0, liveIndex).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
-if (navigator.vibrate) navigator.vibrate(15);
+hapticLight();
 }
 };
 const confirmPrevPartie = () => {
@@ -1350,7 +1355,7 @@ if (target) {
 }
 setShowPrevPartieModal(false);
 setCounters(prev => prev.map(c => ({ ...c, value: 1 })));
-if (navigator.vibrate) navigator.vibrate(20);
+hapticMedium();
 };
 const goToPartie = (partieId) => {
 const targetGlobalId = getPartieFirstCountableGlobalId(partieId);
@@ -2710,6 +2715,7 @@ useEffect(() => {
       return;
     }
 
+    hapticMedium();
     consumed = true;
     tracking = false;
     setEdgeSwipeDragging(false);
@@ -2760,6 +2766,7 @@ useEffect(() => {
     if (!gestureLocked) {
       if (dx > LOCK_DX && dy < LOCK_DY) {
         gestureLocked = true;
+        hapticLight();
         setEdgeSwipeActive(true);
         setEdgeSwipeDragging(true);
       } else if (dy > LOCK_DY && dy > dx * 2.2) {
@@ -3606,7 +3613,7 @@ transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 
 willChange: "transform",
 position: "relative",
 zIndex: 2,
-boxShadow: "-18px 0 36px rgba(0,0,0,0.26)"
+boxShadow: `-24px 0 48px rgba(0,0,0,${(0.12 + edgeSwipeProgress * 0.20).toFixed(3)}), 0 0 0 1px rgba(255,255,255,${(0.02 + edgeSwipeProgress * 0.04).toFixed(3)})`
 } : {};
 const previewHubStyle = interactiveBackPreview ? {
 display: "block",
@@ -3614,10 +3621,11 @@ position: "absolute",
 inset: 0,
 minHeight: "100vh",
 zIndex: 0,
-transform: `translate3d(${(-12 + edgeSwipeProgress * 12).toFixed(2)}px, 0, 0) scale(${(0.985 + edgeSwipeProgress * 0.015).toFixed(4)})`,
+transform: `translate3d(${(-14 + edgeSwipeProgress * 14).toFixed(2)}px, 0, 0) scale(${(0.972 + edgeSwipeProgress * 0.028).toFixed(4)})`,
 transformOrigin: "left center",
-opacity: Math.min(1, 0.92 + edgeSwipeProgress * 0.08),
-transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease",
+opacity: Math.min(1, 0.88 + edgeSwipeProgress * 0.12),
+filter: `brightness(${(0.94 + edgeSwipeProgress * 0.06).toFixed(3)})`,
+transition: edgeSwipeDragging ? "none" : "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease, filter 220ms ease",
 pointerEvents: "none"
 } : {
 display: currentView === VIEWS.HUB ? "block" : "none",
