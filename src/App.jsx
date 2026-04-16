@@ -3287,6 +3287,7 @@ addProjectToDB(newProject);
 setShowImportModal(false);
 }} />}
 </div>
+</div>
 );
 // ─── VUE PATRON EDITOR ────────────────────────────────────
 const PatronEditorView = () => {
