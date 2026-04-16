@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import AppPro from "./AppPro";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -2389,22 +2388,6 @@ export default function KaleidoHub() {
   const [currentPatron, setCurrentPatron] = useState(null);
   const [database, setDatabase] = useState(() => initDatabase());
   const [mode, setMode] = useState("personal");
-
-  const WorkspaceWrapper = ({ children }) => {
-    if (mode === "pro") {
-      return (
-        <AppPro
-          mode={mode}
-          projects={projects}
-          totalRangs={totalRangs}
-          termines={termines}
-        >
-          {children}
-        </AppPro>
-      );
-    }
-    return <>{children}</>;
-  };
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [exportData, setExportData] = useState('');
   const [showExportData, setShowExportData] = useState(false);
@@ -3017,7 +3000,6 @@ const HubView = () => (
 </button>
 ))}
 </div>
-<WorkspaceWrapper>
 {/* Stats */}
 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
 {[
@@ -3078,7 +3060,6 @@ setPhotoTarget(null);
 }}
 />
 )}
-</WorkspaceWrapper>
 {/* Modale import */}
 {showDataImportModal && (
 <div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
