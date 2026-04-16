@@ -1,6 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-
-const DB_KEY = "kaleido_database";
+import React, { useMemo } from "react";
 
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
@@ -12,31 +10,6 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#3B82F6", light: "#93C5FD" },
   { bg: "#EF4444", light: "#FCA5A5" },
 ];
-
-function safeParseJSON(value) {
-  try {
-    return value ? JSON.parse(value) : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-function canUseStorage() {
-  try {
-    return typeof window !== "undefined" && typeof localStorage !== "undefined";
-  } catch (e) {
-    return false;
-  }
-}
-
-function readDatabase() {
-  if (!canUseStorage()) return null;
-  return safeParseJSON(localStorage.getItem(DB_KEY));
-}
-
-function isValidProjectsPro(value) {
-  return Array.isArray(value);
-}
 
 function computeProgress(project) {
   if (!project || typeof project !== "object") return 0;
@@ -173,131 +146,59 @@ function ProCard({ project }) {
   );
 }
 
-export default function AppPro() {
-  const [database, setDatabase] = useState(null);
-
-  const reloadDatabase = () => {
-    setDatabase(readDatabase());
-  };
-
-  useEffect(() => {
-    reloadDatabase();
-
-    const onFocus = () => reloadDatabase();
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") reloadDatabase();
-    };
-
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, []);
-
+export default function AppPro({ database }) {
   const projectsPro = useMemo(() => {
-    if (!database || typeof database !== "object") return [];
-    return isValidProjectsPro(database.projectsPro) ? database.projectsPro : [];
+    if (!database || typeof database !== "object" || !Array.isArray(database.projectsPro)) {
+      return [];
+    }
+    return database.projectsPro;
   }, [database]);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#050514",
-        color: "white",
-        padding: "28px 20px 90px",
-        boxSizing: "border-box",
-        fontFamily: "'DM Sans', system-ui, sans-serif",
-      }}
-    >
-      <div style={{ marginBottom: 24 }}>
+    <>
+      <div style={{ marginBottom: 16 }}>
         <div
           style={{
-            fontSize: 42,
+            color: "#F6F3FF",
+            fontSize: 28,
             fontWeight: 800,
             lineHeight: 1,
             letterSpacing: "-0.04em",
-            marginBottom: 10,
+            marginBottom: 8,
           }}
         >
-          Module Professionnel
+          Professionnel
         </div>
         <div
           style={{
             color: "#B8B2C8",
-            fontSize: 15,
-            lineHeight: 1.45,
-            maxWidth: 560,
-          }}
-        >
-          Affichage des vrais projets professionnels enregistrés dans la base actuelle de l’app.
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          marginBottom: 18,
-          flexWrap: "wrap",
-        }}
-      >
-        <button
-          onClick={reloadDatabase}
-          style={{
-            padding: "12px 16px",
-            borderRadius: 14,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(255,255,255,0.05)",
-            color: "#F6F3FF",
             fontSize: 14,
-            fontWeight: 600,
-            cursor: "pointer",
+            lineHeight: 1.45,
           }}
         >
-          Recharger les projets pro
-        </button>
-
-        <div style={{ color: "#A59DB7", fontSize: 13 }}>
-          {projectsPro.length} projet{projectsPro.length > 1 ? "s" : ""} trouvé{projectsPro.length > 1 ? "s" : ""}
+          Projets professionnels enregistrés dans la base actuelle.
         </div>
       </div>
 
-      {!database ? (
-        <div
-          style={{
-            padding: 18,
-            borderRadius: 20,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.07)",
-            color: "#D5CFE5",
-          }}
-        >
-          Impossible de lire la base locale pour le moment.
-        </div>
-      ) : projectsPro.length === 0 ? (
-        <div
-          style={{
-            padding: 22,
-            borderRadius: 22,
-            background: "linear-gradient(180deg, rgba(26,26,46,0.96), rgba(20,20,36,0.96))",
-            border: "1px solid rgba(255,255,255,0.06)",
-            color: "#D7D0E7",
-          }}
-        >
-          Aucun projet professionnel enregistré dans la base actuelle.
-        </div>
-      ) : (
-        <div>
-          {projectsPro.map((project) => (
+      <div style={{ padding: "4px 0 100px" }}>
+        {projectsPro.length === 0 ? (
+          <div
+            style={{
+              padding: 22,
+              borderRadius: 22,
+              background: "linear-gradient(180deg, rgba(26,26,46,0.96), rgba(20,20,36,0.96))",
+              border: "1px solid rgba(255,255,255,0.06)",
+              color: "#D7D0E7",
+            }}
+          >
+            Aucun projet professionnel enregistré dans la base actuelle.
+          </div>
+        ) : (
+          projectsPro.map((project) => (
             <ProCard key={project.id || project.name} project={project} />
-          ))}
-        </div>
-      )}
-    </div>
+          ))
+        )}
+      </div>
+    </>
   );
 }
