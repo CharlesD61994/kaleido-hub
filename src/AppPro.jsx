@@ -1,9 +1,6 @@
 import React from "react";
+import AppPro from "./AppPro";
 
-export default function AppPro({ children, mode, projects, totalRangs, termines }) {
-  return (
-    <div data-kaleido-pro-root="true" style={{ position: "relative" }}>
-      {children}
-    </div>
-  );
+export default function App() {
+  return <AppPro />;
 }
