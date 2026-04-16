@@ -3031,7 +3031,6 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 <button key={f} onClick={() => setActiveFilter(f)} style={{ padding: "5px 12px", borderRadius: 9999, border: `1px solid ${activeFilter === f ? "#A78BFA" : "#333"}`, background: activeFilter === f ? "#7C3AED33" : "none", color: activeFilter === f ? "#A78BFA" : "#6B6A7A", fontSize: 11, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif" }}>{f}</button>
 ))}
 </div>
-</div>
 <div style={{ padding: "4px 10px 100px" }}>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 10, columnGap: 6, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
