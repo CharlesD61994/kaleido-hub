@@ -70,12 +70,17 @@ function getProjectSubtitle(project) {
   return parts.join(" • ");
 }
 
-function ProCard({ project }) {
+function ProCard({ project, onOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
 
+  const handleOpen = () => {
+    if (typeof onOpen === "function") onOpen(project);
+  };
+
   return (
-    <div
+    <button
+      onClick={handleOpen}
       style={{
         position: "relative",
         overflow: "hidden",
@@ -85,6 +90,9 @@ function ProCard({ project }) {
         background: "linear-gradient(180deg, rgba(26,26,46,0.96), rgba(20,20,36,0.96))",
         border: "1px solid rgba(255,255,255,0.06)",
         boxShadow: "0 12px 36px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.05)",
+        width: "100%",
+        textAlign: "left",
+        cursor: "pointer",
       }}
     >
       <div
@@ -175,11 +183,11 @@ function ProCard({ project }) {
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
-export default function AppPro({ database }) {
+export default function AppPro({ database, onProjectOpen }) {
   const [projectsPro, setProjectsPro] = useState(() => {
     const localDb = readLocalDatabase();
     return getProjectsFromDatabase(localDb).length > 0
@@ -228,11 +236,16 @@ export default function AppPro({ database }) {
       total: 1,
       colorIdx: currentProjectsPro.length % KALEIDOSCOPE_COLORS.length,
       image: null,
+      projectType: "custom",
       type: "crochet",
       laine: "",
       outil: "",
       notes: "",
       parties: [],
+      patronId: null,
+      linkMode: "detached",
+      status: "en_cours",
+      createdAt: new Date().toISOString(),
     };
 
     const nextDb = {
@@ -316,7 +329,13 @@ export default function AppPro({ database }) {
             Aucun projet professionnel enregistré dans la base actuelle.
           </div>
         ) : (
-          projectsPro.map((project) => <ProCard key={project.id || project.name} project={project} />)
+          projectsPro.map((project) => (
+            <ProCard
+              key={project.id || project.name}
+              project={project}
+              onOpen={onProjectOpen}
+            />
+          ))
         )}
       </div>
     </>
