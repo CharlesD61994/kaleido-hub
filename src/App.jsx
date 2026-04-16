@@ -3001,8 +3001,8 @@ const HubView = () => (
 </button>
 ))}
 </div>
-{{mode === "pro" ? (
-<AppPro database={database} />
+{mode === "pro" ? (
+  <AppPro database={database} />
 ) : (
 <>
 {/* Stats */}
