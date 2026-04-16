@@ -1,4 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+const DB_KEY = "kaleido_database";
 
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
@@ -10,6 +12,37 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#3B82F6", light: "#93C5FD" },
   { bg: "#EF4444", light: "#FCA5A5" },
 ];
+
+function safeParseJSON(value) {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function readLocalDatabase() {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") return null;
+  return safeParseJSON(localStorage.getItem(DB_KEY));
+}
+
+function writeLocalDatabase(nextDb) {
+  if (typeof window === "undefined" || typeof localStorage === "undefined") return false;
+  try {
+    localStorage.setItem(DB_KEY, JSON.stringify(nextDb));
+    return true;
+  } catch (e) {
+    console.warn("[Kaleido Pro] Impossible d'écrire la base locale:", e);
+    return false;
+  }
+}
+
+function getProjectsFromDatabase(database) {
+  if (!database || typeof database !== "object" || !Array.isArray(database.projectsPro)) {
+    return [];
+  }
+  return database.projectsPro;
+}
 
 function computeProgress(project) {
   if (!project || typeof project !== "object") return 0;
@@ -147,12 +180,78 @@ function ProCard({ project }) {
 }
 
 export default function AppPro({ database }) {
-  const projectsPro = useMemo(() => {
-    if (!database || typeof database !== "object" || !Array.isArray(database.projectsPro)) {
-      return [];
-    }
-    return database.projectsPro;
+  const [projectsPro, setProjectsPro] = useState(() => {
+    const localDb = readLocalDatabase();
+    return getProjectsFromDatabase(localDb).length > 0
+      ? getProjectsFromDatabase(localDb)
+      : getProjectsFromDatabase(database);
+  });
+
+  useEffect(() => {
+    const localDb = readLocalDatabase();
+    const nextProjects =
+      getProjectsFromDatabase(localDb).length > 0
+        ? getProjectsFromDatabase(localDb)
+        : getProjectsFromDatabase(database);
+
+    setProjectsPro(nextProjects);
   }, [database]);
+
+  const projectCountLabel = useMemo(() => {
+    return `${projectsPro.length} projet${projectsPro.length > 1 ? "s" : ""}`;
+  }, [projectsPro.length]);
+
+  const handleCreateProProject = () => {
+    const localDb = readLocalDatabase() || database;
+
+    if (!localDb || typeof localDb !== "object") {
+      alert("Impossible de lire la base locale pour créer un projet pro.");
+      return;
+    }
+
+    const currentProjectsPro = Array.isArray(localDb.projectsPro) ? localDb.projectsPro : [];
+    const currentSettings =
+      localDb.settings && typeof localDb.settings === "object"
+        ? localDb.settings
+        : { lastProjectId: 0, lastPatronId: 0 };
+
+    const nextId =
+      typeof currentSettings.lastProjectId === "number"
+        ? currentSettings.lastProjectId + 1
+        : currentProjectsPro.reduce((maxId, p) => Math.max(maxId, Number(p?.id) || 0), 0) + 1;
+
+    const nextProject = {
+      id: nextId,
+      name: `Projet pro ${nextId}`,
+      client: "",
+      rang: 0,
+      total: 1,
+      colorIdx: currentProjectsPro.length % KALEIDOSCOPE_COLORS.length,
+      image: null,
+      type: "crochet",
+      laine: "",
+      outil: "",
+      notes: "",
+      parties: [],
+    };
+
+    const nextDb = {
+      ...localDb,
+      projectsPro: [...currentProjectsPro, nextProject],
+      settings: {
+        ...currentSettings,
+        lastProjectId: nextId,
+      },
+    };
+
+    const ok = writeLocalDatabase(nextDb);
+    if (!ok) {
+      alert("Impossible d'enregistrer le projet pro.");
+      return;
+    }
+
+    setProjectsPro(nextDb.projectsPro);
+  };
 
   return (
     <>
@@ -174,9 +273,32 @@ export default function AppPro({ database }) {
             color: "#B8B2C8",
             fontSize: 14,
             lineHeight: 1.45,
+            marginBottom: 14,
           }}
         >
           Projets professionnels enregistrés dans la base actuelle.
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <button
+            onClick={handleCreateProProject}
+            style={{
+              padding: "12px 16px",
+              minHeight: 44,
+              borderRadius: 14,
+              border: "none",
+              background: "linear-gradient(135deg, #7C3AED, #DB2777)",
+              color: "#fff",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 8px 22px rgba(124,58,237,0.24)",
+            }}
+          >
+            Créer un projet pro
+          </button>
+
+          <div style={{ color: "#A79FB7", fontSize: 13 }}>{projectCountLabel}</div>
         </div>
       </div>
 
@@ -194,12 +316,9 @@ export default function AppPro({ database }) {
             Aucun projet professionnel enregistré dans la base actuelle.
           </div>
         ) : (
-          projectsPro.map((project) => (
-            <ProCard key={project.id || project.name} project={project} />
-          ))
+          projectsPro.map((project) => <ProCard key={project.id || project.name} project={project} />)
         )}
       </div>
     </>
   );
 }
-
