@@ -3990,4 +3990,3 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 </div>
 );
 }
-
