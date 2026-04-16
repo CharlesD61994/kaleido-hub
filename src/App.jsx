@@ -3002,7 +3002,16 @@ const HubView = () => (
 ))}
 </div>
 {mode === "pro" ? (
-  <AppPro database={database} />
+<AppPro
+  database={database}
+  onProjectOpen={(project) => {
+    if (project?.projectType === "pdf") {
+      navigateToPdfViewer(project);
+    } else {
+      navigateToRowCounter(project);
+    }
+  }}
+/>
 ) : (
 <>
 {/* Stats */}
