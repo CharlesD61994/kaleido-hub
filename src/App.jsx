@@ -3065,7 +3065,7 @@ setPhotoTarget(null);
 />
 )}
 </>
-)}{/* Modale import */
+)}{/* Modale import */}
 {showDataImportModal && (
 <div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 22, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
