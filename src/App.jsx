@@ -3003,7 +3003,51 @@ const HubView = () => (
 </div>
 {mode === "pro" ? (
 <AppPro
-  database={database}
+  projectsPro={database.projectsPro || []}
+  onCreateProProject={() => {
+    const currentProjectsPro = Array.isArray(database?.projectsPro) ? database.projectsPro : [];
+    const currentSettings =
+      database?.settings && typeof database.settings === "object"
+        ? database.settings
+        : { lastProjectId: 0, lastPatronId: 0 };
+
+    const nextId =
+      typeof currentSettings.lastProjectId === "number"
+        ? currentSettings.lastProjectId + 1
+        : currentProjectsPro.reduce((maxId, p) => Math.max(maxId, Number(p?.id) || 0), 0) + 1;
+
+    const nextProject = {
+      id: nextId,
+      name: `Projet pro ${nextId}`,
+      client: "",
+      rang: 0,
+      total: 1,
+      colorIdx: currentProjectsPro.length % 8,
+      image: null,
+      projectType: "custom",
+      type: "crochet",
+      laine: "",
+      outil: "",
+      notes: "",
+      parties: [],
+      patronId: null,
+      linkMode: "detached",
+      status: "en_cours",
+      createdAt: new Date().toISOString(),
+    };
+
+    const nextDb = {
+      ...database,
+      projectsPro: [...currentProjectsPro, nextProject],
+      settings: {
+        ...currentSettings,
+        lastProjectId: nextId,
+      },
+    };
+
+    setDatabase(nextDb);
+    saveToDatabase(nextDb);
+  }}
   onProjectOpen={(project) => {
     if (project?.projectType === "pdf") {
       navigateToPdfViewer(project);
