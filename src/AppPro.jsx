@@ -255,8 +255,8 @@ export default function AppPro({
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 108px)",
-                columnGap: 18,
-                rowGap: 28,
+                columnGap: 28,
+                rowGap: 36,
                 justifyItems: "center",
                 alignItems: "start",
                 width: "max-content",
