@@ -255,6 +255,9 @@ export default function AppPro({
               justifyItems: "center",
               alignItems: "start",
               padding: "0 16px",
+              justifyContent: "center",
+              maxWidth: 420,
+              margin: "0 auto",
             }}
           >
             {projectsPro.map((project) => (
