@@ -250,18 +250,17 @@ export default function AppPro({
             Aucun projet professionnel enregistré dans la base actuelle.
           </div>
         ) : (
-          <div style={{ display: "flex", justifyContent: "flex-start" }}>
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, 108px)",
-                columnGap: 20,
+                columnGap: 18,
                 rowGap: 28,
                 justifyItems: "center",
                 alignItems: "start",
-                width: "100%",
-                maxWidth: 364,
-                marginLeft: 12,
+                width: "max-content",
+                margin: "0 auto",
               }}
             >
               {projects.map((project) => (
@@ -298,4 +297,3 @@ export default function AppPro({
     </>
   );
 }
-
