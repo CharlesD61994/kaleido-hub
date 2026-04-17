@@ -3085,7 +3085,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 32, columnGap: 24, justifyItems: "center", alignItems: "start" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 40, columnGap: 32, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
