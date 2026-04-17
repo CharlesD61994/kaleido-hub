@@ -197,9 +197,13 @@ export default function AppPro({
   onProjectOpen,
   onCreateProProject,
 }) {
+  const projects = [...(projectsPro || [])]
+    .filter((p) => p && p.id != null)
+    .sort((a, b) => a.id - b.id);
+
   const projectCountLabel = useMemo(() => {
-    return `${projectsPro.length} projet${projectsPro.length > 1 ? "s" : ""}`;
-  }, [projectsPro.length]);
+    return `${projects.length} projet${projects.length > 1 ? "s" : ""}`;
+  }, [projects.length]);
 
   return (
     <>
@@ -233,7 +237,7 @@ export default function AppPro({
       </div>
 
       <div style={{ padding: "4px 10px 100px" }}>
-        {projectsPro.length === 0 ? (
+        {projects.length === 0 ? (
           <div
             style={{
               padding: 22,
@@ -260,7 +264,7 @@ export default function AppPro({
               margin: "0 auto",
             }}
           >
-            {projectsPro.map((project) => (
+            {projects.map((project) => (
               <div key={project.id || project.name}>
                 <ProBubble project={project} onOpen={onProjectOpen} />
               </div>
