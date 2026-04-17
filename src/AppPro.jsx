@@ -249,12 +249,12 @@ export default function AppPro({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, auto)",
+              gridTemplateColumns: "repeat(3, 1fr)",
               rowGap: 28,
-              columnGap: 28,
+              columnGap: 16,
               justifyItems: "center",
               alignItems: "start",
-              padding: "0 20px",
+              padding: "0 16px",
             }}
           >
             {projectsPro.map((project) => (
