@@ -250,23 +250,25 @@ export default function AppPro({
             Aucun projet professionnel enregistré dans la base actuelle.
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 108px))",
-              rowGap: 28,
-              columnGap: 20,
-              justifyContent: "center",
-              justifyItems: "center",
-              alignItems: "start",
-              padding: "0 12px",
-            }}
-          >
-            {projects.map((project) => (
-              <div key={project.id || project.name}>
-                <ProBubble project={project} onOpen={onProjectOpen} />
-              </div>
-            ))}
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 108px)",
+                columnGap: 20,
+                rowGap: 28,
+                justifyItems: "center",
+                alignItems: "start",
+                width: "100%",
+                maxWidth: 364,
+              }}
+            >
+              {projects.map((project) => (
+                <div key={project.id || project.name}>
+                  <ProBubble project={project} onOpen={onProjectOpen} />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
