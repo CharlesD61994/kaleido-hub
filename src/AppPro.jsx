@@ -192,7 +192,7 @@ function ProBubble({ project, onOpen }) {
   );
 }
 
-export default function AppPerso({
+export default function AppPro({
   projectsPro = [],
   onProjectOpen,
   onCreateProProject,
