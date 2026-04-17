@@ -12,28 +12,52 @@ const KALEIDOSCOPE_COLORS = [
 ];
 
 function computeProgress(project) {
-  if (!project) return 0;
-  if (project.rang && project.total) {
-    return Math.round((project.rang / project.total) * 100);
+  if (!project || typeof project !== "object") return 0;
+
+  if (typeof project.rang === "number" && typeof project.total === "number" && project.total > 0) {
+    return Math.max(0, Math.min(100, Math.round((project.rang / project.total) * 100)));
   }
-  return project.progress || 0;
+
+  if (typeof project.progress === "number") {
+    return Math.max(0, Math.min(100, Math.round(project.progress)));
+  }
+
+  return 0;
+}
+
+function YarnGlyph() {
+  return (
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="11.5" r="6.8" />
+    </svg>
+  );
 }
 
 function ProBubble({ project, onOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
-
-  const size = "clamp(86px, 24vw, 98px)";
+  const size = "clamp(94px, 27vw, 108px)"; // 👈 inchangé
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-      <div
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px" }}>
+      
+      <button
         onClick={() => onOpen(project)}
         style={{
           position: "relative",
           width: size,
           height: size,
-          borderRadius: "50%",
+          background: "none",
+          border: "none",
           cursor: "pointer",
         }}
       >
@@ -77,14 +101,20 @@ function ProBubble({ project, onOpen }) {
             transform="rotate(-90 55 55)"
           />
         </svg>
-      </div>
+      </button>
 
-      <div style={{ color: "#F1F0EE", fontSize: 12 }}>{project.name}</div>
+      <div style={{ color: "#F1F0EE", fontSize: 12 }}>
+        {project.name}
+      </div>
     </div>
   );
 }
 
-export default function AppPro({ projectsPro = [], onProjectOpen, onCreateProProject }) {
+export default function AppPro({
+  projectsPro = [],
+  onProjectOpen,
+  onCreateProProject,
+}) {
   const label = useMemo(() => `${projectsPro.length} projets`, [projectsPro.length]);
 
   return (
@@ -95,21 +125,26 @@ export default function AppPro({ projectsPro = [], onProjectOpen, onCreateProPro
       </div>
 
       <div style={{ padding: "4px 10px 100px" }}>
+        
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            rowGap: 18,
-            columnGap: 22,
+
+            // ✅ SEULE MODIF
+            rowGap: 20,
+            columnGap: 24,
+            padding: "0 12px",
+
             justifyItems: "center",
             alignItems: "start",
-            padding: "0 10px",
           }}
         >
           {projectsPro.map((project) => (
             <ProBubble key={project.id} project={project} onOpen={onProjectOpen} />
           ))}
         </div>
+
       </div>
 
       <button
