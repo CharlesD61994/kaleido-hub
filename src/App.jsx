@@ -551,13 +551,13 @@ return (
       onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
     >
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
-        <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
+        <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 ${bubbleLift}px ${16 + ringShadow}px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
           {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
-          <svg style={{ position: "absolute", top: -10, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
+          <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
             <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
             <circle cx="55" cy="55" r="51" fill="none" stroke={color.light} strokeWidth="5"
               strokeDasharray={2 * Math.PI * 51}
@@ -569,7 +569,7 @@ return (
       </div>
     </div>
     {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-      style={{ position: "absolute", top: isLibrary ? -6 : -8, right: isLibrary ? -6 : -8, transform: "translate(50%, -50%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", zIndex: 10 }}
+      style={{ position: "absolute", top: isLibrary ? -6 : -8, right: isLibrary ? -6 : -8, transform: "translate(25%, -25%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", zIndex: 10 }}
       onTouchStart={(e) => { e.stopPropagation(); e.currentTarget.style.transform = "translate(25%, -25%) scale(0.92)"; e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.30)"; e.currentTarget.style.filter = "brightness(1.04)"; }}
       onTouchEnd={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
       onTouchCancel={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
@@ -709,7 +709,7 @@ return (
     position: "fixed",
     top: cardTop ?? "18vh",
     left: "50%",
-    transform: "translate(50%, -50%)",
+    transform: "translateX(-50%)",
     width: "calc(100% - 40px)",
     maxWidth: 340
   }}
@@ -956,7 +956,7 @@ style={{ width: "100%", background: "#0D0D1A", border: "1px solid #D9770644", bo
 <button onClick={e => { e.stopPropagation(); onMoveDown(rang.id); }} disabled={isLast} style={{ background: isLast ? "#333" : "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: isLast ? "not-allowed" : "pointer" }}>↓</button>
 </div>
 </div>
-<div style={{ position: "absolute", top: -10, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
+<div style={{ position: "absolute", top: 12, right: isSwipedOpen ? 12 : -80, display: "flex", flexDirection: "column", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
 <button onClick={e => handleActionClick(e, () => onUpdate(rang.id, { isNote: false }))} style={{ background: "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11, cursor: "pointer" }}><Icon name="undo" size={16} color="#fff" /></button>
 <button onClick={e => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
 </div>
@@ -999,7 +999,7 @@ style={{ background: "#0D0D1A", border: "1px solid #A78BFA44", borderRadius: 8, 
 <button onClick={(e) => { e.stopPropagation(); onMoveDown(rang.id); }} disabled={isLast} style={{ background: isLast ? "#333" : "#7C3AED", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: isLast ? "not-allowed" : "pointer" }}>↓</button>
 </div>
 </div>
-<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translate(50%, -50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 72 }}>
+<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 8 : -80, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 72 }}>
 <button onClick={(e) => handleActionClick(e, () => onUpdate(rang.id, { isNote: true }))} style={{ background: "#D97706", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, cursor: "pointer" }}><Icon name="note" size={15} color="#fff" /></button>
 <button onClick={(e) => handleActionClick(e, () => onDuplicate(rang.id))} style={{ background: "#0891B2", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>⧉</button>
 <button onClick={(e) => handleActionClick(e, () => onDelete(rang.id))} style={{ background: "#DC2626", border: "none", borderRadius: 6, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, cursor: "pointer" }}>✗</button>
@@ -1045,7 +1045,7 @@ style={{ width: 24, height: 24, borderRadius: "50%", background: `linear-gradien
 {showColorPicker && (
 <>
 <div onClick={e => { e.stopPropagation(); setShowColorPicker(false); }} style={{ position: "fixed", inset: 0, zIndex: 50 }} />
-<div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: -10, left: 0, zIndex: 51, background: "#1A1A2E", border: `1px solid ${color.light}44`, borderRadius: 14, padding: 10, display: "flex", flexWrap: "wrap", gap: 8, width: 152, boxShadow: "0 8px 24px rgba(0,0,0,0.6)" }}>
+<div onClick={e => e.stopPropagation()} style={{ position: "absolute", top: 30, left: 0, zIndex: 51, background: "#1A1A2E", border: `1px solid ${color.light}44`, borderRadius: 14, padding: 10, display: "flex", flexWrap: "wrap", gap: 8, width: 152, boxShadow: "0 8px 24px rgba(0,0,0,0.6)" }}>
 {KALEIDOSCOPE_COLORS.map((c, i) => (
 <div key={i} onClick={() => { onUpdate(partie.id, { colorIdx: i }); setShowColorPicker(false); }}
 style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradient(135deg, ${c.bg}, ${c.light})`, cursor: "pointer", border: partie.colorIdx === i ? "3px solid #fff" : "2px solid transparent", boxSizing: "border-box" }} />
@@ -1152,7 +1152,7 @@ style={{ background: counter.syncWithGlobal ? "#333" : col.bg, border: "none", b
 {counter.syncWithGlobal && <div style={{ color: "#666", fontSize: 10, marginTop: 6, fontStyle: "italic" }}>Sync • Reset après {counter.maxRepeats || 4}</div>}
 </div>
 {/* Actions swipe — stopPropagation sur chaque bouton */}
-<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 6 : -95, transform: "translate(50%, -50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 85 }}>
+<div style={{ position: "absolute", top: "50%", right: isSwipedOpen ? 6 : -95, transform: "translateY(-50%)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4, transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, width: 85 }}>
 <button onClick={e => doAction(e, () => onUpdate({ syncWithGlobal: !counter.syncWithGlobal }))}
 style={{ background: counter.syncWithGlobal ? col.bg : "#666", border: "none", borderRadius: 6, padding: "4px 5px", color: "#fff", fontSize: 9, cursor: "pointer", fontWeight: 600, height: 28 }}>SYNC</button>
 {isEditingMax
@@ -1170,7 +1170,7 @@ style={{ background: "#059669", border: "none", borderRadius: 6, padding: "4px 5
 <button onClick={e => doAction(e, onDelete)}
 style={{ background: "#DC2626", border: "none", borderRadius: 6, padding: "4px 5px", color: "#fff", fontSize: 9, cursor: "pointer", fontWeight: 600, height: 28 }}>DEL</button>
 </div>
-{isSwipedOpen && <div style={{ position: "absolute", bottom: 6, right: -10, color: col.light, fontSize: 8, opacity: 0.7 }}>→</div>}
+{isSwipedOpen && <div style={{ position: "absolute", bottom: 6, right: 8, color: col.light, fontSize: 8, opacity: 0.7 }}>→</div>}
 </div>
 );
 }
@@ -1192,7 +1192,7 @@ style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 12, posi
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
 <div style={{ color: currentPartieColor.light, fontSize: 13, fontFamily: "'DM Sans', sans-serif", fontWeight: 700 }}>Global</div>
 <div key={`progress-${currentCountIndex}-${totalRangs}`} style={{ position: "relative", width: 95, height: 95, filter: `drop-shadow(0 0 10px ${currentPartieColor.bg}33)`, transformOrigin: "center", animation: "kaleidoProgressCleanPulse 340ms cubic-bezier(0.25, 0.9, 0.35, 1)" }}>
-<svg width="95" height="95" style={{ transform: "translate(50%, -50%)" }}>
+<svg width="95" height="95" style={{ transform: "rotate(-90deg)" }}>
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="rgba(255,255,255,0.1)" strokeWidth="4" fill="none" />
 <circle cx="47.5" cy="47.5" r={circ_r} stroke="url(#kg)" strokeWidth="4" fill="none"
 strokeDasharray={circ_c} strokeDashoffset={circ_c * (1 - Math.max(0, currentCountIndex + 1) / totalRangs)}
@@ -1207,7 +1207,7 @@ strokeLinecap="round" style={{
 <stop offset="100%" stopColor={currentPartieColor.light} />
 </linearGradient></defs>
 </svg>
-<div style={{ position: "absolute", top: -10, left:0, right: -10, bottom:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+<div style={{ position: "absolute", top:0, left:0, right:0, bottom:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
 <div style={{ color: "#F1F0EE", fontSize: 26, fontWeight: 700, fontFamily: "'Syne', sans-serif", lineHeight: 1 }}>{Math.max(0, currentCountIndex + 1)}</div>
 <div style={{ color: currentPartieColor.light, fontSize: 12, fontFamily: "monospace", marginTop: 3 }}>/ {totalRangs}</div>
 </div>
@@ -1226,11 +1226,11 @@ strokeLinecap="round" style={{
 </div>
 </div>
 {/* Bouton swipe */}
-<div style={{ position: "absolute", top: "50%", right: swiped ? 0 : -120, transform: "translate(50%, -50%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
+<div style={{ position: "absolute", top: "50%", right: swiped ? 0 : -120, transform: "translateY(-60%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10 }}>
 <button onClick={e => { e.stopPropagation(); onAddCounter(); setSwiped(false); }}
 style={{ background: "#059669", border: "none", borderRadius: 8, padding: "10px 14px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>+ Compteur</button>
 </div>
-{swiped && <div style={{ position: "absolute", bottom: 14, right: -10, color: currentPartieColor.light, fontSize: 8, opacity: 0.6 }}>→</div>}
+{swiped && <div style={{ position: "absolute", bottom: 14, right: 4, color: currentPartieColor.light, fontSize: 8, opacity: 0.6 }}>→</div>}
 </div>
 );
 }
@@ -1414,7 +1414,7 @@ return (
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-1px); }
 }`}</style>
-<div className="kgbg" style={{ position: "absolute", top: -10, left:0, right: -10, bottom:0 }} />
+<div className="kgbg" style={{ position: "absolute", top:0, left:0, right:0, bottom:0 }} />
 {Array.from({ length: 6 }).map((_, i) => (
 <div key={i} style={{ position: "absolute", top: `${20+i*15}%`, left: `${10+i*12}%`, width: 20, height: 20, borderRadius: "50%", background: `${currentPartieColor.light}22`, animation: `float ${3+i*0.5}s ease-in-out infinite`, animationDelay: `${i*0.3}s` }} />
 ))}
@@ -1777,7 +1777,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, width: 80, flexShrink: 0 }}>
           <div style={{ color: color.light, fontSize: 14, fontFamily: "'DM Sans', sans-serif", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2, fontWeight: 700 }}>Global</div>
           <div key={`pdf-progress-${rang}-${total}`} style={{ position: "relative", width: 64, height: 64, filter: `drop-shadow(0 0 10px ${color.bg}30)`, transformOrigin: "center", animation: "kaleidoProgressCleanPulse 320ms cubic-bezier(0.25, 0.9, 0.35, 1)" }}>
-            <svg width="64" height="64" style={{ transform: "translate(50%, -50%)" }}>
+            <svg width="64" height="64" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.08)" strokeWidth="3.5" fill="none" />
               <circle cx="32" cy="32" r="27" stroke="url(#pgc)" strokeWidth="3.5" fill="none"
                 strokeDasharray={2 * Math.PI * 27}
@@ -1818,7 +1818,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
               <div style={{ background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, width: `${pct}%`, height: "100%", transition: "width 260ms cubic-bezier(0.22, 1, 0.36, 1)" }} />
             </div>
           </>) : <div style={{ marginBottom: 16 }} />}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transform: "translate(50%, -50%)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transform: "translateX(-16px)" }}>
             <button onClick={decrementRang} style={{ width: 42, height: 42, borderRadius: "50%", background: `${color.bg}33`, border: `1.5px solid ${color.light}44`, color: color.light, fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
             <span style={{ color: "#F1F0EE", fontSize: 34, fontWeight: 700, fontFamily: "'Syne', sans-serif", minWidth: 44, textAlign: "center", lineHeight: 1 }}>{currentPartie ? rangDansPartie : rang}</span>
             <button onClick={incrementRang} style={{ width: 42, height: 42, borderRadius: "50%", background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, border: "none", color: "#fff", fontSize: 22, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 3px 10px ${color.bg}55` }}>+</button>
@@ -1826,13 +1826,13 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
         </div>
       </div>
       {/* Menu swipe */}
-      <div style={{ position: "absolute", top: "50%", right: swiped ? 10 : -110, transform: "translate(50%, -50%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ position: "absolute", top: "50%", right: swiped ? 10 : -110, transform: "translateY(-50%)", transition: "right 260ms cubic-bezier(0.22, 1, 0.36, 1)", zIndex: 10, display: "flex", flexDirection: "column", gap: 6 }}>
         <button onClick={e => { e.stopPropagation(); addCounter(); setSwiped(false); }}
           style={{ background: "#059669", border: "none", borderRadius: 8, padding: "8px 12px", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>+ Compteur</button>
         <button onClick={e => { e.stopPropagation(); resetRang(); setSwiped(false); }}
           style={{ background: "#DC2626", border: "none", borderRadius: 8, padding: "8px 12px", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>↺ Reset</button>
       </div>
-      {swiped && <div style={{ position: "absolute", bottom: 4, right: -10, color: color.light, fontSize: 8, opacity: 0.6 }}>→</div>}
+      {swiped && <div style={{ position: "absolute", bottom: 4, right: 8, color: color.light, fontSize: 8, opacity: 0.6 }}>→</div>}
     </div>
   );
 }
@@ -3085,7 +3085,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 56, columnGap: 48, justifyItems: "center", alignItems: "start" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 48, columnGap: 40, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
@@ -3702,7 +3702,7 @@ const moveRang = (partieId, rangId, dir) =>
 return (
   <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto" }}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} ::-webkit-scrollbar{width:0} *{-webkit-tap-highlight-color:transparent} input,textarea,select{font-size:16px!important}`}</style>
-    <div style={{ background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", padding: "44px 20px 20px", position: "sticky", top: -10, zIndex: 10 }}>
+    <div style={{ background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", padding: "44px 20px 20px", position: "sticky", top: 0, zIndex: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <button data-kaleido-back-button="true" onClick={isPatronMode ? navigateToLibrary : navigateToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
         {isEditingNom
@@ -3833,14 +3833,14 @@ const previewLibraryStyle = previewUsesLibrary ? {
 display: "block",
 position: "fixed",
 left: 0,
-top: -10,
-right: -10,
+top: 0,
+right: 0,
 bottom: 0,
 height: "100vh",
 minHeight: "100vh",
 zIndex: 0,
 overflow: "hidden",
-transform: "translate(50%, -50%)",
+transform: "translate3d(0, 0, 0)",
 transformOrigin: "left top",
 opacity: 1,
 transition: "none",
@@ -3849,8 +3849,8 @@ pointerEvents: "none"
 display: "none",
 position: "fixed",
 left: 0,
-top: -10,
-right: -10,
+top: 0,
+right: 0,
 bottom: 0,
 height: "100vh",
 minHeight: "100vh",
@@ -3976,7 +3976,7 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
   style={{
     position: "fixed",
     left: 0,
-    top: -10,
+    top: 0,
     bottom: 0,
     width: 28,
     zIndex: 9999,
