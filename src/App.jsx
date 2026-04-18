@@ -557,7 +557,7 @@ return (
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
-          <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
+          <svg style={{ position: "absolute", top: 4, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
             <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
             <circle cx="55" cy="55" r="51" fill="none" stroke={color.light} strokeWidth="5"
               strokeDasharray={2 * Math.PI * 51}
@@ -3085,7 +3085,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 48, columnGap: 40, justifyItems: "center", alignItems: "start" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 56, columnGap: 48, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
@@ -3702,7 +3702,7 @@ const moveRang = (partieId, rangId, dir) =>
 return (
   <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto" }}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} ::-webkit-scrollbar{width:0} *{-webkit-tap-highlight-color:transparent} input,textarea,select{font-size:16px!important}`}</style>
-    <div style={{ background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", padding: "44px 20px 20px", position: "sticky", top: 0, zIndex: 10 }}>
+    <div style={{ background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", padding: "44px 20px 20px", position: "sticky", top: 4, zIndex: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
         <button data-kaleido-back-button="true" onClick={isPatronMode ? navigateToLibrary : navigateToHub} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
         {isEditingNom
@@ -3833,8 +3833,8 @@ const previewLibraryStyle = previewUsesLibrary ? {
 display: "block",
 position: "fixed",
 left: 0,
-top: 0,
-right: 0,
+top: 4,
+right: 4,
 bottom: 0,
 height: "100vh",
 minHeight: "100vh",
@@ -3849,8 +3849,8 @@ pointerEvents: "none"
 display: "none",
 position: "fixed",
 left: 0,
-top: 0,
-right: 0,
+top: 4,
+right: 4,
 bottom: 0,
 height: "100vh",
 minHeight: "100vh",
@@ -3976,7 +3976,7 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
   style={{
     position: "fixed",
     left: 0,
-    top: 0,
+    top: 4,
     bottom: 0,
     width: 28,
     zIndex: 9999,
