@@ -423,85 +423,19 @@ console.warn("[KALEIDO] initDatabase error:", e);
 }
 return getDefaultDatabase();
 };
-const DB_STATE_IDB_NAME = 'kaleido_state';
-const DB_STATE_STORE_NAME = 'state';
-const DB_STATE_RECORD_ID = 'main';
-
-const _stateDb = (() => {
-let db = null;
-return () => new Promise((resolve, reject) => {
-if (db) { resolve(db); return; }
-try {
-  const req = indexedDB.open(DB_STATE_IDB_NAME, 1);
-  req.onupgradeneeded = e => {
-    const nextDb = e.target.result;
-    if (!nextDb.objectStoreNames.contains(DB_STATE_STORE_NAME)) {
-      nextDb.createObjectStore(DB_STATE_STORE_NAME, { keyPath: 'id' });
-    }
-  };
-  req.onsuccess = e => { db = e.target.result; resolve(db); };
-  req.onerror = () => reject(req.error);
-} catch (e) {
-  reject(e);
-}
-});
-})();
-
-const saveDatabaseToIndexedDB = async (data) => {
-try {
-if (typeof indexedDB === 'undefined' || !isValidDatabase(data)) return false;
-const db = await _stateDb();
-await new Promise((resolve, reject) => {
-  const tx = db.transaction(DB_STATE_STORE_NAME, 'readwrite');
-  tx.objectStore(DB_STATE_STORE_NAME).put({
-    id: DB_STATE_RECORD_ID,
-    data,
-    savedAt: new Date().toISOString(),
-  });
-  tx.oncomplete = resolve;
-  tx.onerror = () => reject(tx.error);
-});
-return true;
-} catch (e) {
-console.warn('[KALEIDO] saveDatabaseToIndexedDB error:', e);
-return false;
-}
-};
-
-const loadDatabaseFromIndexedDB = async () => {
-try {
-if (typeof indexedDB === 'undefined') return null;
-const db = await _stateDb();
-return await new Promise((resolve, reject) => {
-  const tx = db.transaction(DB_STATE_STORE_NAME, 'readonly');
-  const req = tx.objectStore(DB_STATE_STORE_NAME).get(DB_STATE_RECORD_ID);
-  req.onsuccess = () => {
-    const data = req.result?.data || null;
-    resolve(isValidDatabase(data) ? data : null);
-  };
-  req.onerror = () => reject(req.error);
-});
-} catch (e) {
-console.warn('[KALEIDO] loadDatabaseFromIndexedDB error:', e);
-return null;
-}
-};
-
 const saveToDatabase = (data) => {
 try {
+if (!canUseStorage()) return false;
 if (!isValidDatabase(data)) {
 console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
 return false;
 }
-if (canUseStorage()) {
-  const currentRaw = localStorage.getItem(DB_KEY);
-  if (currentRaw) {
-    const currentData = safeParseJSON(currentRaw);
-    if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
-  }
-  writeStorageJSON(DB_KEY, data);
+const currentRaw = localStorage.getItem(DB_KEY);
+if (currentRaw) {
+  const currentData = safeParseJSON(currentRaw);
+  if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
 }
-void saveDatabaseToIndexedDB(data);
+writeStorageJSON(DB_KEY, data);
 return true;
 } catch(e) {
 console.warn("[KALEIDO] saveToDatabase error:", e);
@@ -2458,7 +2392,6 @@ export default function KaleidoHub() {
   const [currentProject, setCurrentProject] = useState(null);
   const [currentPatron, setCurrentPatron] = useState(null);
   const [database, setDatabase] = useState(() => initDatabase());
-  const [databaseHydrated, setDatabaseHydrated] = useState(false);
   const [mode, setMode] = useState("personal");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [exportData, setExportData] = useState('');
@@ -2557,41 +2490,15 @@ export default function KaleidoHub() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const hydrateDatabase = async () => {
-      const persisted = await loadDatabaseFromIndexedDB();
-      if (cancelled) return;
-
-      if (isValidDatabase(persisted)) {
-        setDatabase(persisted);
-        databaseRef.current = persisted;
-      } else {
-        databaseRef.current = database;
-      }
-
-      setDatabaseHydrated(true);
-    };
-
-    hydrateDatabase();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
     databaseRef.current = database;
   }, [database]);
 
   useEffect(() => {
-    if (!databaseHydrated) return;
     saveToDatabase(database);
-  }, [database, databaseHydrated]);
+  }, [database]);
 
   useEffect(() => {
     const flushDatabase = () => {
-      if (!databaseHydrated) return;
       saveToDatabase(databaseRef.current);
     };
 
@@ -3182,7 +3089,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 16px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, max-content)", rowGap: 36, columnGap: 20, justifyContent: "center", justifyItems: "center", alignItems: "start", width: "100%" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, max-content)", rowGap: 36, columnGap: 14, justifyContent: "center", justifyItems: "center", alignItems: "start", width: "100%" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
