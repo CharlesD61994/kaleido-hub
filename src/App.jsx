@@ -532,14 +532,14 @@ function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isLibrary = mode === "library";
 const size = isLibrary ? "clamp(96px, 28vw, 110px)" : "clamp(94px, 27vw, 108px)";
-const progress = Math.min(project.total > 0 ? project.rang / project.total : 0, 1);
 const glowOpacity = isLibrary ? 0.2 : 0.42;
 const glowNear = isLibrary ? 8 : 10;
 const glowFar = isLibrary ? 16 : 22;
-const innerSize = isLibrary ? "82%" : "82%";
-const ringRadius = 46;
-const ringStroke = 7;
-const ringCircumference = 2 * Math.PI * ringRadius;
+const ringShadow = isLibrary ? 8 : 5;
+const bubbleLift = isLibrary ? 3 : 2;
+const progress = (typeof project?.rang === "number" && typeof project?.total === "number" && project.total > 0)
+  ? Math.max(0, Math.min(100, Math.round((project.rang / project.total) * 100)))
+  : (typeof project?.progress === "number" ? Math.max(0, Math.min(100, Math.round(project.progress))) : 0);
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "default" }}>
   <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
@@ -554,32 +554,21 @@ return (
       onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1) translateY(0)"; e.currentTarget.style.filter = "saturate(1.02)"; }}
     >
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
-        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}${Math.round(glowOpacity * 255).toString(16).padStart(2, "0")} 0%, ${color.bg}2a 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 ${glowNear}px ${color.bg}66, 0 0 ${glowFar}px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
-
-        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }} viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r={ringRadius} fill="none" stroke="rgba(8,8,20,0.96)" strokeWidth={ringStroke + 2.5} />
-          <circle cx="50" cy="50" r={ringRadius} fill="none" stroke={isLibrary ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.10)"} strokeWidth={ringStroke} />
-          {!isLibrary && (
-            <circle
-              cx="50"
-              cy="50"
-              r={ringRadius}
-              fill="none"
-              stroke={color.light}
-              strokeWidth={ringStroke}
-              strokeDasharray={ringCircumference}
-              strokeDashoffset={ringCircumference * (1 - progress)}
-              strokeLinecap="round"
-              transform="rotate(-90 50 50)"
-              style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 4px ${color.light})` }}
-            />
-          )}
-        </svg>
-
-        <div style={{ width: innerSize, height: innerSize, borderRadius: "50%", background: project.image ? "#11111D" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}cc)`, boxShadow: "0 0 0 2px rgba(10,10,24,0.92), 0 10px 22px rgba(0,0,0,0.22)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 2 }}>
-          {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
-          {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03) 34%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
+        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
+        <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
+          {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
+          {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
+        {!isLibrary && (
+          <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
+            <circle cx="55" cy="55" r="51" fill="none" stroke={color.light} strokeWidth="5"
+              strokeDasharray={2 * Math.PI * 51}
+              strokeDashoffset={2 * Math.PI * 51 * (1 - progress / 100)}
+              strokeLinecap="round" transform="rotate(-90 55 55)"
+              style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 4px ${color.light})` }} />
+          </svg>
+        )}
       </div>
     </div>
     {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
