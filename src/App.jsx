@@ -537,6 +537,12 @@ const glowNear = isLibrary ? 8 : 10;
 const glowFar = isLibrary ? 16 : 22;
 const ringShadow = isLibrary ? 8 : 5;
 const bubbleLift = isLibrary ? 3 : 2;
+const ringViewBox = 100;
+const ringCenter = 50;
+const ringRadius = 46;
+const ringStroke = 4.5;
+const ringCircumference = 2 * Math.PI * ringRadius;
+const ringProgress = Math.min(project.rang / project.total, 1);
 return (
 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "default" }}>
   <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
@@ -557,13 +563,43 @@ return (
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
-          <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }} viewBox="0 0 110 110">
-            <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
-            <circle cx="55" cy="55" r="51" fill="none" stroke={color.light} strokeWidth="5"
-              strokeDasharray={2 * Math.PI * 51}
-              strokeDashoffset={2 * Math.PI * 51 * (1 - Math.min(project.rang / project.total, 1))}
-              strokeLinecap="round" transform="rotate(-90 55 55)"
-              style={{ transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)", filter: `drop-shadow(0 0 4px ${color.light})` }} />
+          <svg
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              zIndex: 2,
+              overflow: "visible"
+            }}
+            viewBox={`0 0 ${ringViewBox} ${ringViewBox}`}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <circle
+              cx={ringCenter}
+              cy={ringCenter}
+              r={ringRadius}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={ringStroke}
+            />
+            <circle
+              cx={ringCenter}
+              cy={ringCenter}
+              r={ringRadius}
+              fill="none"
+              stroke={color.light}
+              strokeWidth={ringStroke}
+              strokeDasharray={ringCircumference}
+              strokeDashoffset={ringCircumference * (1 - ringProgress)}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${ringCenter} ${ringCenter})`}
+              style={{
+                transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
+                filter: `drop-shadow(0 0 4px ${color.light})`
+              }}
+            />
           </svg>
         )}
       </div>
