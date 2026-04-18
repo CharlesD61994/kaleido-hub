@@ -542,7 +542,7 @@ const progress = (typeof project?.rang === "number" && typeof project?.total ===
   ? Math.max(0, Math.min(100, Math.round((project.rang / project.total) * 100)))
   : (typeof project?.progress === "number" ? Math.max(0, Math.min(100, Math.round(project.progress))) : 0);
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 12px", cursor: "default" }}>
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "8px 4px 8px", cursor: "default" }}>
   <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
     <div
       style={{ position: "absolute", inset: 0, transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", filter: "saturate(1.02)" }}
@@ -2271,7 +2271,7 @@ function LibraryView({ database, onNavigateHub, onEditPatron, onNewCustomPatron,
         )}
       </div>
       {/* Bouton + */}
-      <div style={{ position: "fixed", bottom: 28, right: "calc(50% - 200px)", zIndex: 50 }}>
+      <div style={{ position: "fixed", bottom: 24, right: "calc(50% - 200px)", zIndex: 50 }}>
         <button onClick={() => setShowNewMenu(true)} style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #7C3AED, #EC4899)", border: "none", cursor: "pointer", fontSize: 28, color: "#fff", boxShadow: "0 4px 20px #7C3AED88", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
       </div>
       {/* Menu contextuel */}
@@ -3088,8 +3088,8 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 <button key={f} onClick={() => setActiveFilter(f)} style={{ padding: "5px 12px", borderRadius: 9999, border: `1px solid ${activeFilter === f ? "#A78BFA" : "#333"}`, background: activeFilter === f ? "#7C3AED33" : "none", color: activeFilter === f ? "#A78BFA" : "#6B6A7A", fontSize: 11, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif" }}>{f}</button>
 ))}
 </div>
-<div style={{ padding: "18px 16px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, max-content)", rowGap: 24, columnGap: 14, justifyContent: "center", justifyItems: "center", alignItems: "start", width: "100%" }}>
+<div style={{ padding: "18px 16px 116px" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, max-content)", rowGap: 16, columnGap: 14, justifyContent: "center", justifyItems: "center", alignItems: "start", width: "100%" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
