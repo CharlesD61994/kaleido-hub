@@ -3089,7 +3089,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", rowGap: 4, columnGap: 0, justifyItems: "center", alignItems: "start" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", rowGap: 44, columnGap: 34, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
