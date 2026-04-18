@@ -531,7 +531,8 @@ tx.oncomplete = resolve;
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isLibrary = mode === "library";
-const size = isLibrary ? "clamp(96px, 28vw, 110px)" : "clamp(94px, 27vw, 108px)";
+const libraryBubbleSize = "clamp(96px, 28vw, 110px)";
+const size = libraryBubbleSize;
 const glowOpacity = isLibrary ? 0.2 : 0.42;
 const glowNear = isLibrary ? 8 : 10;
 const glowFar = isLibrary ? 16 : 22;
@@ -541,7 +542,7 @@ const progress = (typeof project?.rang === "number" && typeof project?.total ===
   ? Math.max(0, Math.min(100, Math.round((project.rang / project.total) * 100)))
   : (typeof project?.progress === "number" ? Math.max(0, Math.min(100, Math.round(project.progress))) : 0);
 return (
-<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "10px 4px 14px", cursor: "default" }}>
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: isLibrary ? "12px 4px 14px" : "12px 4px 14px", cursor: "default" }}>
   <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
     <div
       style={{ position: "absolute", inset: 0, transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", filter: "saturate(1.02)" }}
@@ -572,7 +573,7 @@ return (
       </div>
     </div>
     {onMenuOpen && <button onClick={(e) => { e.stopPropagation(); onMenuOpen(project, e); }}
-      style={{ position: "absolute", top: isLibrary ? -6 : -8, right: isLibrary ? -6 : -8, transform: "translate(25%, -25%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", zIndex: 10 }}
+      style={{ position: "absolute", top: isLibrary ? -6 : -6, right: isLibrary ? -6 : -6, transform: "translate(25%, -25%)", width: 24, height: 24, borderRadius: "50%", background: `linear-gradient(135deg, ${color.light}, ${color.bg})`, border: "2.5px solid #0D0D1A", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontStyle: "italic", fontWeight: 700, color: "#fff", boxShadow: "0 6px 14px rgba(0,0,0,0.35)", animation: "infoBob 2.6s ease-in-out infinite", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease", zIndex: 10 }}
       onTouchStart={(e) => { e.stopPropagation(); e.currentTarget.style.transform = "translate(25%, -25%) scale(0.92)"; e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.30)"; e.currentTarget.style.filter = "brightness(1.04)"; }}
       onTouchEnd={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
       onTouchCancel={(e) => { e.currentTarget.style.transform = "translate(25%, -25%) scale(1)"; e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)"; e.currentTarget.style.filter = "brightness(1)"; }}
@@ -3088,7 +3089,7 @@ style={{ background: "none", border: "none", outline: "none", color: "#F1F0EE", 
 ))}
 </div>
 <div style={{ padding: "4px 10px 100px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", rowGap: 56, columnGap: 48, justifyItems: "center", alignItems: "start" }}>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", rowGap: 4, columnGap: 0, justifyItems: "center", alignItems: "start" }}>
 {filtered.map((project, idx) => (
 <div key={project.id}>
 <ProjectBubble project={project} onMenuOpen={handleMenuOpen} onProjectClick={p => p.projectType === "pdf" ? navigateToPdfViewer(p) : navigateToRowCounter(p)} mode={mode} />
