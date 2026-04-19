@@ -2723,6 +2723,26 @@ const handleMenuOpen = (project, e) => {
 const rect = e.currentTarget.getBoundingClientRect();
 setMenuPos({ x: rect.right, y: rect.bottom }); setMenuProject(project);
 };
+const updateProProject = (projectId, updates) => {
+setDatabase(prev => {
+  const nextDb = {
+    ...prev,
+    projectsPro: (prev.projectsPro || []).map(p => p.id === projectId ? { ...p, ...updates } : p)
+  };
+  saveToDatabase(nextDb);
+  return nextDb;
+});
+};
+const deleteProProjectFromDB = (projectId) => {
+setDatabase(prev => {
+  const nextDb = {
+    ...prev,
+    projectsPro: (prev.projectsPro || []).filter(p => p.id !== projectId)
+  };
+  saveToDatabase(nextDb);
+  return nextDb;
+});
+};
 const handleRename = (newName) => { updateProject(renameProject.id, { name: newName }); setRenameProject(null); };
 const handleDelete = () => { deleteProjectFromDB(deleteProject.id); setDeleteProject(null); };
 useEffect(() => {
@@ -3059,7 +3079,10 @@ const HubView = () => (
       navigateToRowCounter(project);
     }
   }}
-  onProjectMenuOpen={handleMenuOpen}
+  onRenameProProject={(projectId, newName) => updateProProject(projectId, { name: newName })}
+  onDeleteProProject={(projectId) => deleteProProjectFromDB(projectId)}
+  onChangeProProjectPhoto={(projectId, image) => updateProProject(projectId, { image })}
+  onChangeProProjectColor={(projectId, colorIdx) => updateProProject(projectId, { colorIdx })}
 />
 ) : (
 <>
