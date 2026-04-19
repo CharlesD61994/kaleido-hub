@@ -3059,6 +3059,7 @@ const HubView = () => (
       navigateToRowCounter(project);
     }
   }}
+  onProjectMenuOpen={handleMenuOpen}
 />
 ) : (
 <>
