@@ -48,7 +48,7 @@ function YarnGlyph() {
   );
 }
 
-function ProBubble({ project, onOpen }) {
+function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(94px, 27vw, 108px)";
@@ -150,6 +150,72 @@ function ProBubble({ project, onOpen }) {
             }}
           />
         </svg>
+
+        {typeof onMenuOpen === "function" ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onMenuOpen(project, e);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(0.92)";
+              e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.30)";
+              e.currentTarget.style.filter = "brightness(1.04)";
+            }}
+            onTouchEnd={(e) => {
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(1)";
+              e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)";
+              e.currentTarget.style.filter = "brightness(1)";
+            }}
+            onTouchCancel={(e) => {
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(1)";
+              e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)";
+              e.currentTarget.style.filter = "brightness(1)";
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(0.94)";
+              e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.30)";
+              e.currentTarget.style.filter = "brightness(1.04)";
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(1)";
+              e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)";
+              e.currentTarget.style.filter = "brightness(1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translate(12%, -20%) scale(1)";
+              e.currentTarget.style.boxShadow = "0 6px 14px rgba(0,0,0,0.35)";
+              e.currentTarget.style.filter = "brightness(1)";
+            }}
+            style={{
+              position: "absolute",
+              top: -6,
+              right: -6,
+              transform: "translate(12%, -20%)",
+              width: 24,
+              height: 24,
+              borderRadius: "50%",
+              background: `linear-gradient(135deg, ${color.light}, ${color.bg})`,
+              border: "2.5px solid #0D0D1A",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontStyle: "italic",
+              fontWeight: 700,
+              color: "#fff",
+              boxShadow: "0 6px 14px rgba(0,0,0,0.35)",
+              transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), filter 220ms ease",
+              zIndex: 10,
+              padding: 0,
+            }}
+          >
+            i
+          </button>
+        ) : null}
       </button>
 
       <button
@@ -196,6 +262,7 @@ export default function AppPro({
   projectsPro = [],
   onProjectOpen,
   onCreateProProject,
+  onProjectMenuOpen,
 }) {
   const projects = [...(projectsPro || [])]
     .filter((p) => p && p.id != null)
@@ -265,7 +332,7 @@ export default function AppPro({
             >
               {projects.map((project) => (
                 <div key={project.id || project.name}>
-                  <ProBubble project={project} onOpen={onProjectOpen} />
+                  <ProBubble project={project} onOpen={onProjectOpen} onMenuOpen={onProjectMenuOpen} />
                 </div>
               ))}
             </div>
