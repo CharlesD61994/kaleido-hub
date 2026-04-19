@@ -526,6 +526,60 @@ tx.oncomplete = resolve;
 } catch(e) {}
 };
 // ═══════════════════════════════════════════════════════════════
+// STOCKAGE IMAGES — IndexedDB
+// ═══════════════════════════════════════════════════════════════
+const _imageDb = (() => {
+let db = null;
+return () => new Promise((resolve, reject) => {
+if (db) { resolve(db); return; }
+const req = indexedDB.open('kaleido_images', 1);
+req.onupgradeneeded = e => e.target.result.createObjectStore('images', { keyPath: 'id' });
+req.onsuccess = e => { db = e.target.result; resolve(db); };
+req.onerror = () => reject(req.error);
+});
+})();
+const saveImage = async (id, data) => {
+try {
+const db = await _imageDb();
+await new Promise((resolve, reject) => {
+const tx = db.transaction('images', 'readwrite');
+tx.objectStore('images').put({ id, data });
+tx.oncomplete = resolve;
+tx.onerror = () => reject(tx.error);
+});
+return true;
+} catch(e) {
+console.error('saveImage error:', e);
+return false;
+}
+};
+const loadImage = async (id) => {
+try {
+if (!id) return null;
+const db = await _imageDb();
+return await new Promise((resolve, reject) => {
+const tx = db.transaction('images', 'readonly');
+const req = tx.objectStore('images').get(id);
+req.onsuccess = () => resolve(req.result?.data || null);
+req.onerror = () => reject(req.error);
+});
+} catch(e) {
+console.error('loadImage error:', e);
+return null;
+}
+};
+const deleteImage = async (id) => {
+try {
+const db = await _imageDb();
+await new Promise((resolve) => {
+const tx = db.transaction('images', 'readwrite');
+tx.objectStore('images').delete(id);
+tx.oncomplete = resolve;
+});
+} catch(e) {}
+};
+
+// ═══════════════════════════════════════════════════════════════
 // COMPOSANTS HUB
 // ═══════════════════════════════════════════════════════════════
 function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
@@ -533,6 +587,25 @@ const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length]
 const isLibrary = mode === "library";
 const libraryBubbleSize = "clamp(96px, 28vw, 110px)";
 const size = libraryBubbleSize;
+const [resolvedImage, setResolvedImage] = useState(project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null));
+
+useEffect(() => {
+let cancelled = false;
+const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+if (directImage) {
+  setResolvedImage(directImage);
+  return;
+}
+const imageId = project?.image?.imageId;
+if (!imageId) {
+  setResolvedImage(null);
+  return;
+}
+loadImage(imageId).then((data) => {
+  if (!cancelled) setResolvedImage(data || null);
+});
+return () => { cancelled = true; };
+}, [project?.image]);
 const glowOpacity = isLibrary ? 0.2 : 0.42;
 const glowNear = isLibrary ? 8 : 10;
 const glowFar = isLibrary ? 16 : 22;
@@ -557,7 +630,7 @@ return (
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
         <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
-          {project.image ? <img src={project.image?.preview || project.image?.src || project.image} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
+          {resolvedImage ? <img src={resolvedImage} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
@@ -762,7 +835,7 @@ return (
 // PHOTO CROP MODAL
 // ═══════════════════════════════════════════════════════════════
 function PhotoCropModal({ onClose, onConfirm, existingImage }) {
-const [imgSrc, setImgSrc] = useState(existingImage?.src || existingImage || null);
+const [imgSrc, setImgSrc] = useState(existingImage?.preview || existingImage?.src || existingImage || null);
 const [pos, setPos] = useState(existingImage?.pos || { x: 0, y: 0 });
 const [scale, setScale] = useState(existingImage?.scale || 1);
 const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
@@ -815,7 +888,7 @@ const handleConfirm = () => {
 if (!imgSrc) return;
 const img = new Image();
 img.onload = () => {
-const OUT = 300;
+const OUT = 220;
 const canvas = document.createElement('canvas');
 canvas.width = OUT; canvas.height = OUT;
 const ctx = canvas.getContext('2d');
@@ -2733,6 +2806,18 @@ setDatabase(prev => {
   return nextDb;
 });
 };
+const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "personal") => {
+  const imageId = `img_${scope}_${projectId}_${Date.now()}`;
+  const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
+  if (!imagePayload) return;
+  await saveImage(imageId, imagePayload);
+  const imageRef = { imageId, preview: imgData?.preview || imagePayload };
+  if (scope === "pro") {
+    updateProProject(projectId, { image: imageRef });
+  } else {
+    updateProject(projectId, { image: imageRef });
+  }
+};
 const deleteProProjectFromDB = (projectId) => {
 setDatabase(prev => {
   const nextDb = {
@@ -3081,7 +3166,7 @@ const HubView = () => (
   }}
   onRenameProProject={(projectId, newName) => updateProProject(projectId, { name: newName })}
   onDeleteProProject={(projectId) => deleteProProjectFromDB(projectId)}
-  onChangeProProjectPhoto={(projectId, image) => updateProProject(projectId, { image })}
+  onChangeProProjectPhoto={(projectId, image) => persistProjectImageToIndexedDB(projectId, image, "pro")}
   onChangeProProjectColor={(projectId, colorIdx) => updateProProject(projectId, { colorIdx })}
 />
 ) : (
@@ -3138,9 +3223,17 @@ existingImage={photoTarget.context === 'project'
 ? projects.find(p => p.id === photoTarget.id)?.image
 : (database.patrons||[]).find(p => p.id === photoTarget.id)?.image}
 onClose={() => setPhotoTarget(null)}
-onConfirm={(imgData) => {
-if (photoTarget.context === 'project') updateProject(photoTarget.id, { image: imgData });
-else updatePatron(photoTarget.id, { image: imgData });
+onConfirm={async (imgData) => {
+if (photoTarget.context === 'project') {
+  await persistProjectImageToIndexedDB(photoTarget.id, imgData, 'personal');
+} else {
+  const imageId = `img_patron_${photoTarget.id}_${Date.now()}`;
+  const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
+  if (imagePayload) {
+    await saveImage(imageId, imagePayload);
+    updatePatron(photoTarget.id, { image: { imageId, preview: imgData?.preview || imagePayload } });
+  }
+}
 setPhotoTarget(null);
 }}
 />
