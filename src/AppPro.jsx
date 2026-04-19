@@ -11,6 +11,33 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#EF4444", light: "#FCA5A5" },
 ];
 
+const _imageDb = (() => {
+  let db = null;
+  return () => new Promise((resolve, reject) => {
+    if (db) { resolve(db); return; }
+    const req = indexedDB.open('kaleido_images', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('images', { keyPath: 'id' });
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+})();
+
+const loadImage = async (id) => {
+  try {
+    if (!id) return null;
+    const db = await _imageDb();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction('images', 'readonly');
+      const req = tx.objectStore('images').get(id);
+      req.onsuccess = () => resolve(req.result?.data || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.error('loadImage error:', e);
+    return null;
+  }
+};
+
 function computeProgress(project) {
   if (!project || typeof project !== "object") return 0;
 
@@ -345,7 +372,7 @@ function DeleteModal({ project, onConfirm, onClose }) {
 }
 
 function PhotoCropModal({ onClose, onConfirm, existingImage }) {
-  const [imgSrc, setImgSrc] = useState(existingImage?.src || existingImage || null);
+  const [imgSrc, setImgSrc] = useState(existingImage?.src || existingImage?.preview || existingImage || null);
   const [pos, setPos] = useState(existingImage?.pos || { x: 0, y: 0 });
   const [scale, setScale] = useState(existingImage?.scale || 1);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
@@ -355,6 +382,21 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const lastScale = useRef(1);
   const lastPos = useRef({ x: 0, y: 0 });
   const CROP_SIZE = 260;
+
+  useEffect(() => {
+    let cancelled = false;
+    const directImage = existingImage?.preview || existingImage?.src || (typeof existingImage === "string" ? existingImage : null);
+    if (directImage) {
+      setImgSrc(directImage);
+      return;
+    }
+    const imageId = existingImage?.imageId;
+    if (!imageId) return;
+    loadImage(imageId).then((data) => {
+      if (!cancelled && data) setImgSrc(data);
+    });
+    return () => { cancelled = true; };
+  }, [existingImage]);
 
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -408,7 +450,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
     if (!imgSrc) return;
     const img = new Image();
     img.onload = () => {
-      const OUT = 300;
+      const OUT = 220;
       const canvas = document.createElement("canvas");
       canvas.width = OUT;
       canvas.height = OUT;
@@ -430,11 +472,9 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
         h
       );
 
+      const compactPreview = canvas.toDataURL("image/jpeg", 0.82);
       onConfirm({
-        src: imgSrc,
-        pos,
-        scale,
-        preview: canvas.toDataURL("image/png"),
+        preview: compactPreview,
       });
     };
     img.src = imgSrc;
@@ -517,6 +557,25 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(94px, 27vw, 108px)";
+  const [resolvedImage, setResolvedImage] = useState(project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null));
+
+  useEffect(() => {
+    let cancelled = false;
+    const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+    if (directImage) {
+      setResolvedImage(directImage);
+      return;
+    }
+    const imageId = project?.image?.imageId;
+    if (!imageId) {
+      setResolvedImage(null);
+      return;
+    }
+    loadImage(imageId).then((data) => {
+      if (!cancelled) setResolvedImage(data || null);
+    });
+    return () => { cancelled = true; };
+  }, [project?.image]);
 
   const handleOpen = () => {
     if (typeof onOpen === "function") onOpen(project);
@@ -580,9 +639,9 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
               zIndex: 1,
             }}
           >
-            {project?.image ? (
+            {resolvedImage ? (
               <img
-                src={project.image?.preview || project.image?.src || project.image}
+                src={resolvedImage}
                 alt={project?.name || "Projet"}
                 loading="lazy"
                 style={{
