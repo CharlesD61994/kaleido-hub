@@ -11,33 +11,6 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#EF4444", light: "#FCA5A5" },
 ];
 
-const _imageDb = (() => {
-  let db = null;
-  return () => new Promise((resolve, reject) => {
-    if (db) { resolve(db); return; }
-    const req = indexedDB.open('kaleido_images', 1);
-    req.onupgradeneeded = e => e.target.result.createObjectStore('images', { keyPath: 'id' });
-    req.onsuccess = e => { db = e.target.result; resolve(db); };
-    req.onerror = () => reject(req.error);
-  });
-})();
-
-const loadImage = async (id) => {
-  try {
-    if (!id) return null;
-    const db = await _imageDb();
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction('images', 'readonly');
-      const req = tx.objectStore('images').get(id);
-      req.onsuccess = () => resolve(req.result?.data || null);
-      req.onerror = () => reject(req.error);
-    });
-  } catch (e) {
-    console.error('loadImage error:', e);
-    return null;
-  }
-};
-
 function computeProgress(project) {
   if (!project || typeof project !== "object") return 0;
 
@@ -120,6 +93,40 @@ function Icon({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
         <svg {...common}>
           <path d="M4.5 8.5h3l1.2-2h6.6l1.2 2h3a1.8 1.8 0 0 1 1.8 1.8v7.2a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.2A1.8 1.8 0 0 1 4.5 8.5Z" />
           <circle cx="12" cy="13" r="3.2" />
+        </svg>
+      );
+    case "projects":
+      return (
+        <svg {...common}>
+          <rect x="4.5" y="5" width="11" height="14" rx="2.2" />
+          <path d="M8 9h4" />
+          <path d="M8 12.5h4.5" />
+          <path d="M16.5 8.5h3" />
+          <path d="M16.5 12h3" />
+          <path d="M16.5 15.5h3" />
+        </svg>
+      );
+    case "chart":
+      return (
+        <svg {...common}>
+          <path d="M5 19.5h14" />
+          <path d="M7.5 16V11" />
+          <path d="M12 16V7.5" />
+          <path d="M16.5 16v-5" />
+        </svg>
+      );
+    case "checkBadge":
+      return (
+        <svg {...common}>
+          <path d="M12 3.5 9.8 5 7 4.6l-.8 2.7L4 9l1.5 2.4-.2 2.8 2.7.8L9.7 17l2.3 1.5 2.3-1.5 2.7.4.8-2.7L20 15l-.4-2.7L21 9.9l-2.1-1.6-.8-2.7-2.8.4L12 3.5Z" />
+          <path d="m9.3 12 1.7 1.8 3.7-4" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4 4" />
         </svg>
       );
     default:
@@ -383,21 +390,6 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const lastPos = useRef({ x: 0, y: 0 });
   const CROP_SIZE = 260;
 
-  useEffect(() => {
-    let cancelled = false;
-    const directImage = existingImage?.preview || existingImage?.src || (typeof existingImage === "string" ? existingImage : null);
-    if (directImage) {
-      setImgSrc(directImage);
-      return;
-    }
-    const imageId = existingImage?.imageId;
-    if (!imageId) return;
-    loadImage(imageId).then((data) => {
-      if (!cancelled && data) setImgSrc(data);
-    });
-    return () => { cancelled = true; };
-  }, [existingImage]);
-
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -557,25 +549,6 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(94px, 27vw, 108px)";
-  const [resolvedImage, setResolvedImage] = useState(project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null));
-
-  useEffect(() => {
-    let cancelled = false;
-    const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
-    if (directImage) {
-      setResolvedImage(directImage);
-      return;
-    }
-    const imageId = project?.image?.imageId;
-    if (!imageId) {
-      setResolvedImage(null);
-      return;
-    }
-    loadImage(imageId).then((data) => {
-      if (!cancelled) setResolvedImage(data || null);
-    });
-    return () => { cancelled = true; };
-  }, [project?.image]);
 
   const handleOpen = () => {
     if (typeof onOpen === "function") onOpen(project);
@@ -639,9 +612,9 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
               zIndex: 1,
             }}
           >
-            {resolvedImage ? (
+            {project?.image ? (
               <img
-                src={resolvedImage}
+                src={project.image?.preview || project.image?.src || project.image}
                 alt={project?.name || "Projet"}
                 loading="lazy"
                 style={{
@@ -787,6 +760,8 @@ export default function AppPro({
   const [renameProject, setRenameProject] = useState(null);
   const [deleteProject, setDeleteProject] = useState(null);
   const [photoTarget, setPhotoTarget] = useState(null);
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("Tous");
 
   const projects = [...(projectsPro || [])]
     .filter((p) => p && p.id != null)
@@ -795,6 +770,51 @@ export default function AppPro({
   const projectCountLabel = useMemo(() => {
     return `${projects.length} projet${projects.length > 1 ? "s" : ""}`;
   }, [projects.length]);
+
+  const totalRangs = useMemo(() => {
+    return projects.reduce((sum, project) => sum + (Number(project?.rang) || 0), 0);
+  }, [projects]);
+
+  const termines = useMemo(() => {
+    return projects.filter((project) => {
+      const total = Number(project?.total) || 0;
+      const rang = Number(project?.rang) || 0;
+      return total > 0 && rang >= total;
+    }).length;
+  }, [projects]);
+
+  const filteredProjects = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return projects.filter((project) => {
+      const matchesSearch =
+        !term ||
+        (project?.name || "").toLowerCase().includes(term) ||
+        (project?.client || "").toLowerCase().includes(term);
+
+      if (!matchesSearch) return false;
+
+      switch (activeFilter) {
+        case "En cours": {
+          const total = Number(project?.total) || 0;
+          const rang = Number(project?.rang) || 0;
+          return total <= 0 || rang < total;
+        }
+        case "Terminés": {
+          const total = Number(project?.total) || 0;
+          const rang = Number(project?.rang) || 0;
+          return total > 0 && rang >= total;
+        }
+        case "PDF":
+          return project?.projectType === "pdf";
+        case "Crochet":
+          return (project?.type || "").toLowerCase() === "crochet";
+        case "Tricot":
+          return (project?.type || "").toLowerCase() === "tricot";
+        default:
+          return true;
+      }
+    });
+  }, [projects, search, activeFilter]);
 
   const handleMenuOpen = (project, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -818,68 +838,111 @@ export default function AppPro({
 
   return (
     <>
-      <div style={{ marginBottom: 10 }}>
-        <div
-          style={{
-            color: "#F6F3FF",
-            fontSize: 28,
-            fontWeight: 800,
-            lineHeight: 1,
-            letterSpacing: "-0.04em",
-            marginBottom: 8,
-          }}
-        >
-          Professionnel
-        </div>
-        <div
-          style={{
-            color: "#B8B2C8",
-            fontSize: 14,
-            lineHeight: 1.45,
-            marginBottom: 10,
-          }}
-        >
-          Projets professionnels enregistrés dans la base actuelle.
-        </div>
-
-        <div style={{ color: "#A79FB7", fontSize: 13 }}>
-          {projectCountLabel}
-        </div>
-      </div>
-
-      <div style={{ padding: "4px 10px 100px" }}>
-        {projects.length === 0 ? (
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        {[
+          { label: "PROJETS", value: projects.length, icon: <Icon name="projects" size={28} stroke={2.2} color="#A78BFA" />, border: "#7C3AED", glow: "#7C3AED" },
+          { label: "RANGS", value: totalRangs > 999 ? `${(totalRangs / 1000).toFixed(1)}k` : totalRangs, icon: <Icon name="chart" size={28} stroke={2.2} color="#22D3EE" />, border: "#0891B2", glow: "#0891B2" },
+          { label: "TERMINÉS", value: termines, icon: <Icon name="checkBadge" size={28} stroke={2.2} color="#34D399" />, border: "#059669", glow: "#059669" },
+        ].map((stat) => (
           <div
+            key={stat.label}
             style={{
-              padding: 22,
-              borderRadius: 22,
-              background: "linear-gradient(180deg, rgba(26,26,46,0.96), rgba(20,20,36,0.96))",
-              border: "1px solid rgba(255,255,255,0.06)",
-              color: "#D7D0E7",
+              flex: 1,
+              background: "#111128",
+              borderRadius: 14,
+              padding: "12px 8px",
+              textAlign: "center",
+              border: `1px solid ${stat.border}88`,
+              boxShadow: `0 0 14px ${stat.glow}44, inset 0 0 12px ${stat.glow}11`,
             }}
           >
-            Aucun projet professionnel enregistré dans la base actuelle.
+            <div style={{ height: 28, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 4 }}>
+              {stat.icon}
+            </div>
+            <div style={{ color: "#F1F0EE", fontWeight: 700, fontSize: 20 }}>{stat.value}</div>
+            <div style={{ color: "#6B6A7A", fontSize: 10, marginTop: 2, fontFamily: "monospace", letterSpacing: 0.5 }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          background: "#1A1A2E",
+          borderRadius: 14,
+          padding: "12px 14px",
+          marginBottom: 8,
+          border: "1px solid rgba(255,255,255,0.12)",
+        }}
+      >
+        <span style={{ color: "#6B6A7A", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="search" size={16} color="#6B6A7A" />
+        </span>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher un projet..."
+          style={{
+            background: "none",
+            border: "none",
+            outline: "none",
+            color: "#F1F0EE",
+            flex: 1,
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 15,
+          }}
+        />
+      </div>
+
+      <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+        {["Tous", "En cours", "Terminés", "PDF", "Crochet", "Tricot"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setActiveFilter(f)}
+            style={{
+              padding: "5px 12px",
+              borderRadius: 9999,
+              border: `1px solid ${activeFilter === f ? "#A78BFA" : "#333"}`,
+              background: activeFilter === f ? "#7C3AED33" : "none",
+              color: activeFilter === f ? "#A78BFA" : "#6B6A7A",
+              fontSize: 11,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: "18px 16px 116px" }}>
+        {filteredProjects.length === 0 ? (
+          <div style={{ textAlign: "center", color: "#6B6A7A", padding: "40px 0", fontSize: 14 }}>
+            Aucun projet trouvé
           </div>
         ) : (
-          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 108px)",
-                columnGap: 24,
-                rowGap: 32,
-                justifyItems: "center",
-                alignItems: "start",
-                width: "max-content",
-                margin: "0 auto",
-              }}
-            >
-              {projects.map((project) => (
-                <div key={project.id || project.name}>
-                  <ProBubble project={project} onOpen={onProjectOpen} onMenuOpen={handleMenuOpen} />
-                </div>
-              ))}
-            </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, max-content)",
+              rowGap: 16,
+              columnGap: 14,
+              justifyContent: "center",
+              justifyItems: "center",
+              alignItems: "start",
+              width: "100%",
+            }}
+          >
+            {filteredProjects.map((project) => (
+              <div key={project.id || project.name}>
+                <ProBubble project={project} onOpen={onProjectOpen} onMenuOpen={handleMenuOpen} />
+              </div>
+            ))}
           </div>
         )}
       </div>
