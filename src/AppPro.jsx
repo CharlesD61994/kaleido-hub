@@ -929,7 +929,7 @@ export default function AppPro({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 108px)",
+              gridTemplateColumns: "repeat(3, 112px)",
               rowGap: 16,
               columnGap: 14,
               justifyContent: "center",
