@@ -548,7 +548,7 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
 function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
-  const size = "clamp(94px, 27vw, 108px)";
+  const size = "clamp(96px, 28vw, 110px)";
 
   const handleOpen = () => {
     if (typeof onOpen === "function") onOpen(project);
@@ -929,10 +929,9 @@ export default function AppPro({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 114px)",
-              rowGap: 16,
-              columnGap: 16,
-              justifyContent: "center",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              rowGap: 18,
+              columnGap: 18,
               justifyItems: "center",
               alignItems: "start",
               width: "100%",
