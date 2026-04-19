@@ -59,97 +59,106 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "10px 4px 14px" }}>
-      <button
-        onClick={handleOpen}
+      <div
         style={{
           position: "relative",
           width: size,
           height: size,
           overflow: "visible",
           isolation: "isolate",
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
         }}
       >
-        <div
+        <button
+          onClick={handleOpen}
           style={{
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            pointerEvents: "none",
-            zIndex: 0,
-            background: `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`,
-            boxShadow: `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`,
-          }}
-        />
-
-        <div
-          style={{
-            width: "86%",
-            height: "86%",
-            borderRadius: "50%",
-            background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`,
-            boxShadow:
-              `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 1,
+            inset: 0,
+            overflow: "visible",
+            isolation: "isolate",
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
           }}
         >
-          {project?.image ? (
-            <img
-              src={project.image?.preview || project.image?.src || project.image}
-              alt={project?.name || "Projet"}
-              loading="lazy"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "50%",
-                display: "block",
-              }}
-            />
-          ) : (
-            <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <YarnGlyph />
-            </span>
-          )}
-        </div>
-
-        <svg
-          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}
-          viewBox="0 0 110 110"
-        >
-          <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
-          <circle
-            cx="55"
-            cy="55"
-            r="51"
-            fill="none"
-            stroke={color.light}
-            strokeWidth="5"
-            strokeDasharray={2 * Math.PI * 51}
-            strokeDashoffset={2 * Math.PI * 51 * (1 - progress / 100)}
-            strokeLinecap="round"
-            transform="rotate(-90 55 55)"
+          <div
             style={{
-              transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
-              filter: `drop-shadow(0 0 4px ${color.light})`,
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              pointerEvents: "none",
+              zIndex: 0,
+              background: `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`,
+              boxShadow: `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`,
             }}
           />
-        </svg>
+
+          <div
+            style={{
+              width: "86%",
+              height: "86%",
+              borderRadius: "50%",
+              background: `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`,
+              boxShadow:
+                `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 1,
+            }}
+          >
+            {project?.image ? (
+              <img
+                src={project.image?.preview || project.image?.src || project.image}
+                alt={project?.name || "Projet"}
+                loading="lazy"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                  display: "block",
+                }}
+              />
+            ) : (
+              <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <YarnGlyph />
+              </span>
+            )}
+          </div>
+
+          <svg
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}
+            viewBox="0 0 110 110"
+          >
+            <circle cx="55" cy="55" r="51" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
+            <circle
+              cx="55"
+              cy="55"
+              r="51"
+              fill="none"
+              stroke={color.light}
+              strokeWidth="5"
+              strokeDasharray={2 * Math.PI * 51}
+              strokeDashoffset={2 * Math.PI * 51 * (1 - progress / 100)}
+              strokeLinecap="round"
+              transform="rotate(-90 55 55)"
+              style={{
+                transition: "stroke-dashoffset 0.56s cubic-bezier(0.22, 1, 0.36, 1)",
+                filter: `drop-shadow(0 0 4px ${color.light})`,
+              }}
+            />
+          </svg>
+        </button>
 
         {typeof onMenuOpen === "function" ? (
           <button
@@ -216,7 +225,7 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
             i
           </button>
         ) : null}
-      </button>
+      </div>
 
       <button
         onClick={handleOpen}
