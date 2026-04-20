@@ -929,12 +929,14 @@ export default function AppPro({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              rowGap: 16,
-              columnGap: 32,
+              gridTemplateColumns: "repeat(3, 1fr)",
+              columnGap: 28,
+              rowGap: 18,
               justifyItems: "center",
               alignItems: "start",
               width: "100%",
+              paddingLeft: 8,
+              paddingRight: 8,
             }}
           >
             {filteredProjects.map((project) => (
