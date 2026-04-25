@@ -15,7 +15,7 @@ import {
   updateClientInfoRecord,
 } from "./services/clientStore";
 import { updateProjectProgress } from "./services/progressStore";
-import { loadImage, loadPdf, saveImage, savePdf, deleteImage, deletePdf } from "./services/mediaStore";
+import { loadImage, loadPdf, saveImage, savePdf, deleteImage, deletePdf, getCachedImage } from "./services/mediaStore";
 import { loadDatabase, saveDatabase, importDatabase } from "./services/databaseStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
@@ -28,6 +28,18 @@ const KALEIDOSCOPE_COLORS = [
 { bg: "#3B82F6", light: "#93C5FD" }, // bleu clair
 { bg: "#EF4444", light: "#FCA5A5" }, // corail rouge
 ];
+
+const getProjectDirectImage = (project) => (
+  project?.image?.preview
+  || project?.image?.src
+  || (typeof project?.image === "string" ? project.image : null)
+);
+
+const getProjectCachedImage = (project) => {
+  const directImage = getProjectDirectImage(project);
+  if (directImage) return directImage;
+  return getCachedImage(project?.image?.imageId) || null;
+};
 
 const KALEIDO_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const KALEIDO_TIMING_FAST = "180ms";
@@ -476,42 +488,32 @@ const clearPatronDraft = ({ sourceId, mode }) => {
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANTS HUB
 // ═══════════════════════════════════════════════════════════════
-function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
+const ProjectBubble = React.memo(function ProjectBubble({ project, onMenuOpen, onProjectClick, mode }) {
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isLibrary = mode === "library";
 const libraryBubbleSize = "clamp(96px, 28vw, 110px)";
 const size = libraryBubbleSize;
-const initialDirectImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
-const initialImageId = project?.image?.imageId;
-const [resolvedImage, setResolvedImage] = useState(initialDirectImage || null);
-const [isImageLoading, setIsImageLoading] = useState(!initialDirectImage && !!initialImageId);
+const [resolvedImage, setResolvedImage] = useState(() => getProjectCachedImage(project));
 
 useEffect(() => {
 let cancelled = false;
-const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+const directImage = getProjectDirectImage(project);
 if (directImage) {
   setResolvedImage(directImage);
-  setIsImageLoading(false);
-  return () => { cancelled = true; };
+  return;
 }
 const imageId = project?.image?.imageId;
+const cachedImage = getCachedImage(imageId);
+if (cachedImage) {
+  setResolvedImage(cachedImage);
+  return;
+}
 if (!imageId) {
   setResolvedImage(null);
-  setIsImageLoading(false);
-  return () => { cancelled = true; };
+  return;
 }
-setResolvedImage(null);
-setIsImageLoading(true);
 loadImage(imageId).then((data) => {
-  if (!cancelled) {
-    setResolvedImage(data || null);
-    setIsImageLoading(false);
-  }
-}).catch(() => {
-  if (!cancelled) {
-    setResolvedImage(null);
-    setIsImageLoading(false);
-  }
+  if (!cancelled) setResolvedImage(data || null);
 });
 return () => { cancelled = true; };
 }, [project?.image]);
@@ -539,7 +541,7 @@ return (
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
         <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
-          {resolvedImage ? <img src={resolvedImage} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : (isImageLoading ? null : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>)}
+          {resolvedImage ? <img src={resolvedImage} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
@@ -578,7 +580,7 @@ return (
   </div>
 </div>
 );
-}
+});
 function ContextMenu({ project, position, onClose, onRename, onDelete, onChangePhoto, onChangeColor }) {
 if (!project) return null;
 const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
@@ -2375,123 +2377,6 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
     </div>
   );
 }
-
-const isLikelyInlineMediaString = (value) => {
-  if (typeof value !== "string") return false;
-  return value.startsWith("data:") || value.length > 1200;
-};
-
-const makeImportMediaId = (prefix, itemId) => {
-  const safeId = itemId != null ? String(itemId).replace(/[^a-zA-Z0-9_-]/g, "") : "item";
-  return `${prefix}_${safeId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-};
-
-const migrateImportedImage = async (item, prefix) => {
-  if (!item || typeof item !== "object") return;
-
-  const image = item.image;
-  let payload = null;
-  let imageId = null;
-  let pos = null;
-  let scale = null;
-
-  if (typeof image === "string") {
-    payload = image;
-  } else if (image && typeof image === "object") {
-    imageId = image.imageId || null;
-    payload = image.preview || image.src || image.data || null;
-    pos = image.pos || null;
-    scale = image.scale ?? null;
-  }
-
-  if (isLikelyInlineMediaString(payload)) {
-    const finalImageId = imageId || makeImportMediaId(prefix, item.id);
-    await saveImage(finalImageId, payload);
-    item.image = {
-      imageId: finalImageId,
-      ...(pos ? { pos } : {}),
-      ...(scale != null ? { scale } : {}),
-    };
-    return;
-  }
-
-  if (imageId) {
-    item.image = {
-      imageId,
-      ...(pos ? { pos } : {}),
-      ...(scale != null ? { scale } : {}),
-    };
-    return;
-  }
-
-  if (typeof image === "string" || (image && typeof image === "object")) {
-    item.image = null;
-  }
-};
-
-const migrateImportedPdf = async (item, prefix) => {
-  if (!item || typeof item !== "object") return;
-
-  const pdfPayload = item.pdfData || item.pdf || item.pdfSrc || item.pdfBase64 || null;
-
-  if (isLikelyInlineMediaString(pdfPayload)) {
-    const finalPdfId = item.pdfId || makeImportMediaId(`pdf_${prefix}`, item.id);
-    await savePdf(finalPdfId, pdfPayload);
-    item.pdfId = finalPdfId;
-  }
-
-  delete item.pdfData;
-  delete item.pdf;
-  delete item.pdfSrc;
-  delete item.pdfBase64;
-};
-
-const restoreKaleidoBackup = async (rawBackup) => {
-  const backup = rawBackup && typeof rawBackup === "object"
-    ? JSON.parse(JSON.stringify(rawBackup))
-    : rawBackup;
-
-  const sourceDb = backup?.database && typeof backup.database === "object" ? backup.database : backup;
-
-  if (!sourceDb || typeof sourceDb !== "object") {
-    return importDatabase(backup);
-  }
-
-  const pdfsToRestore = backup?.pdfs || sourceDb?.pdfs || {};
-  for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
-    if (pdfId && isLikelyInlineMediaString(pdfData)) await savePdf(pdfId, pdfData);
-  }
-
-  const imagesToRestore = backup?.images || sourceDb?.images || {};
-  for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
-    if (imageId && isLikelyInlineMediaString(imageData)) await saveImage(imageId, imageData);
-  }
-
-  const projectsPersonal = Array.isArray(sourceDb.projectsPersonal) ? sourceDb.projectsPersonal : [];
-  const projectsPro = Array.isArray(sourceDb.projectsPro) ? sourceDb.projectsPro : [];
-  const legacyProjects = Array.isArray(sourceDb.projects) ? sourceDb.projects : [];
-  const patrons = Array.isArray(sourceDb.patrons) ? sourceDb.patrons : [];
-
-  for (const project of [...projectsPersonal, ...projectsPro, ...legacyProjects]) {
-    await migrateImportedImage(project, "img_project");
-    await migrateImportedPdf(project, "project");
-  }
-
-  for (const patron of patrons) {
-    await migrateImportedImage(patron, "img_patron");
-    await migrateImportedPdf(patron, "patron");
-  }
-
-  delete sourceDb.pdfs;
-  delete sourceDb.images;
-  if (backup && typeof backup === "object") {
-    delete backup.pdfs;
-    delete backup.images;
-  }
-
-  return importDatabase(backup);
-};
-
 export default function KaleidoHub() {
   const [currentView, setCurrentView] = useState(VIEWS.HUB);
   const [prevView, setPrevView] = useState(null);
@@ -3375,7 +3260,7 @@ style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #059
 <button onClick={async () => {
 try {
 const parsed = JSON.parse(importText.trim());
-const restoredDb = await restoreKaleidoBackup(parsed);
+const restoredDb = importDatabase(parsed);
 setDatabase(restoredDb);
 setCurrentProject(null);
 setCurrentPatron(null);
@@ -3474,7 +3359,20 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
-const restoredDb = await restoreKaleidoBackup(data);
+const sourceDb = data?.database && typeof data.database === "object" ? data.database : data;
+
+// Restaurer les médias AVANT de finaliser l'état visuel.
+const pdfsToRestore = data?.pdfs || sourceDb?.pdfs || {};
+for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
+  if (pdfId && typeof pdfData === "string") await savePdf(pdfId, pdfData);
+}
+
+const imagesToRestore = data?.images || sourceDb?.images || {};
+for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
+  if (imageId && typeof imageData === "string") await saveImage(imageId, imageData);
+}
+
+const restoredDb = importDatabase(data);
 setDatabase(restoredDb);
 setCurrentProject(null);
 setCurrentPatron(null);
