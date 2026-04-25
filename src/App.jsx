@@ -481,22 +481,37 @@ const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length]
 const isLibrary = mode === "library";
 const libraryBubbleSize = "clamp(96px, 28vw, 110px)";
 const size = libraryBubbleSize;
-const [resolvedImage, setResolvedImage] = useState(project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null));
+const initialDirectImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+const initialImageId = project?.image?.imageId;
+const [resolvedImage, setResolvedImage] = useState(initialDirectImage || null);
+const [isImageLoading, setIsImageLoading] = useState(!initialDirectImage && !!initialImageId);
 
 useEffect(() => {
 let cancelled = false;
 const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
 if (directImage) {
   setResolvedImage(directImage);
-  return;
+  setIsImageLoading(false);
+  return () => { cancelled = true; };
 }
 const imageId = project?.image?.imageId;
 if (!imageId) {
   setResolvedImage(null);
-  return;
+  setIsImageLoading(false);
+  return () => { cancelled = true; };
 }
+setResolvedImage(null);
+setIsImageLoading(true);
 loadImage(imageId).then((data) => {
-  if (!cancelled) setResolvedImage(data || null);
+  if (!cancelled) {
+    setResolvedImage(data || null);
+    setIsImageLoading(false);
+  }
+}).catch(() => {
+  if (!cancelled) {
+    setResolvedImage(null);
+    setIsImageLoading(false);
+  }
 });
 return () => { cancelled = true; };
 }, [project?.image]);
@@ -524,7 +539,7 @@ return (
       <div style={{ position: "relative", width: size, height: size, overflow: "visible", isolation: "isolate" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: "100%", height: "100%", borderRadius: "50%", pointerEvents: "none", zIndex: 0, background: isLibrary ? `radial-gradient(circle, ${color.bg}55 0%, ${color.bg}20 42%, transparent 70%)` : `radial-gradient(circle, ${color.bg}66 0%, ${color.bg}2A 40%, transparent 66%)`, boxShadow: isLibrary ? `0 0 ${glowNear}px ${color.bg}55, 0 0 ${glowFar}px ${color.bg}20` : `0 0 10px ${color.bg}66, 0 0 22px ${color.bg}33`, willChange: "transform, opacity, box-shadow" }} />
         <div style={{ width: isLibrary ? "88%" : "86%", height: isLibrary ? "88%" : "86%", borderRadius: "50%", background: isLibrary ? "linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))" : `radial-gradient(circle at 35% 35%, ${color.light}38, ${color.bg}CC)`, boxShadow: isLibrary ? `0 ${bubbleLift}px ${18 + ringShadow}px rgba(0,0,0,0.24), 0 0 0 1.5px rgba(255,255,255,0.16), inset 0 1px 0 rgba(255,255,255,0.26), inset 0 -16px 24px rgba(0,0,0,0.1)` : `0 2px 21px rgba(0,0,0,0.20), 0 0 0 1px ${color.light}22, inset 0 1px 2px rgba(255,255,255,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1)", willChange: "transform, box-shadow", zIndex: 1, backdropFilter: isLibrary ? "blur(10px)" : "none" }}>
-          {resolvedImage ? <img src={resolvedImage} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>}
+          {resolvedImage ? <img src={resolvedImage} alt={project.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", filter: isLibrary ? "saturate(1.02) contrast(1.03)" : "none" }} /> : (isImageLoading ? null : <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="yarn" size={36} color="#F8F7FF" /></span>)}
           {isLibrary && <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.03) 36%, rgba(255,255,255,0) 56%)", pointerEvents: "none" }} />}
         </div>
         {!isLibrary && (
