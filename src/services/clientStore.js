@@ -30,8 +30,8 @@ export const attachClientInfoToProject = (project = {}, clientInfo = {}) => ({
   ...buildClientInfo(clientInfo),
 });
 
-export const updateClientInfoRecord = (setDatabase, saveToDatabase, projectId, clientInfo = {}) => {
+export const updateClientInfoRecord = (setDatabase, saveDatabase, projectId, clientInfo = {}) => {
   const updates = buildClientInfo(clientInfo);
-  updateProProjectRecord(setDatabase, saveToDatabase, projectId, updates);
+  updateProProjectRecord(setDatabase, saveDatabase, projectId, updates);
   return updates;
 };
