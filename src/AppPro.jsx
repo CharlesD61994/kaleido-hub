@@ -145,7 +145,7 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
       <div
         style={{
           position: "fixed",
-          top: Math.min(position.y, window.innerHeight - 260),
+          top: Math.max(90, Math.min(position.y, window.innerHeight - 430)),
           left: Math.min(position.x - 10, window.innerWidth - 200),
           zIndex: 101,
           background: "#1A1A2E",
@@ -153,6 +153,9 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
           borderRadius: 16,
           padding: "8px 0",
           minWidth: 200,
+          maxHeight: "min(72vh, 420px)",
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
           boxShadow: "0 8px 40px rgba(0,0,0,0.6)",
         }}
       >
