@@ -31,7 +31,7 @@ const withUpdatedProProject = (database, projectId, updates = {}) => {
   return {
     ...safeDb,
     projectsPro: getProProjects(safeDb).map((project) =>
-      project.id === projectId ? { ...project, ...updates } : project
+      String(project.id) === String(projectId) ? { ...project, ...updates } : project
     ),
   };
 };
@@ -41,11 +41,11 @@ const withDeletedProProject = (database, projectId) => {
 
   return {
     ...safeDb,
-    projectsPro: getProProjects(safeDb).filter((project) => project.id !== projectId),
+    projectsPro: getProProjects(safeDb).filter((project) => String(project.id) !== String(projectId)),
   };
 };
 
-export const createProProject = (setDatabase, saveToDatabase, project) => {
+export const createProProject = (setDatabase, saveDatabase, project) => {
   const safeProject = project && typeof project === "object" ? project : {};
   let finalProject = { ...safeProject, id: normalizeProjectId(safeProject) };
 
@@ -56,29 +56,29 @@ export const createProProject = (setDatabase, saveToDatabase, project) => {
     };
 
     const nextDb = withCreatedProProject(prev, finalProject);
-    saveToDatabase(nextDb);
+    saveDatabase(nextDb);
     return nextDb;
   });
 
   return finalProject;
 };
 
-export const updateProProjectRecord = (setDatabase, saveToDatabase, projectId, updates = {}) => {
+export const updateProProjectRecord = (setDatabase, saveDatabase, projectId, updates = {}) => {
   setDatabase((prev) => {
     const nextDb = withUpdatedProProject(prev, projectId, updates);
-    saveToDatabase(nextDb);
+    saveDatabase(nextDb);
     return nextDb;
   });
 };
 
-export const deleteProProjectRecord = (setDatabase, saveToDatabase, projectId) => {
+export const deleteProProjectRecord = (setDatabase, saveDatabase, projectId) => {
   setDatabase((prev) => {
     const nextDb = withDeletedProProject(prev, projectId);
-    saveToDatabase(nextDb);
+    saveDatabase(nextDb);
     return nextDb;
   });
 };
 
 export const findProProject = (database, projectId) => {
-  return getProProjects(database).find((project) => project.id === projectId) || null;
+  return getProProjects(database).find((project) => String(project.id) === String(projectId)) || null;
 };
