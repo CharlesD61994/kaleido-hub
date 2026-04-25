@@ -35,3 +35,4 @@ export const updateClientInfoRecord = (setDatabase, saveDatabase, projectId, cli
   updateProProjectRecord(setDatabase, saveDatabase, projectId, updates);
   return updates;
 };
+
