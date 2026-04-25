@@ -15,6 +15,7 @@ import {
   updateClientInfoRecord,
 } from "./services/clientStore";
 import { updateProjectProgress } from "./services/progressStore";
+import { loadImage, loadPdf, saveImage, savePdf, deleteImage, deletePdf } from "./services/mediaStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -527,119 +528,8 @@ const clearPatronDraft = ({ sourceId, mode }) => {
   return clearStorageKey(PATRON_BACKUP_KEY);
 };
 // ═══════════════════════════════════════════════════════════════
-// STOCKAGE PDFs — IndexedDB
 // ═══════════════════════════════════════════════════════════════
-const _pdfDb = (() => {
-let db = null;
-return () => new Promise((resolve, reject) => {
-if (db) { resolve(db); return; }
-const req = indexedDB.open('kaleido_pdfs', 1);
-req.onupgradeneeded = e => e.target.result.createObjectStore('pdfs', { keyPath: 'id' });
-req.onsuccess = e => { db = e.target.result; resolve(db); };
-req.onerror = () => reject(req.error);
-});
-})();
-const savePdf = async (id, data) => {
-try {
-const db = await _pdfDb();
-await new Promise((resolve, reject) => {
-const tx = db.transaction('pdfs', 'readwrite');
-tx.objectStore('pdfs').put({ id, data });
-tx.oncomplete = resolve;
-tx.onerror = () => reject(tx.error);
-});
-return true;
-} catch(e) {
-console.error('savePdf error:', e);
-return false;
-}
-};
-const loadPdf = async (id) => {
-try {
-if (!id) return null;
-const db = await _pdfDb();
-return await new Promise((resolve, reject) => {
-const tx = db.transaction('pdfs', 'readonly');
-const req = tx.objectStore('pdfs').get(id);
-req.onsuccess = () => {
-const data = req.result?.data || null;
-if (!data || typeof data !== "string") {
-resolve(null);
-return;
-}
-resolve(data);
-};
-req.onerror = () => reject(req.error);
-});
-} catch(e) {
-console.error('loadPdf error:', e);
-return null;
-}
-};
-const deletePdf = async (id) => {
-try {
-const db = await _pdfDb();
-await new Promise((resolve) => {
-const tx = db.transaction('pdfs', 'readwrite');
-tx.objectStore('pdfs').delete(id);
-tx.oncomplete = resolve;
-});
-} catch(e) {}
-};
-// ═══════════════════════════════════════════════════════════════
-// STOCKAGE IMAGES — IndexedDB
-// ═══════════════════════════════════════════════════════════════
-const _imageDb = (() => {
-let db = null;
-return () => new Promise((resolve, reject) => {
-if (db) { resolve(db); return; }
-const req = indexedDB.open('kaleido_images', 1);
-req.onupgradeneeded = e => e.target.result.createObjectStore('images', { keyPath: 'id' });
-req.onsuccess = e => { db = e.target.result; resolve(db); };
-req.onerror = () => reject(req.error);
-});
-})();
-const saveImage = async (id, data) => {
-try {
-const db = await _imageDb();
-await new Promise((resolve, reject) => {
-const tx = db.transaction('images', 'readwrite');
-tx.objectStore('images').put({ id, data });
-tx.oncomplete = resolve;
-tx.onerror = () => reject(tx.error);
-});
-return true;
-} catch(e) {
-console.error('saveImage error:', e);
-return false;
-}
-};
-const loadImage = async (id) => {
-try {
-if (!id) return null;
-const db = await _imageDb();
-return await new Promise((resolve, reject) => {
-const tx = db.transaction('images', 'readonly');
-const req = tx.objectStore('images').get(id);
-req.onsuccess = () => resolve(req.result?.data || null);
-req.onerror = () => reject(req.error);
-});
-} catch(e) {
-console.error('loadImage error:', e);
-return null;
-}
-};
-const deleteImage = async (id) => {
-try {
-const db = await _imageDb();
-await new Promise((resolve) => {
-const tx = db.transaction('images', 'readwrite');
-tx.objectStore('images').delete(id);
-tx.oncomplete = resolve;
-});
-} catch(e) {}
-};
-
+// STOCKAGE MÉDIAS — externalisé dans services/mediaStore.js
 // ═══════════════════════════════════════════════════════════════
 // COMPOSANTS HUB
 // ═══════════════════════════════════════════════════════════════
