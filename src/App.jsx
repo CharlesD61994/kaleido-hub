@@ -79,6 +79,21 @@ const GLOBAL_MOTION_CSS = `
   [data-kaleido-screen="true"] {
     min-height: 100vh;
   }
+  [data-kaleido-screen="true"], [data-kaleido-view-layer="true"], [data-kaleido-module-panel="true"] {
+    animation: none !important;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    contain: paint;
+  }
+  [data-kaleido-module-panel="true"] {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    contain: paint;
+  }
   @keyframes kaleidoFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -3156,7 +3171,26 @@ const HubView = () => (
 </button>
 ))}
 </div>
-{mode === "pro" ? (
+{/* Modules personnel/pro gardés montés pour éviter le flash Safari */}
+<div
+  data-kaleido-module-panel="true"
+  data-active={mode === "pro" ? "true" : "false"}
+  aria-hidden={mode !== "pro"}
+  style={{
+    position: mode === "pro" ? "relative" : "absolute",
+    inset: mode === "pro" ? "auto" : 0,
+    opacity: mode === "pro" ? 1 : 0,
+    visibility: mode === "pro" ? "visible" : "hidden",
+    pointerEvents: mode === "pro" ? "auto" : "none",
+    minHeight: 1,
+    transform: "translateZ(0)",
+    WebkitTransform: "translateZ(0)",
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    contain: "paint",
+    transition: "none"
+  }}
+>
 <AppPro
   projectsPro={database.projectsPro || []}
   onCreateProProject={() => {
@@ -3176,8 +3210,26 @@ const HubView = () => (
   onChangeProProjectColor={(projectId, colorIdx) => updateProProject(projectId, { colorIdx })}
   onEditProProjectClient={(project) => openClientEditor(project)}
 />
-) : (
-<>
+</div>
+<div
+  data-kaleido-module-panel="true"
+  data-active={mode === "personal" ? "true" : "false"}
+  aria-hidden={mode !== "personal"}
+  style={{
+    position: mode === "personal" ? "relative" : "absolute",
+    inset: mode === "personal" ? "auto" : 0,
+    opacity: mode === "personal" ? 1 : 0,
+    visibility: mode === "personal" ? "visible" : "hidden",
+    pointerEvents: mode === "personal" ? "auto" : "none",
+    minHeight: 1,
+    transform: "translateZ(0)",
+    WebkitTransform: "translateZ(0)",
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    contain: "paint",
+    transition: "none"
+  }}
+>
 {/* Stats */}
 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
 {[
@@ -3245,8 +3297,8 @@ setPhotoTarget(null);
 }}
 />
 )}
-</>
-)}{/* Modale import */}
+</div>
+{/* Modale import */}
 {showDataImportModal && (
 <div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 22, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
@@ -4178,11 +4230,20 @@ filter: `brightness(${(0.80 + edgeSwipeProgress * 0.20).toFixed(3)}) saturate(${
 transition: edgeSwipeDragging ? "none" : "transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease, filter 240ms ease",
 pointerEvents: "none"
 } : {
-display: currentView === VIEWS.HUB ? "block" : "none",
+display: "block",
 minHeight: "100vh",
 position: currentView === VIEWS.HUB ? "relative" : "absolute",
-inset: 0,
-zIndex: 0
+inset: currentView === VIEWS.HUB ? "auto" : 0,
+zIndex: currentView === VIEWS.HUB ? 2 : 0,
+opacity: currentView === VIEWS.HUB ? 1 : 0,
+visibility: currentView === VIEWS.HUB ? "visible" : "hidden",
+pointerEvents: currentView === VIEWS.HUB ? "auto" : "none",
+transform: "translateZ(0)",
+WebkitTransform: "translateZ(0)",
+backfaceVisibility: "hidden",
+WebkitBackfaceVisibility: "hidden",
+contain: "paint",
+transition: "none"
 };
 const previewLibraryStyle = previewUsesLibrary ? {
 display: "block",
@@ -4220,11 +4281,11 @@ background: `linear-gradient(90deg, rgba(13,13,26,${(0.18 + edgeSwipeProgress * 
 opacity: Math.min(1, 0.55 + edgeSwipeProgress * 0.35),
 transition: edgeSwipeDragging ? "none" : "opacity 240ms ease, background 240ms ease"
 } : null;
-const keepHubMounted = currentView === VIEWS.HUB || currentView === VIEWS.PDF_VIEWER || previewUsesHub;
+const keepHubMounted = true;
 const keepLibraryMountedForPreview = previewUsesLibrary;
 
 return (
-<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A", overflowX: "hidden" }}>
+<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), position: "relative", minHeight: "100vh", background: "#0D0D1A", overflowX: "hidden", transform: "translateZ(0)", WebkitTransform: "translateZ(0)", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", contain: "paint", isolation: "isolate" }}>
 <style>{GLOBAL_MOTION_CSS}</style>
 
 {keepHubMounted && (
@@ -4272,8 +4333,25 @@ aria-hidden="true"
 )}
 {previewBackdropStyle && <div style={previewBackdropStyle} aria-hidden="true" />}
 
-{currentView === VIEWS.LIBRARY && (
-<div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
+{(
+<div data-kaleido-screen="true" data-kaleido-view-layer="true" aria-hidden={currentView !== VIEWS.LIBRARY} style={{
+  ...viewWrapStyle(viewTransition),
+  ...(currentView === VIEWS.LIBRARY ? activeScreenInteractiveStyle : {}),
+  display: "block",
+  position: currentView === VIEWS.LIBRARY ? "relative" : "absolute",
+  inset: currentView === VIEWS.LIBRARY ? "auto" : 0,
+  minHeight: "100vh",
+  opacity: currentView === VIEWS.LIBRARY ? 1 : 0,
+  visibility: currentView === VIEWS.LIBRARY ? "visible" : "hidden",
+  pointerEvents: currentView === VIEWS.LIBRARY ? "auto" : "none",
+  zIndex: currentView === VIEWS.LIBRARY ? 2 : 0,
+  transform: "translateZ(0)",
+  WebkitTransform: "translateZ(0)",
+  backfaceVisibility: "hidden",
+  WebkitBackfaceVisibility: "hidden",
+  contain: "paint",
+  transition: "none"
+}}>
 <LibraryView
 database={database}
 onNavigateHub={navigateToHub}
