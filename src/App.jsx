@@ -2360,6 +2360,123 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
     </div>
   );
 }
+
+const isLikelyInlineMediaString = (value) => {
+  if (typeof value !== "string") return false;
+  return value.startsWith("data:") || value.length > 1200;
+};
+
+const makeImportMediaId = (prefix, itemId) => {
+  const safeId = itemId != null ? String(itemId).replace(/[^a-zA-Z0-9_-]/g, "") : "item";
+  return `${prefix}_${safeId}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+};
+
+const migrateImportedImage = async (item, prefix) => {
+  if (!item || typeof item !== "object") return;
+
+  const image = item.image;
+  let payload = null;
+  let imageId = null;
+  let pos = null;
+  let scale = null;
+
+  if (typeof image === "string") {
+    payload = image;
+  } else if (image && typeof image === "object") {
+    imageId = image.imageId || null;
+    payload = image.preview || image.src || image.data || null;
+    pos = image.pos || null;
+    scale = image.scale ?? null;
+  }
+
+  if (isLikelyInlineMediaString(payload)) {
+    const finalImageId = imageId || makeImportMediaId(prefix, item.id);
+    await saveImage(finalImageId, payload);
+    item.image = {
+      imageId: finalImageId,
+      ...(pos ? { pos } : {}),
+      ...(scale != null ? { scale } : {}),
+    };
+    return;
+  }
+
+  if (imageId) {
+    item.image = {
+      imageId,
+      ...(pos ? { pos } : {}),
+      ...(scale != null ? { scale } : {}),
+    };
+    return;
+  }
+
+  if (typeof image === "string" || (image && typeof image === "object")) {
+    item.image = null;
+  }
+};
+
+const migrateImportedPdf = async (item, prefix) => {
+  if (!item || typeof item !== "object") return;
+
+  const pdfPayload = item.pdfData || item.pdf || item.pdfSrc || item.pdfBase64 || null;
+
+  if (isLikelyInlineMediaString(pdfPayload)) {
+    const finalPdfId = item.pdfId || makeImportMediaId(`pdf_${prefix}`, item.id);
+    await savePdf(finalPdfId, pdfPayload);
+    item.pdfId = finalPdfId;
+  }
+
+  delete item.pdfData;
+  delete item.pdf;
+  delete item.pdfSrc;
+  delete item.pdfBase64;
+};
+
+const restoreKaleidoBackup = async (rawBackup) => {
+  const backup = rawBackup && typeof rawBackup === "object"
+    ? JSON.parse(JSON.stringify(rawBackup))
+    : rawBackup;
+
+  const sourceDb = backup?.database && typeof backup.database === "object" ? backup.database : backup;
+
+  if (!sourceDb || typeof sourceDb !== "object") {
+    return importDatabase(backup);
+  }
+
+  const pdfsToRestore = backup?.pdfs || sourceDb?.pdfs || {};
+  for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
+    if (pdfId && isLikelyInlineMediaString(pdfData)) await savePdf(pdfId, pdfData);
+  }
+
+  const imagesToRestore = backup?.images || sourceDb?.images || {};
+  for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
+    if (imageId && isLikelyInlineMediaString(imageData)) await saveImage(imageId, imageData);
+  }
+
+  const projectsPersonal = Array.isArray(sourceDb.projectsPersonal) ? sourceDb.projectsPersonal : [];
+  const projectsPro = Array.isArray(sourceDb.projectsPro) ? sourceDb.projectsPro : [];
+  const legacyProjects = Array.isArray(sourceDb.projects) ? sourceDb.projects : [];
+  const patrons = Array.isArray(sourceDb.patrons) ? sourceDb.patrons : [];
+
+  for (const project of [...projectsPersonal, ...projectsPro, ...legacyProjects]) {
+    await migrateImportedImage(project, "img_project");
+    await migrateImportedPdf(project, "project");
+  }
+
+  for (const patron of patrons) {
+    await migrateImportedImage(patron, "img_patron");
+    await migrateImportedPdf(patron, "patron");
+  }
+
+  delete sourceDb.pdfs;
+  delete sourceDb.images;
+  if (backup && typeof backup === "object") {
+    delete backup.pdfs;
+    delete backup.images;
+  }
+
+  return importDatabase(backup);
+};
+
 export default function KaleidoHub() {
   const [currentView, setCurrentView] = useState(VIEWS.HUB);
   const [prevView, setPrevView] = useState(null);
@@ -3243,7 +3360,7 @@ style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #059
 <button onClick={async () => {
 try {
 const parsed = JSON.parse(importText.trim());
-const restoredDb = importDatabase(parsed);
+const restoredDb = await restoreKaleidoBackup(parsed);
 setDatabase(restoredDb);
 setCurrentProject(null);
 setCurrentPatron(null);
@@ -3342,20 +3459,7 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
-const sourceDb = data?.database && typeof data.database === "object" ? data.database : data;
-
-// Restaurer les médias AVANT de finaliser l'état visuel.
-const pdfsToRestore = data?.pdfs || sourceDb?.pdfs || {};
-for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
-  if (pdfId && typeof pdfData === "string") await savePdf(pdfId, pdfData);
-}
-
-const imagesToRestore = data?.images || sourceDb?.images || {};
-for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
-  if (imageId && typeof imageData === "string") await saveImage(imageId, imageData);
-}
-
-const restoredDb = importDatabase(data);
+const restoredDb = await restoreKaleidoBackup(data);
 setDatabase(restoredDb);
 setCurrentProject(null);
 setCurrentPatron(null);
