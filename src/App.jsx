@@ -2112,17 +2112,17 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
         ::-webkit-scrollbar{width:0} * { -webkit-tap-highlight-color: transparent; }
         @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
       `}</style>
-      {/* ══ BARRE FIXE — header PDF harmonisé avec les patrons custom ══════════════════════════════════════════ */}
+      {/* ══ BARRE FIXE — header PDF copié sur le header des patrons custom ═════════════════════════════════════ */}
       <div style={{
         flexShrink: 0,
         position: "relative",
         zIndex: 10,
         background: "rgba(13,13,26,0.95)",
         backdropFilter: "blur(10px)",
-        padding: "44px 20px 12px"
+        padding: "44px 20px 0"
       }}>
-        {/* Header unifié : retour + titre lisible + timer compact */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+        {/* Header identique au patron custom : retour + titre + timer */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
           <button
             data-kaleido-back-button="true"
             onClick={handleBack}
@@ -2135,7 +2135,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: color.light,
+              color: "#A78BFA",
               fontSize: 16,
               cursor: "pointer",
               flexShrink: 0
@@ -2144,88 +2144,62 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
             ←
           </button>
 
-          <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+          <div style={{ flex: 1 }}>
             <h1 style={{
               color: "#F1F0EE",
               margin: 0,
               fontSize: 16,
-              lineHeight: 1.18,
               fontWeight: 700,
               fontFamily: "'Syne', sans-serif",
+              lineHeight: 1.18,
               overflowWrap: "anywhere"
             }}>
               {project?.name || "Projet PDF"}
             </h1>
             <div style={{
-              color: color.light,
+              color: "#A78BFA",
               fontSize: 11,
               fontFamily: "monospace",
-              marginTop: 3,
+              marginTop: 2,
               textTransform: "uppercase",
               letterSpacing: 0.4
             }}>
               PDF{currentPartie?.nom ? ` • ${currentPartie.nom}` : ""}
             </div>
-
-            {project?.client && (
-              <button
-                onClick={() => typeof onEditClient === "function" && onEditClient(project)}
-                style={{
-                  marginTop: 7,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  maxWidth: "100%",
-                  background: `${color.bg}22`,
-                  border: `1px solid ${color.light}33`,
-                  borderRadius: 999,
-                  padding: "5px 9px",
-                  color: color.light,
-                  fontSize: 12,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontWeight: 700,
-                  cursor: "pointer"
-                }}
-              >
-                <span aria-hidden="true">👤</span>
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.client}</span>
-                <span style={{ color: "#A8A6B8", fontWeight: 600 }}>Voir</span>
-              </button>
-            )}
           </div>
 
           <div style={{
             background: "linear-gradient(135deg, #1E1E32, #2A2A3E)",
-            border: `2px solid ${color.light}44`,
+            border: "2px solid #7C3AED44",
             borderRadius: 16,
-            padding: "8px 10px",
-            boxShadow: `0 6px 20px ${color.bg}44`,
-            minWidth: 112,
+            padding: "12px 16px",
+            boxShadow: "0 6px 20px rgba(124,58,237,0.4)",
+            minWidth: 140,
             flexShrink: 0
           }}>
             <div style={{
               color: "#F1F0EE",
-              fontSize: 18,
-              lineHeight: 1,
+              fontSize: 22,
               fontFamily: "monospace",
               fontWeight: 700,
               textAlign: "center",
-              marginBottom: 6
+              marginBottom: 4,
+              lineHeight: 1
             }}>
               {formatTime(elapsedTime)}
             </div>
-            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
               <button
                 onClick={toggleTimer}
                 style={{
                   background: isTimerRunning ? "#DC2626" : "#059669",
                   border: "none",
-                  borderRadius: 9,
-                  padding: "5px 8px",
+                  borderRadius: 10,
+                  padding: "5px 11px",
                   color: "#fff",
-                  fontSize: 10,
+                  fontSize: 11,
                   cursor: "pointer",
-                  fontWeight: 700
+                  fontWeight: 600
                 }}
               >
                 {isTimerRunning ? "PAUSE" : "PLAY"}
@@ -2235,12 +2209,12 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
                 style={{
                   background: "#7C3AED",
                   border: "none",
-                  borderRadius: 9,
-                  padding: "5px 8px",
+                  borderRadius: 10,
+                  padding: "5px 11px",
                   color: "#fff",
-                  fontSize: 10,
+                  fontSize: 11,
                   cursor: "pointer",
-                  fontWeight: 700
+                  fontWeight: 600
                 }}
               >
                 RESET
