@@ -3,9 +3,9 @@ import AppPro from "./AppPro";
 import ClientPage from "./ClientPage";
 import {
   getProProjects,
-  withCreatedProProject,
-  withUpdatedProProject,
-  withDeletedProProject,
+  createProProjectInStore,
+  updateProProjectInStore,
+  deleteProProjectInStore,
 } from "./services/proProjectsStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
@@ -2799,11 +2799,7 @@ const confirmClientProjectCreation = () => {
     email: trimmedClientEmail,
   };
 
-  setDatabase(prev => {
-    const nextDb = withCreatedProProject(prev, finalProject);
-    saveToDatabase(nextDb);
-    return nextDb;
-  });
+  createProProjectInStore(setDatabase, saveToDatabase, finalProject);
 
   const actionAfterCreate = pendingProjectAction;
   resetClientModalState();
@@ -2989,11 +2985,7 @@ const rect = e.currentTarget.getBoundingClientRect();
 setMenuPos({ x: rect.right, y: rect.bottom }); setMenuProject(project);
 };
 const updateProProject = (projectId, updates) => {
-setDatabase(prev => {
-  const nextDb = withUpdatedProProject(prev, projectId, updates);
-  saveToDatabase(nextDb);
-  return nextDb;
-});
+updateProProjectInStore(setDatabase, saveToDatabase, projectId, updates);
 setCurrentProject(prev => (prev && prev.id === projectId ? { ...prev, ...updates } : prev));
 };
 const openClientEditor = (project) => {
@@ -3020,11 +3012,7 @@ const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "perso
   }
 };
 const deleteProProjectFromDB = (projectId) => {
-setDatabase(prev => {
-  const nextDb = withDeletedProProject(prev, projectId);
-  saveToDatabase(nextDb);
-  return nextDb;
-});
+deleteProProjectInStore(setDatabase, saveToDatabase, projectId);
 setCurrentProject(prev => (prev && prev.id === projectId ? null : prev));
 };
 const handleRename = (newName) => { updateProject(renameProject.id, { name: newName }); setRenameProject(null); };
