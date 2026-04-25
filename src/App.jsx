@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import AppPro from "./AppPro";
 import ClientPage from "./ClientPage";
+import {
+  getProProjects,
+  withCreatedProProject,
+  withUpdatedProProject,
+  withDeletedProProject,
+} from "./services/proProjectsStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -2794,11 +2800,7 @@ const confirmClientProjectCreation = () => {
   };
 
   setDatabase(prev => {
-    const nextDb = {
-      ...prev,
-      projectsPro: [...(prev.projectsPro || []), finalProject],
-      settings: { ...prev.settings, lastProjectId: finalProject.id }
-    };
+    const nextDb = withCreatedProProject(prev, finalProject);
     saveToDatabase(nextDb);
     return nextDb;
   });
@@ -2988,10 +2990,7 @@ setMenuPos({ x: rect.right, y: rect.bottom }); setMenuProject(project);
 };
 const updateProProject = (projectId, updates) => {
 setDatabase(prev => {
-  const nextDb = {
-    ...prev,
-    projectsPro: (prev.projectsPro || []).map(p => p.id === projectId ? { ...p, ...updates } : p)
-  };
+  const nextDb = withUpdatedProProject(prev, projectId, updates);
   saveToDatabase(nextDb);
   return nextDb;
 });
@@ -3022,13 +3021,11 @@ const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "perso
 };
 const deleteProProjectFromDB = (projectId) => {
 setDatabase(prev => {
-  const nextDb = {
-    ...prev,
-    projectsPro: (prev.projectsPro || []).filter(p => p.id !== projectId)
-  };
+  const nextDb = withDeletedProProject(prev, projectId);
   saveToDatabase(nextDb);
   return nextDb;
 });
+setCurrentProject(prev => (prev && prev.id === projectId ? null : prev));
 };
 const handleRename = (newName) => { updateProject(renameProject.id, { name: newName }); setRenameProject(null); };
 const handleDelete = () => { deleteProjectFromDB(deleteProject.id); setDeleteProject(null); };
@@ -3314,7 +3311,7 @@ const HubView = () => (
 </div>
 {mode === "pro" ? (
 <AppPro
-  projectsPro={database.projectsPro || []}
+  projectsPro={getProProjects(database)}
   onCreateProProject={() => {
     setCreationMode("pro");
     setShowNewMenu(true);
@@ -4533,4 +4530,3 @@ onEditClient={openClientEditor}
 </div>
 );
 }
-
