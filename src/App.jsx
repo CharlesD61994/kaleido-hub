@@ -2466,6 +2466,7 @@ export default function KaleidoHub() {
   const [currentPatron, setCurrentPatron] = useState(null);
   const [database, setDatabase] = useState(() => initDatabase());
   const [mode, setMode] = useState("personal");
+  const [creationMode, setCreationMode] = useState("personal");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [exportData, setExportData] = useState('');
   const [showExportData, setShowExportData] = useState(false);
@@ -2772,7 +2773,10 @@ setPrevView(currentView);
 setCurrentProject(project);
 setCurrentView(VIEWS.PDF_VIEWER);
 };
-const handleNewProject = () => setShowNewMenu(true);
+const handleNewProject = () => {
+  setCreationMode("personal");
+  setShowNewMenu(true);
+};
 const handleNewCustomPatron = () => {
 const newId = (database.settings.lastPatronId || 0) + 1;
 const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
@@ -3114,48 +3118,8 @@ const HubView = () => (
 <AppPro
   projectsPro={database.projectsPro || []}
   onCreateProProject={() => {
-    const currentProjectsPro = Array.isArray(database?.projectsPro) ? database.projectsPro : [];
-    const currentSettings =
-      database?.settings && typeof database.settings === "object"
-        ? database.settings
-        : { lastProjectId: 0, lastPatronId: 0 };
-
-    const nextId =
-      typeof currentSettings.lastProjectId === "number"
-        ? currentSettings.lastProjectId + 1
-        : currentProjectsPro.reduce((maxId, p) => Math.max(maxId, Number(p?.id) || 0), 0) + 1;
-
-    const nextProject = {
-      id: nextId,
-      name: `Projet pro ${nextId}`,
-      client: "",
-      rang: 0,
-      total: 1,
-      colorIdx: currentProjectsPro.length % 8,
-      image: null,
-      projectType: "custom",
-      type: "crochet",
-      laine: "",
-      outil: "",
-      notes: "",
-      parties: [],
-      patronId: null,
-      linkMode: "detached",
-      status: "en_cours",
-      createdAt: new Date().toISOString(),
-    };
-
-    const nextDb = {
-      ...database,
-      projectsPro: [...currentProjectsPro, nextProject],
-      settings: {
-        ...currentSettings,
-        lastProjectId: nextId,
-      },
-    };
-
-    setDatabase(nextDb);
-    saveToDatabase(nextDb);
+    setCreationMode("pro");
+    setShowNewMenu(true);
   }}
   onProjectOpen={(project) => {
     if (project?.projectType === "pdf") {
