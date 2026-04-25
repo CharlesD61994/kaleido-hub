@@ -37,6 +37,18 @@ const openIndexedDb = (dbName, storeName) => {
 const pdfDb = openIndexedDb("kaleido_pdfs", "pdfs");
 const imageDb = openIndexedDb("kaleido_images", "images");
 
+// Cache mémoire court terme : évite le flash quand React remonte une bulle
+// pendant une navigation entre modules. IndexedDB reste la source persistante.
+const mediaMemoryCache = {
+  pdfs: new Map(),
+  images: new Map(),
+};
+
+export const getCachedPdf = (id) => (id ? mediaMemoryCache.pdfs.get(id) || null : null);
+export const getCachedImage = (id) => (id ? mediaMemoryCache.images.get(id) || null : null);
+
+const getCacheForStore = (storeName) => storeName === "images" ? mediaMemoryCache.images : mediaMemoryCache.pdfs;
+
 const putIntoStore = async (openDb, storeName, id, data) => {
   const db = await openDb();
 
@@ -47,18 +59,26 @@ const putIntoStore = async (openDb, storeName, id, data) => {
     tx.onerror = () => reject(tx.error);
   });
 
+  getCacheForStore(storeName).set(id, data);
   return true;
 };
 
 const getFromStore = async (openDb, storeName, id) => {
   if (!id) return null;
 
+  const cache = getCacheForStore(storeName);
+  if (cache.has(id)) return cache.get(id) || null;
+
   const db = await openDb();
 
   return await new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
     const req = tx.objectStore(storeName).get(id);
-    req.onsuccess = () => resolve(req.result?.data || null);
+    req.onsuccess = () => {
+      const data = req.result?.data || null;
+      if (data) cache.set(id, data);
+      resolve(data);
+    };
     req.onerror = () => reject(req.error);
   });
 };
@@ -75,6 +95,7 @@ const deleteFromStore = async (openDb, storeName, id) => {
     tx.onerror = () => reject(tx.error);
   });
 
+  getCacheForStore(storeName).delete(id);
   return true;
 };
 
