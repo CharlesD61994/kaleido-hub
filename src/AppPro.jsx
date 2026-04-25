@@ -134,7 +134,7 @@ function Icon({ name, size = 20, stroke = 1.9, color = "currentColor", style = {
   }
 }
 
-function ContextMenu({ project, position, onClose, onRename, onDelete, onChangePhoto, onChangeColor }) {
+function ContextMenu({ project, position, onClose, onRename, onDelete, onChangePhoto, onChangeColor, onEditClient }) {
   if (!project) return null;
   const color = KALEIDOSCOPE_COLORS[project.colorIdx % KALEIDOSCOPE_COLORS.length];
   const [showColors, setShowColors] = useState(false);
@@ -164,6 +164,7 @@ function ContextMenu({ project, position, onClose, onRename, onDelete, onChangeP
 
         {[
           { icon: <Icon name="edit" size={21} color="#E2E0DC" />, label: "Renommer", action: onRename },
+          { icon: <Icon name="projects" size={21} color="#E2E0DC" />, label: "Modifier la fiche client", action: onEditClient },
           { icon: <Icon name="image" size={21} color="#E2E0DC" />, label: "Changer la photo", action: onChangePhoto },
         ].map((item) => (
           <button
@@ -754,6 +755,7 @@ export default function AppPro({
   onDeleteProProject,
   onChangeProProjectPhoto,
   onChangeProProjectColor,
+  onEditProProjectClient,
 }) {
   const [menuProject, setMenuProject] = useState(null);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
@@ -976,6 +978,12 @@ export default function AppPro({
         onRename={() => { setRenameProject(menuProject); setMenuProject(null); }}
         onDelete={() => { setDeleteProject(menuProject); setMenuProject(null); }}
         onChangePhoto={() => { setPhotoTarget(menuProject); setMenuProject(null); }}
+        onEditClient={() => {
+          if (menuProject && typeof onEditProProjectClient === "function") {
+            onEditProProjectClient(menuProject);
+          }
+          setMenuProject(null);
+        }}
         onChangeColor={(idx) => {
           if (menuProject && typeof onChangeProProjectColor === "function") {
             onChangeProProjectColor(menuProject.id, idx);
