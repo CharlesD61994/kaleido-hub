@@ -132,3 +132,4 @@ export const deleteImage = async (id) => {
     return false;
   }
 };
+
