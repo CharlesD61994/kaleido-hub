@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { loadImage, getCachedImage } from "./services/mediaStore";
+import { computeProgress } from "./services/progressStore";
 
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
@@ -23,20 +24,6 @@ const getProjectCachedImage = (project) => {
   if (directImage) return directImage;
   return getCachedImage(project?.image?.imageId) || null;
 };
-
-function computeProgress(project) {
-  if (!project || typeof project !== "object") return 0;
-
-  if (typeof project.rang === "number" && typeof project.total === "number" && project.total > 0) {
-    return Math.max(0, Math.min(100, Math.round((project.rang / project.total) * 100)));
-  }
-
-  if (typeof project.progress === "number") {
-    return Math.max(0, Math.min(100, Math.round(project.progress)));
-  }
-
-  return 0;
-}
 
 function YarnGlyph() {
   return (
