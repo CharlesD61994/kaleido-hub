@@ -17,14 +17,6 @@ import {
 import { updateProjectProgress } from "./services/progressStore";
 import { loadImage, loadPdf, saveImage, savePdf, deleteImage, deletePdf, getCachedImage } from "./services/mediaStore";
 import { loadDatabase, saveDatabase, importDatabase } from "./services/databaseStore";
-import {
-  addPatronRecord,
-  updatePatronRecord,
-  deletePatronRecord,
-  loadPatronDraft,
-  savePatronDraft,
-  clearPatronDraft,
-} from "./services/patronStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -427,6 +419,69 @@ return (
 );
 }
 
+const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
+const debug = (...args) => {
+if (typeof window !== "undefined" && window.KALEIDO_DEBUG) {
+console.log("[KALEIDO]", ...args);
+}
+};
+const canUseStorage = () => {
+  try {
+    return typeof window !== "undefined" && typeof localStorage !== "undefined";
+  } catch (e) {
+    return false;
+  }
+};
+const safeParseJSON = (value) => {
+try { return value ? JSON.parse(value) : null; } catch (e) { return null; }
+};
+const readStorageJSON = (key) => {
+  if (!canUseStorage()) return null;
+  return safeParseJSON(localStorage.getItem(key));
+};
+const writeStorageJSON = (key, value) => {
+  if (!canUseStorage()) return false;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.warn("[KALEIDO] writeStorageJSON error:", e);
+    return false;
+  }
+};
+const clearStorageKey = (key) => {
+  if (!canUseStorage()) return false;
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (e) {
+    console.warn("[KALEIDO] clearStorageKey error:", e);
+    return false;
+  }
+};
+const loadPatronDraft = ({ sourceId, mode }) => {
+  const payload = readStorageJSON(PATRON_BACKUP_KEY);
+  if (!payload || typeof payload !== "object") return null;
+  if ((payload.mode || null) !== mode) return null;
+  if ((payload.sourceId ?? null) !== (sourceId ?? null)) return null;
+  return payload.patron && typeof payload.patron === "object" ? payload.patron : null;
+};
+const savePatronDraft = ({ label, mode, sourceId, patron }) => {
+  return writeStorageJSON(PATRON_BACKUP_KEY, {
+    label,
+    savedAt: new Date().toISOString(),
+    mode,
+    sourceId,
+    patron
+  });
+};
+const clearPatronDraft = ({ sourceId, mode }) => {
+  const payload = readStorageJSON(PATRON_BACKUP_KEY);
+  if (!payload || typeof payload !== "object") return false;
+  if ((payload.mode || null) !== mode) return false;
+  if ((payload.sourceId ?? null) !== (sourceId ?? null)) return false;
+  return clearStorageKey(PATRON_BACKUP_KEY);
+};
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
 // STOCKAGE MÉDIAS — externalisé dans services/mediaStore.js
@@ -2623,17 +2678,78 @@ const totalRangs = projects.reduce((s, p) => s + p.rang, 0);
 const termines = projects.filter(p => p.rang >= p.total).length;
 // ─── PATRONS CRUD ─────────────────────────────────────────────
 const addPatron = (patron) => {
-  return addPatronRecord(setDatabase, saveDatabase, patron);
+const newDb = { ...database, patrons: [...(database.patrons || []), patron], settings: { ...database.settings, lastPatronId: patron.id } };
+setDatabase(newDb); saveDatabase(newDb);
 };
-
 const updatePatron = (patronId, updates) => {
-  return updatePatronRecord(setDatabase, saveDatabase, patronId, updates);
+const updatedPatrons = (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p);
+const updatedPatron = updatedPatrons.find(p => p.id === patronId);
+
+const computeCustomTotal = (patron) => Math.max(
+  1,
+  (patron?.parties || []).reduce(
+    (sum, partie) => sum + ((partie?.rangs || []).filter(r => !r?.isNote).length),
+    0
+  )
+);
+
+const syncProjectFromPatron = (project) => {
+  if (project.patronId !== patronId || !updatedPatron || project.linkMode === 'detached') return project;
+
+  if (updatedPatron.projectType === 'custom') {
+    return {
+      ...project,
+      name: updatedPatron.name,
+      colorIdx: updatedPatron.colorIdx,
+      image: updatedPatron.image || null,
+      projectType: 'custom',
+      type: updatedPatron.type,
+      laine: updatedPatron.laine,
+      outil: updatedPatron.outil,
+      notes: updatedPatron.notes,
+      parties: updatedPatron.parties || [],
+      total: computeCustomTotal(updatedPatron),
+    };
+  }
+
+  return {
+    ...project,
+    name: updatedPatron.name,
+    colorIdx: updatedPatron.colorIdx,
+    image: updatedPatron.image || null,
+    projectType: 'pdf',
+    pdfId: updatedPatron.pdfId,
+    pdfParties: updatedPatron.pdfParties || [],
+    total: updatedPatron.total || 1,
+  };
 };
 
+const newDb = {
+  ...database,
+  patrons: updatedPatrons,
+  projectsPersonal: (database.projectsPersonal || []).map(syncProjectFromPatron),
+  projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
+};
+setDatabase(newDb); saveDatabase(newDb);
+
+};
 const deletePatronFromDB = (patronId) => {
-  return deletePatronRecord(setDatabase, saveDatabase, patronId);
+const detachProjectFromPatron = (project) => {
+  if (project.patronId !== patronId) return project;
+  return {
+    ...project,
+    patronId: null,
+    linkMode: 'detached',
+  };
 };
-
+const newDb = {
+  ...database,
+  patrons: (database.patrons || []).filter(p => p.id !== patronId),
+  projectsPersonal: (database.projectsPersonal || []).map(detachProjectFromPatron),
+  projectsPro: (database.projectsPro || []).map(detachProjectFromPatron),
+};
+setDatabase(newDb); saveDatabase(newDb);
+};
 const navigateToHub = () => {
 setPrevView(currentView);
 setViewTransition('slide-out');
@@ -3626,22 +3742,7 @@ return;
   clearPatronDraft({ sourceId: source?.id ?? null, mode: draftMode });
 
   if (isPatronMode) {
-    const persistedUpdates = {
-      name: normalizedPatron.nom,
-      laine: normalizedPatron.laine,
-      type: normalizedPatron.technique,
-      outil: normalizedPatron.outil,
-      notes: normalizedPatron.notes,
-      parties: normalizedPatron.parties,
-      total: totalRangsNormalized,
-    };
-
-    updatePatron(currentPatron.id, persistedUpdates);
-    setCurrentPatron(prevPatron =>
-      prevPatron && String(prevPatron.id) === String(currentPatron.id)
-        ? { ...prevPatron, ...persistedUpdates }
-        : prevPatron
-    );
+    updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized });
     navigateToLibrary();
   } else {
     updateProject(currentProject.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: Math.max(totalRangsNormalized, currentProject.total || 1) });
