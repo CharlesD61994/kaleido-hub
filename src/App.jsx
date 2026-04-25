@@ -3353,18 +3353,21 @@ try {
 const allProjects = [...(database.projectsPersonal||[]), ...(database.projectsPro||[])];
 const pdfProjects = allProjects.filter(p => p.projectType === 'pdf' && p.pdfId);
 const patronPdfs = (database.patrons||[]).filter(p => p.projectType === 'pdf' && p.pdfId);
-const imageProjects = [...allProjects, ...(database.patrons||[])].filter(p => p?.image?.imageId);
 const pdfs = {};
-const images = {};
 for (const p of [...pdfProjects, ...patronPdfs]) {
 const data = await loadPdf(p.pdfId);
 if (data) pdfs[p.pdfId] = data;
 }
-for (const p of imageProjects) {
-const imageId = p?.image?.imageId;
-if (!imageId || images[imageId]) continue;
-const data = await loadImage(imageId);
-if (data) images[imageId] = data;
+const imageIds = new Set();
+const collectImageId = (item) => {
+  const imageId = item?.image?.imageId;
+  if (imageId) imageIds.add(imageId);
+};
+[...allProjects, ...(database.patrons || [])].forEach(collectImageId);
+const images = {};
+for (const imageId of imageIds) {
+  const imageData = await loadImage(imageId);
+  if (imageData) images[imageId] = imageData;
 }
 const fullExport = JSON.stringify({ ...database, pdfs, images });
 const blob = new Blob([fullExport], { type: 'application/json' });
@@ -3395,43 +3398,33 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
-const rawDbData = data?.database && typeof data.database === "object" ? data.database : data;
-const { pdfs, images, database: _ignoredDatabase, ...dbDataCandidate } = rawDbData;
+const sourceDb = data?.database && typeof data.database === "object" ? data.database : data;
 const restoredDb = {
-  ...getDefaultDatabase(),
-  ...dbDataCandidate,
-  projectsPersonal: Array.isArray(dbDataCandidate.projectsPersonal) ? dbDataCandidate.projectsPersonal : [],
-  projectsPro: Array.isArray(dbDataCandidate.projectsPro) ? dbDataCandidate.projectsPro : [],
-  patrons: Array.isArray(dbDataCandidate.patrons) ? dbDataCandidate.patrons : [],
-  settings: {
-    ...getDefaultDatabase().settings,
-    ...(dbDataCandidate.settings || {}),
-  },
+  projectsPersonal: Array.isArray(sourceDb?.projectsPersonal) ? sourceDb.projectsPersonal : [],
+  projectsPro: Array.isArray(sourceDb?.projectsPro) ? sourceDb.projectsPro : [],
+  patrons: Array.isArray(sourceDb?.patrons) ? sourceDb.patrons : [],
+  settings: sourceDb?.settings && typeof sourceDb.settings === "object" ? sourceDb.settings : getDefaultDatabase().settings,
 };
-
-// Restaurer les PDFs dans IndexedDB
-if (data.pdfs) {
-for (const [pdfId, pdfData] of Object.entries(data.pdfs)) {
-await savePdf(pdfId, pdfData);
-}
-}
-
-// Restaurer les images dans IndexedDB
-if (data.images) {
-for (const [imageId, imageData] of Object.entries(data.images)) {
-await saveImage(imageId, imageData);
-}
-}
-
-// Restaurer la base de données
 if (!isValidDatabase(restoredDb)) {
-throw new Error("Le fichier importé ne contient pas une base Kaleido valide.");
+  throw new Error("Le fichier JSON ne contient pas une base Kaleido valide.");
+}
+// Restaurer les PDFs dans IndexedDB
+const pdfsToRestore = data?.pdfs || sourceDb?.pdfs || {};
+for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
+  await savePdf(pdfId, pdfData);
+}
+// Restaurer les images dans IndexedDB
+const imagesToRestore = data?.images || sourceDb?.images || {};
+for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
+  await saveImage(imageId, imageData);
 }
 const saved = saveToDatabase(restoredDb);
 if (!saved) {
-throw new Error("La base importée n’a pas pu être sauvegardée dans le navigateur.");
+  throw new Error("La base restaurée n’a pas pu être sauvegardée dans le navigateur.");
 }
 setDatabase(restoredDb);
+setCurrentProject(null);
+setCurrentView(VIEWS.HUB);
 setShowSettingsModal(false);
 e.target.value = "";
 alert('✅ Données restaurées avec succès !');
