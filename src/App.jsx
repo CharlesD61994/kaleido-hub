@@ -1450,7 +1450,7 @@ const col = KALEIDOSCOPE_COLORS[p.colorIdx % KALEIDOSCOPE_COLORS.length];
 const isActive = currentPartie?.id === p.id;
 return (
 <button key={p.id} onClick={() => goToPartie(p.id)}
-style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 18, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "all 220ms cubic-bezier(0.22, 1, 0.36, 1)", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
+style={{ background: isActive ? `linear-gradient(135deg, ${col.bg}, ${col.light})` : "#1E1E32", border: "none", borderRadius: 18, padding: "6px 18px", color: isActive ? "#fff" : col.light, fontSize: 12, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, cursor: "pointer", transition: "none", transform: isActive ? "scale(1.05)" : "scale(1)", textTransform: "uppercase", letterSpacing: 0.5, boxShadow: isActive ? `0 4px 12px ${col.bg}44` : "none", minWidth: 75, height: 32, lineHeight: "20px", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: isActive ? 2 : 0, whiteSpace: "nowrap", flexShrink: 0 }}>
 {p.nom}
 </button>
 );
@@ -3151,54 +3151,78 @@ const HubView = () => (
 {/* Toggle Personnel / Professionnel */}
 <div style={{ display: "flex", background: "#1E1E32", borderRadius: 14, padding: 4, marginBottom: 10 }}>
 {["personal", "pro"].map(m => (
-<button key={m} onClick={() => { if (mode !== m) setMode(m); }} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "background 160ms ease, color 160ms ease", transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
+<button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px 0", borderRadius: 11, border: "none", background: mode === m ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "none", color: mode === m ? "#fff" : "#6B6A7A", fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", transition: "none" }}>
 {m === "personal" ? "Personnel" : "Professionnel"}
 </button>
 ))}
 </div>
+{/* Modules Personnel / Professionnel gardés montés : pas de remount, pas de display:none */}
 <div
-  data-kaleido-module="pro"
-  aria-hidden={mode !== "pro"}
+  data-kaleido-module-stack="true"
   style={{
-    display: mode === "pro" ? "block" : "none",
-    minHeight: mode === "pro" ? "auto" : 0,
-    contain: "paint",
+    position: "relative",
+    minHeight: 0,
+    isolation: "isolate",
     transform: "translateZ(0)",
-    backfaceVisibility: "hidden"
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden"
   }}
 >
-  <AppPro
-    projectsPro={database.projectsPro || []}
-    onCreateProProject={() => {
-      setCreationMode("pro");
-      setShowNewMenu(true);
-    }}
-    onProjectOpen={(project) => {
-      if (project?.projectType === "pdf") {
-        navigateToPdfViewer(project);
-      } else {
-        navigateToRowCounter(project);
-      }
-    }}
-    onRenameProProject={(projectId, newName) => updateProProject(projectId, { name: newName })}
-    onDeleteProProject={(projectId) => deleteProProjectFromDB(projectId)}
-    onChangeProProjectPhoto={(projectId, image) => persistProjectImageToIndexedDB(projectId, image, "pro")}
-    onChangeProProjectColor={(projectId, colorIdx) => updateProProject(projectId, { colorIdx })}
-    onEditProProjectClient={(project) => openClientEditor(project)}
-  />
-</div>
-<div
-  data-kaleido-module="personal"
-  aria-hidden={mode !== "personal"}
-  style={{
-    display: mode === "personal" ? "block" : "none",
-    minHeight: mode === "personal" ? "auto" : 0,
-    contain: "paint",
+  <div
+    aria-hidden={mode !== "pro"}
+    style={{
+    position: mode === "pro" ? "relative" : "absolute",
+    inset: mode === "pro" ? "auto" : 0,
+    width: "100%",
+    opacity: mode === "pro" ? 1 : 0,
+    visibility: mode === "pro" ? "visible" : "hidden",
+    pointerEvents: mode === "pro" ? "auto" : "none",
+    overflow: mode === "pro" ? "visible" : "hidden",
+    height: mode === "pro" ? "auto" : 0,
     transform: "translateZ(0)",
-    backfaceVisibility: "hidden"
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    contain: "layout paint style"
   }}
->
-<>
+  >
+<AppPro
+  projectsPro={database.projectsPro || []}
+  onCreateProProject={() => {
+    setCreationMode("pro");
+    setShowNewMenu(true);
+  }}
+  onProjectOpen={(project) => {
+    if (project?.projectType === "pdf") {
+      navigateToPdfViewer(project);
+    } else {
+      navigateToRowCounter(project);
+    }
+  }}
+  onRenameProProject={(projectId, newName) => updateProProject(projectId, { name: newName })}
+  onDeleteProProject={(projectId) => deleteProProjectFromDB(projectId)}
+  onChangeProProjectPhoto={(projectId, image) => persistProjectImageToIndexedDB(projectId, image, "pro")}
+  onChangeProProjectColor={(projectId, colorIdx) => updateProProject(projectId, { colorIdx })}
+  onEditProProjectClient={(project) => openClientEditor(project)}
+/>
+  </div>
+
+  <div
+    aria-hidden={mode !== "personal"}
+    style={{
+    position: mode === "personal" ? "relative" : "absolute",
+    inset: mode === "personal" ? "auto" : 0,
+    width: "100%",
+    opacity: mode === "personal" ? 1 : 0,
+    visibility: mode === "personal" ? "visible" : "hidden",
+    pointerEvents: mode === "personal" ? "auto" : "none",
+    overflow: mode === "personal" ? "visible" : "hidden",
+    height: mode === "personal" ? "auto" : 0,
+    transform: "translateZ(0)",
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+    contain: "layout paint style"
+  }}
+  >
 {/* Stats */}
 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
 {[
@@ -3266,9 +3290,8 @@ setPhotoTarget(null);
 }}
 />
 )}
-</>
-</div>
-{/* Modale import */}
+  </div>
+</div>{/* Modale import */}
 {showDataImportModal && (
 <div onClick={() => setShowDataImportModal(false)} style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "flex-start", padding: 20, paddingTop: "max(72px, 10vh)" }}>
 <div onClick={e => e.stopPropagation()} data-kaleido-modal-card="true" style={{ background: "#1A1A2E", borderRadius: 22, padding: 20, width: "100%", maxWidth: 390, maxHeight: "85vh", display: "flex", flexDirection: "column" }}>
