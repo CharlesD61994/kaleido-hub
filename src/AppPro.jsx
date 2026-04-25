@@ -565,24 +565,37 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(96px, 28vw, 110px)";
-  const [resolvedImage, setResolvedImage] = useState(
-    project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null)
-  );
+  const initialDirectImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+  const initialImageId = project?.image?.imageId;
+  const [resolvedImage, setResolvedImage] = useState(initialDirectImage || null);
+  const [isImageLoading, setIsImageLoading] = useState(!initialDirectImage && !!initialImageId);
 
   useEffect(() => {
     let cancelled = false;
     const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
     if (directImage) {
       setResolvedImage(directImage);
+      setIsImageLoading(false);
       return () => { cancelled = true; };
     }
     const imageId = project?.image?.imageId;
     if (!imageId) {
       setResolvedImage(null);
+      setIsImageLoading(false);
       return () => { cancelled = true; };
     }
+    setResolvedImage(null);
+    setIsImageLoading(true);
     loadImage(imageId).then((data) => {
-      if (!cancelled) setResolvedImage(data || null);
+      if (!cancelled) {
+        setResolvedImage(data || null);
+        setIsImageLoading(false);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setResolvedImage(null);
+        setIsImageLoading(false);
+      }
     });
     return () => { cancelled = true; };
   }, [project?.image]);
@@ -663,9 +676,11 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
                 }}
               />
             ) : (
-              <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <YarnGlyph />
-              </span>
+              isImageLoading ? null : (
+                <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <YarnGlyph />
+                </span>
+              )
             )}
           </div>
 
