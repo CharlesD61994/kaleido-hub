@@ -796,18 +796,6 @@ const lastDist = useRef(null);
 const lastScale = useRef(1);
 const lastPos = useRef({ x: 0, y: 0 });
 const CROP_SIZE = 260;
-
-useEffect(() => {
-  let cancelled = false;
-  const imageId = existingImage?.imageId;
-  if (!imgSrc && imageId) {
-    loadImage(imageId).then((data) => {
-      if (!cancelled && data) setImgSrc(data);
-    });
-  }
-  return () => { cancelled = true; };
-}, [existingImage?.imageId]);
-
 const handleFile = (e) => {
 const file = e.target.files[0];
 if (!file) return;
@@ -2915,11 +2903,7 @@ const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "perso
   const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
   if (!imagePayload) return;
   await saveImage(imageId, imagePayload);
-  const imageRef = {
-    imageId,
-    pos: imgData?.pos || { x: 0, y: 0 },
-    scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
-  };
+  const imageRef = { imageId, preview: imgData?.preview || imagePayload };
   if (scope === "pro") {
     updateProProject(projectId, { image: imageRef });
   } else {
@@ -3294,13 +3278,7 @@ if (photoTarget.context === 'project') {
   const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
   if (imagePayload) {
     await saveImage(imageId, imagePayload);
-    updatePatron(photoTarget.id, {
-      image: {
-        imageId,
-        pos: imgData?.pos || { x: 0, y: 0 },
-        scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
-      }
-    });
+    updatePatron(photoTarget.id, { image: { imageId, preview: imgData?.preview || imagePayload } });
   }
 }
 setPhotoTarget(null);
@@ -3375,12 +3353,20 @@ try {
 const allProjects = [...(database.projectsPersonal||[]), ...(database.projectsPro||[])];
 const pdfProjects = allProjects.filter(p => p.projectType === 'pdf' && p.pdfId);
 const patronPdfs = (database.patrons||[]).filter(p => p.projectType === 'pdf' && p.pdfId);
+const imageProjects = [...allProjects, ...(database.patrons||[])].filter(p => p?.image?.imageId);
 const pdfs = {};
+const images = {};
 for (const p of [...pdfProjects, ...patronPdfs]) {
 const data = await loadPdf(p.pdfId);
 if (data) pdfs[p.pdfId] = data;
 }
-const fullExport = JSON.stringify({ ...database, pdfs });
+for (const p of imageProjects) {
+const imageId = p?.image?.imageId;
+if (!imageId || images[imageId]) continue;
+const data = await loadImage(imageId);
+if (data) images[imageId] = data;
+}
+const fullExport = JSON.stringify({ ...database, pdfs, images });
 const blob = new Blob([fullExport], { type: 'application/json' });
 const url = URL.createObjectURL(blob);
 const a = document.createElement('a');
@@ -3409,17 +3395,45 @@ if (!file) return;
 try {
 const text = await file.text();
 const data = JSON.parse(text);
+const rawDbData = data?.database && typeof data.database === "object" ? data.database : data;
+const { pdfs, images, database: _ignoredDatabase, ...dbDataCandidate } = rawDbData;
+const restoredDb = {
+  ...getDefaultDatabase(),
+  ...dbDataCandidate,
+  projectsPersonal: Array.isArray(dbDataCandidate.projectsPersonal) ? dbDataCandidate.projectsPersonal : [],
+  projectsPro: Array.isArray(dbDataCandidate.projectsPro) ? dbDataCandidate.projectsPro : [],
+  patrons: Array.isArray(dbDataCandidate.patrons) ? dbDataCandidate.patrons : [],
+  settings: {
+    ...getDefaultDatabase().settings,
+    ...(dbDataCandidate.settings || {}),
+  },
+};
+
 // Restaurer les PDFs dans IndexedDB
 if (data.pdfs) {
 for (const [pdfId, pdfData] of Object.entries(data.pdfs)) {
 await savePdf(pdfId, pdfData);
 }
 }
+
+// Restaurer les images dans IndexedDB
+if (data.images) {
+for (const [imageId, imageData] of Object.entries(data.images)) {
+await saveImage(imageId, imageData);
+}
+}
+
 // Restaurer la base de données
-const { pdfs, ...dbData } = data;
-setDatabase(dbData);
-saveToDatabase(dbData);
+if (!isValidDatabase(restoredDb)) {
+throw new Error("Le fichier importé ne contient pas une base Kaleido valide.");
+}
+const saved = saveToDatabase(restoredDb);
+if (!saved) {
+throw new Error("La base importée n’a pas pu être sauvegardée dans le navigateur.");
+}
+setDatabase(restoredDb);
 setShowSettingsModal(false);
+e.target.value = "";
 alert('✅ Données restaurées avec succès !');
 } catch(e) {
 alert('Erreur import : ' + e.message);
@@ -4349,21 +4363,7 @@ setShowLibraryImportModal(false);
 <PhotoCropModal
 existingImage={(database.patrons||[]).find(p => p.id === photoTarget.id)?.image}
 onClose={() => setPhotoTarget(null)}
-onConfirm={async (imgData) => {
-const imageId = `img_patron_${photoTarget.id}_${Date.now()}`;
-const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
-if (imagePayload) {
-  await saveImage(imageId, imagePayload);
-  updatePatron(photoTarget.id, {
-    image: {
-      imageId,
-      pos: imgData?.pos || { x: 0, y: 0 },
-      scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
-    }
-  });
-}
-setPhotoTarget(null);
-}}
+onConfirm={(imgData) => { updatePatron(photoTarget.id, { image: imgData }); setPhotoTarget(null); }}
 />
 )}
 {/* Modale édition patron PDF — dans KaleidoHub pour accès direct à database */}
