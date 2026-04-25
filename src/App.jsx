@@ -1913,7 +1913,7 @@ function PdfCounterCard({ color, currentPartie, totalPartieCourante, rangDansPar
     </div>
   );
 }
-function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
+function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient }) {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -2112,18 +2112,143 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress }) {
         ::-webkit-scrollbar{width:0} * { -webkit-tap-highlight-color: transparent; }
         @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
       `}</style>
-      {/* ══ BARRE FIXE ══════════════════════════════════════════ */}
-      <div style={{ flexShrink: 0, background: "linear-gradient(180deg, #1A0A2E 0%, #0D0D1A 100%)", zIndex: 10, padding: "48px 16px 12px" }}>
-        {/* Ligne header : retour + titre + timer */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <button data-kaleido-back-button="true" onClick={handleBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", color: color.light, fontSize: 15, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 15, fontWeight: 700, fontFamily: "'Syne', sans-serif", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project?.name}</h1>
-          <div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 14, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
-            <span style={{ color: "#F1F0EE", fontSize: 20, fontFamily: "monospace", fontWeight: 700 }}>{formatTime(elapsedTime)}</span>
-            <button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 9, padding: "5px 9px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
-            <button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 9, padding: "5px 9px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>RESET</button>
+      {/* ══ BARRE FIXE — header PDF harmonisé avec les patrons custom ══════════════════════════════════════════ */}
+      <div style={{
+        flexShrink: 0,
+        position: "relative",
+        zIndex: 10,
+        background: "rgba(13,13,26,0.95)",
+        backdropFilter: "blur(10px)",
+        padding: "44px 20px 12px"
+      }}>
+        {/* Header unifié : retour + titre lisible + timer compact */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12 }}>
+          <button
+            data-kaleido-back-button="true"
+            onClick={handleBack}
+            style={{
+              background: "#1E1E32",
+              border: "none",
+              borderRadius: 10,
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: color.light,
+              fontSize: 16,
+              cursor: "pointer",
+              flexShrink: 0
+            }}
+          >
+            ←
+          </button>
+
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+            <h1 style={{
+              color: "#F1F0EE",
+              margin: 0,
+              fontSize: 16,
+              lineHeight: 1.18,
+              fontWeight: 700,
+              fontFamily: "'Syne', sans-serif",
+              overflowWrap: "anywhere"
+            }}>
+              {project?.name || "Projet PDF"}
+            </h1>
+            <div style={{
+              color: color.light,
+              fontSize: 11,
+              fontFamily: "monospace",
+              marginTop: 3,
+              textTransform: "uppercase",
+              letterSpacing: 0.4
+            }}>
+              PDF{currentPartie?.nom ? ` • ${currentPartie.nom}` : ""}
+            </div>
+
+            {project?.client && (
+              <button
+                onClick={() => typeof onEditClient === "function" && onEditClient(project)}
+                style={{
+                  marginTop: 7,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  maxWidth: "100%",
+                  background: `${color.bg}22`,
+                  border: `1px solid ${color.light}33`,
+                  borderRadius: 999,
+                  padding: "5px 9px",
+                  color: color.light,
+                  fontSize: 12,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 700,
+                  cursor: "pointer"
+                }}
+              >
+                <span aria-hidden="true">👤</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.client}</span>
+                <span style={{ color: "#A8A6B8", fontWeight: 600 }}>Voir</span>
+              </button>
+            )}
+          </div>
+
+          <div style={{
+            background: "linear-gradient(135deg, #1E1E32, #2A2A3E)",
+            border: `2px solid ${color.light}44`,
+            borderRadius: 16,
+            padding: "8px 10px",
+            boxShadow: `0 6px 20px ${color.bg}44`,
+            minWidth: 112,
+            flexShrink: 0
+          }}>
+            <div style={{
+              color: "#F1F0EE",
+              fontSize: 18,
+              lineHeight: 1,
+              fontFamily: "monospace",
+              fontWeight: 700,
+              textAlign: "center",
+              marginBottom: 6
+            }}>
+              {formatTime(elapsedTime)}
+            </div>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+              <button
+                onClick={toggleTimer}
+                style={{
+                  background: isTimerRunning ? "#DC2626" : "#059669",
+                  border: "none",
+                  borderRadius: 9,
+                  padding: "5px 8px",
+                  color: "#fff",
+                  fontSize: 10,
+                  cursor: "pointer",
+                  fontWeight: 700
+                }}
+              >
+                {isTimerRunning ? "PAUSE" : "PLAY"}
+              </button>
+              <button
+                onClick={resetTimer}
+                style={{
+                  background: "#7C3AED",
+                  border: "none",
+                  borderRadius: 9,
+                  padding: "5px 8px",
+                  color: "#fff",
+                  fontSize: 10,
+                  cursor: "pointer",
+                  fontWeight: 700
+                }}
+              >
+                RESET
+              </button>
+            </div>
           </div>
         </div>
+
         {/* Carte compteur avec swipe pour ajouter compteur secondaire */}
         <PdfCounterCard color={color} currentPartie={currentPartie} totalPartieCourante={totalPartieCourante}
           rangDansPartie={rangDansPartie} rang={rang} total={total} pct={pct}
@@ -4442,6 +4567,7 @@ onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { ran
 project={currentProject}
 onNavigateHub={navigateToHub}
 onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })}
+onEditClient={openClientEditor}
 />
 </div>
 )}
