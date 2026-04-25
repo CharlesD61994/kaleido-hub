@@ -16,6 +16,7 @@ import {
 } from "./services/clientStore";
 import { updateProjectProgress } from "./services/progressStore";
 import { loadImage, loadPdf, saveImage, savePdf, deleteImage, deletePdf } from "./services/mediaStore";
+import { loadDatabase, saveDatabase, importDatabase } from "./services/databaseStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -406,8 +407,6 @@ return (
 );
 }
 
-const DB_KEY = 'kaleido_database';
-const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
 const debug = (...args) => {
 if (typeof window !== "undefined" && window.KALEIDO_DEBUG) {
@@ -447,62 +446,6 @@ const clearStorageKey = (key) => {
     console.warn("[KALEIDO] clearStorageKey error:", e);
     return false;
   }
-};
-const isValidDatabase = (data) => {
-if (!data || typeof data !== "object") return false;
-return Array.isArray(data.projectsPersonal)
-&& Array.isArray(data.projectsPro)
-&& Array.isArray(data.patrons)
-&& data.settings
-&& typeof data.settings === "object";
-};
-const getDefaultDatabase = () => ({
-projectsPersonal: [
-{ id: 1, name: "Écharpe hiver", rang: 42, total: 80, colorIdx: 0, image: null, type: "tricot", laine: "", outil: "", notes: "", parties: [] },
-{ id: 2, name: "Tuque Noël", rang: 15, total: 30, colorIdx: 1, image: null, type: "crochet", laine: "", outil: "", notes: "", parties: [] },
-{ id: 3, name: "Mitaines bébé", rang: 8, total: 20, colorIdx: 2, image: null, type: "tricot", laine: "", outil: "", notes: "", parties: [] },
-],
-projectsPro: [],
-patrons: [],
-settings: { lastProjectId: 3, lastPatronId: 0 }
-});
-
-const initDatabase = () => {
-try {
-if (!canUseStorage()) return getDefaultDatabase();
-const saved = readStorageJSON(DB_KEY);
-if (isValidDatabase(saved)) return saved;
-
-const backup = readStorageJSON(DB_BACKUP_KEY);
-if (isValidDatabase(backup)) {
-  debug("Base principale invalide, restauration depuis le backup.");
-  writeStorageJSON(DB_KEY, backup);
-  return backup;
-}
-
-} catch(e) {
-console.warn("[KALEIDO] initDatabase error:", e);
-}
-return getDefaultDatabase();
-};
-const saveToDatabase = (data) => {
-try {
-if (!canUseStorage()) return false;
-if (!isValidDatabase(data)) {
-console.warn("[KALEIDO] saveToDatabase ignoré: base invalide.");
-return false;
-}
-const currentRaw = localStorage.getItem(DB_KEY);
-if (currentRaw) {
-  const currentData = safeParseJSON(currentRaw);
-  if (currentData) writeStorageJSON(DB_BACKUP_KEY, currentData);
-}
-writeStorageJSON(DB_KEY, data);
-return true;
-} catch(e) {
-console.warn("[KALEIDO] saveToDatabase error:", e);
-return false;
-}
 };
 const loadPatronDraft = ({ sourceId, mode }) => {
   const payload = readStorageJSON(PATRON_BACKUP_KEY);
@@ -2425,7 +2368,7 @@ export default function KaleidoHub() {
   const [splashFading, setSplashFading] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
   const [currentPatron, setCurrentPatron] = useState(null);
-  const [database, setDatabase] = useState(() => initDatabase());
+  const [database, setDatabase] = useState(() => loadDatabase());
   const [mode, setMode] = useState("personal");
   const [creationMode, setCreationMode] = useState("personal");
   const [showClientModal, setShowClientModal] = useState(false);
@@ -2549,12 +2492,12 @@ export default function KaleidoHub() {
   }, [database]);
 
   useEffect(() => {
-    saveToDatabase(database);
+    saveDatabase(database);
   }, [database]);
 
   useEffect(() => {
     const flushDatabase = () => {
-      saveToDatabase(databaseRef.current);
+      saveDatabase(databaseRef.current);
     };
 
     const onVisibilityChange = () => {
@@ -2589,12 +2532,12 @@ setDatabase(prev => {
     ...prev,
     [prevProjectsKey]: (prev[prevProjectsKey] || []).map(p => p.id === projectId ? { ...p, ...updates } : p)
   };
-  saveToDatabase(nextDb);
+  saveDatabase(nextDb);
   return nextDb;
 });
 };
 const saveProjectProgress = (projectId, progressData) => {
-updateProjectProgress(setDatabase, saveToDatabase, {
+updateProjectProgress(setDatabase, saveDatabase, {
   type: mode === 'pro' ? 'pro' : 'personal',
   projectId,
   data: progressData,
@@ -2607,7 +2550,7 @@ setDatabase(prev => {
     ...prev,
     [prevProjectsKey]: (prev[prevProjectsKey] || []).filter(p => p.id !== projectId)
   };
-  saveToDatabase(nextDb);
+  saveDatabase(nextDb);
   return nextDb;
 });
 };
@@ -2621,7 +2564,7 @@ setDatabase(prev => {
     settings: { ...prev.settings, lastProjectId: project.id }
   };
   createdDb = nextDb;
-  saveToDatabase(nextDb);
+  saveDatabase(nextDb);
   return nextDb;
 });
 return createdDb;
@@ -2692,7 +2635,7 @@ const confirmClientProjectCreation = () => {
     clientInfo
   );
 
-  createProProject(setDatabase, saveToDatabase, finalProject);
+  createProProject(setDatabase, saveDatabase, finalProject);
 
   const actionAfterCreate = pendingProjectAction;
   resetClientModalState();
@@ -2719,7 +2662,7 @@ const termines = projects.filter(p => p.rang >= p.total).length;
 // ─── PATRONS CRUD ─────────────────────────────────────────────
 const addPatron = (patron) => {
 const newDb = { ...database, patrons: [...(database.patrons || []), patron], settings: { ...database.settings, lastPatronId: patron.id } };
-setDatabase(newDb); saveToDatabase(newDb);
+setDatabase(newDb); saveDatabase(newDb);
 };
 const updatePatron = (patronId, updates) => {
 const updatedPatrons = (database.patrons || []).map(p => p.id === patronId ? { ...p, ...updates } : p);
@@ -2770,7 +2713,7 @@ const newDb = {
   projectsPersonal: (database.projectsPersonal || []).map(syncProjectFromPatron),
   projectsPro: (database.projectsPro || []).map(syncProjectFromPatron),
 };
-setDatabase(newDb); saveToDatabase(newDb);
+setDatabase(newDb); saveDatabase(newDb);
 
 };
 const deletePatronFromDB = (patronId) => {
@@ -2788,7 +2731,7 @@ const newDb = {
   projectsPersonal: (database.projectsPersonal || []).map(detachProjectFromPatron),
   projectsPro: (database.projectsPro || []).map(detachProjectFromPatron),
 };
-setDatabase(newDb); saveToDatabase(newDb);
+setDatabase(newDb); saveDatabase(newDb);
 };
 const navigateToHub = () => {
 setPrevView(currentView);
@@ -2878,11 +2821,11 @@ const rect = e.currentTarget.getBoundingClientRect();
 setMenuPos({ x: rect.right, y: rect.bottom }); setMenuProject(project);
 };
 const updateProProject = (projectId, updates) => {
-updateProProjectRecord(setDatabase, saveToDatabase, projectId, updates);
+updateProProjectRecord(setDatabase, saveDatabase, projectId, updates);
 setCurrentProject(prev => (prev && prev.id === projectId ? { ...prev, ...updates } : prev));
 };
 const updateClientInfo = (projectId, clientInfo) => {
-updateClientInfoRecord(setDatabase, saveToDatabase, projectId, clientInfo);
+updateClientInfoRecord(setDatabase, saveDatabase, projectId, clientInfo);
 setCurrentProject(prev => (prev && prev.id === projectId ? { ...prev, ...clientInfo } : prev));
 };
 const openClientEditor = (project) => {
@@ -2911,7 +2854,7 @@ const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "perso
   }
 };
 const deleteProProjectFromDB = (projectId) => {
-deleteProProjectRecord(setDatabase, saveToDatabase, projectId);
+deleteProProjectRecord(setDatabase, saveDatabase, projectId);
 setCurrentProject(prev => (prev && prev.id === projectId ? null : prev));
 };
 const handleRename = (newName) => { updateProject(renameProject.id, { name: newName }); setRenameProject(null); };
@@ -3299,18 +3242,19 @@ style={{ flex: 1, minHeight: 180, background: "#0D0D1A", border: "1px solid #059
 <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
 <button onClick={async () => {
 try {
-const imported = JSON.parse(importText.trim());
-if (imported.projects && imported.settings) {
-setDatabase(imported);
-saveToDatabase(imported);
+const parsed = JSON.parse(importText.trim());
+const restoredDb = importDatabase(parsed);
+setDatabase(restoredDb);
+setCurrentProject(null);
+setCurrentPatron(null);
+setCurrentView(VIEWS.HUB);
 setShowDataImportModal(false);
 setShowSettingsModal(false);
-const pdfCount = imported.projects.filter(p => p.projectType === 'pdf').length;
-alert("✅ Projets restaurés !" + (pdfCount > 0 ? `\n\n${pdfCount} projet(s) PDF — tu devras réimporter les fichiers PDF manuellement depuis ton téléphone.` : ""));
-} else {
-alert("❌ Texte invalide — assure-toi de coller une sauvegarde Kaleido.");
+setImportText("");
+alert("✅ Données restaurées avec succès !");
+} catch (error) {
+alert("❌ Erreur import : " + (error?.message || "le texte ne semble pas valide."));
 }
-} catch { alert("❌ Erreur — le texte ne semble pas valide."); }
 }} style={{ flex: 1, padding: "12px 20px", minHeight: 44, borderRadius: 12, background: "linear-gradient(135deg, #059669, #34D399)", border: "none", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
 Restaurer</button>
 <button onClick={() => setShowDataImportModal(false)}
@@ -3399,37 +3343,28 @@ try {
 const text = await file.text();
 const data = JSON.parse(text);
 const sourceDb = data?.database && typeof data.database === "object" ? data.database : data;
-const restoredDb = {
-  projectsPersonal: Array.isArray(sourceDb?.projectsPersonal) ? sourceDb.projectsPersonal : [],
-  projectsPro: Array.isArray(sourceDb?.projectsPro) ? sourceDb.projectsPro : [],
-  patrons: Array.isArray(sourceDb?.patrons) ? sourceDb.patrons : [],
-  settings: sourceDb?.settings && typeof sourceDb.settings === "object" ? sourceDb.settings : getDefaultDatabase().settings,
-};
-if (!isValidDatabase(restoredDb)) {
-  throw new Error("Le fichier JSON ne contient pas une base Kaleido valide.");
-}
-// Restaurer les PDFs dans IndexedDB
+
+// Restaurer les médias AVANT de finaliser l'état visuel.
 const pdfsToRestore = data?.pdfs || sourceDb?.pdfs || {};
 for (const [pdfId, pdfData] of Object.entries(pdfsToRestore)) {
-  await savePdf(pdfId, pdfData);
+  if (pdfId && typeof pdfData === "string") await savePdf(pdfId, pdfData);
 }
-// Restaurer les images dans IndexedDB
+
 const imagesToRestore = data?.images || sourceDb?.images || {};
 for (const [imageId, imageData] of Object.entries(imagesToRestore)) {
-  await saveImage(imageId, imageData);
+  if (imageId && typeof imageData === "string") await saveImage(imageId, imageData);
 }
-const saved = saveToDatabase(restoredDb);
-if (!saved) {
-  throw new Error("La base restaurée n’a pas pu être sauvegardée dans le navigateur.");
-}
+
+const restoredDb = importDatabase(data);
 setDatabase(restoredDb);
 setCurrentProject(null);
+setCurrentPatron(null);
 setCurrentView(VIEWS.HUB);
 setShowSettingsModal(false);
 e.target.value = "";
 alert('✅ Données restaurées avec succès !');
 } catch(e) {
-alert('Erreur import : ' + e.message);
+alert('Erreur import : ' + (e?.message || 'fichier invalide'));
 }
 }} />
 </label>
