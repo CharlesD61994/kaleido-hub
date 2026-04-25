@@ -4398,4 +4398,3 @@ onEditClient={openClientEditor}
 </div>
 );
 }
-
