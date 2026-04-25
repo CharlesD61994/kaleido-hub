@@ -45,7 +45,7 @@ const normalizeProgressData = (data = {}) => {
 
 export const updateProjectProgress = (
   setDatabase,
-  saveToDatabase,
+  saveDatabase,
   { type = "personal", projectId, data = {} } = {}
 ) => {
   const key = getProjectKey(type);
@@ -55,11 +55,11 @@ export const updateProjectProgress = (
     const nextDb = {
       ...prev,
       [key]: asArray(prev?.[key]).map((project) =>
-        project.id === projectId ? { ...project, ...updates } : project
+        String(project.id) === String(projectId) ? { ...project, ...updates } : project
       ),
     };
 
-    saveToDatabase(nextDb);
+    saveDatabase(nextDb);
     return nextDb;
   });
 
