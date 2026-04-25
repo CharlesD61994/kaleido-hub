@@ -358,21 +358,24 @@ return (
       display: "inline-flex",
       alignItems: "center",
       gap: 6,
-      marginTop: 6,
-      padding: "6px 10px",
+      marginTop: 4,
+      padding: "4px 8px",
       borderRadius: 999,
-      border: "1px solid rgba(167,139,250,0.28)",
-      background: "rgba(124,58,237,0.12)",
-      color: "#E9D5FF",
-      fontSize: 12,
+      border: "1px solid rgba(167,139,250,0.22)",
+      background: "rgba(255,255,255,0.045)",
+      color: "#D8CCFF",
+      fontSize: 11,
       fontFamily: "'DM Sans', sans-serif",
       fontWeight: 700,
       cursor: "pointer",
-      maxWidth: "100%"
+      maxWidth: "100%",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+      backdropFilter: "blur(8px)"
     }}
   >
-    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>👤 {clientName}</span>
-    <span style={{ color: "#A78BFA", fontSize: 11, flexShrink: 0 }}>Voir</span>
+    <span style={{ opacity: 0.9, flexShrink: 0 }}>👤</span>
+    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 104 }}>{clientName}</span>
+    <span style={{ color: "#A78BFA", fontSize: 10, flexShrink: 0, letterSpacing: 0.2 }}>Voir</span>
   </button>
 )}
 </div>
