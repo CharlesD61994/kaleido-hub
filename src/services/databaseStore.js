@@ -70,6 +70,51 @@ const computeLastPatronId = (patrons, fallback = 0) => {
   return Math.max(fallback, 0, ...ids);
 };
 
+const isLikelyInlineMedia = (value) => {
+  if (typeof value !== "string") return false;
+  return value.startsWith("data:") || value.length > 1200;
+};
+
+const cleanImageReference = (image) => {
+  if (!image) return null;
+
+  // Ancien format : image directement en base64 dans la base.
+  // La migration App.jsx doit déjà l'avoir transférée dans IndexedDB.
+  if (typeof image === "string") {
+    return isLikelyInlineMedia(image) ? null : image;
+  }
+
+  if (!image || typeof image !== "object") return null;
+
+  const clean = {};
+  if (image.imageId) clean.imageId = image.imageId;
+  if (image.pos && typeof image.pos === "object") clean.pos = image.pos;
+  if (image.scale != null) clean.scale = image.scale;
+
+  // Ne jamais conserver preview/src/data dans localStorage : trop lourd sur Safari iOS.
+  return clean.imageId ? clean : null;
+};
+
+const stripHeavyMediaFields = (item) => {
+  if (!item || typeof item !== "object") return item;
+
+  const clean = { ...item };
+
+  clean.image = cleanImageReference(clean.image);
+
+  delete clean.preview;
+  delete clean.src;
+  delete clean.data;
+  delete clean.pdf;
+  delete clean.pdfData;
+  delete clean.pdfSrc;
+  delete clean.pdfBase64;
+  delete clean.pdfs;
+  delete clean.images;
+
+  return clean;
+};
+
 export const normalizeDatabase = (input) => {
   const raw = input?.database && typeof input.database === "object" ? input.database : input;
   const defaults = getDefaultDatabase();
@@ -81,12 +126,16 @@ export const normalizeDatabase = (input) => {
   // Ancien format éventuel : { projects: [...], settings: {...} }
   const legacyProjects = Array.isArray(raw.projects) ? raw.projects : null;
 
-  const projectsPersonal = Array.isArray(raw.projectsPersonal)
+  const projectsPersonalRaw = Array.isArray(raw.projectsPersonal)
     ? raw.projectsPersonal
     : (legacyProjects || []);
 
-  const projectsPro = Array.isArray(raw.projectsPro) ? raw.projectsPro : [];
-  const patrons = Array.isArray(raw.patrons) ? raw.patrons : [];
+  const projectsProRaw = Array.isArray(raw.projectsPro) ? raw.projectsPro : [];
+  const patronsRaw = Array.isArray(raw.patrons) ? raw.patrons : [];
+
+  const projectsPersonal = projectsPersonalRaw.map(stripHeavyMediaFields);
+  const projectsPro = projectsProRaw.map(stripHeavyMediaFields);
+  const patrons = patronsRaw.map(stripHeavyMediaFields);
 
   const rawSettings = raw.settings && typeof raw.settings === "object" ? raw.settings : {};
   const lastProjectId = computeLastProjectId(
@@ -134,6 +183,7 @@ export const saveDatabase = (data) => {
   try {
     const current = readStorageJSON(DB_KEY);
     if (current && isValidDatabase(normalizeDatabase(current))) {
+      // Sauvegarder un backup déjà nettoyé, jamais un backup lourd.
       writeStorageJSON(DB_BACKUP_KEY, normalizeDatabase(current));
     }
 
@@ -174,7 +224,7 @@ export const importDatabase = (data) => {
   const saved = saveDatabase(normalized);
 
   if (!saved) {
-    throw new Error("La base restaurée n’a pas pu être sauvegardée dans le navigateur.");
+    throw new Error("La base restaurée n’a pas pu être sauvegardée dans le navigateur. Le fichier est peut-être encore trop lourd pour Safari.");
   }
 
   return normalized;
