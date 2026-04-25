@@ -68,9 +68,12 @@ const normalizePatronId = (patron) => {
 
 const getPatrons = (database) => asArray(database?.patrons);
 
+const normalizeIdForCompare = (value) => String(value ?? "");
+const sameId = (a, b) => normalizeIdForCompare(a) === normalizeIdForCompare(b);
+
 const syncLinkedProjectFromPatron = (project, patronId, updatedPatron) => {
   if (!project || typeof project !== "object") return project;
-  if (project.patronId !== patronId || !updatedPatron || project.linkMode === "detached") return project;
+  if (!sameId(project.patronId, patronId) || !updatedPatron || project.linkMode === "detached") return project;
 
   if (updatedPatron.projectType === "custom") {
     return {
@@ -102,7 +105,7 @@ const syncLinkedProjectFromPatron = (project, patronId, updatedPatron) => {
 
 const detachProjectFromPatron = (project, patronId) => {
   if (!project || typeof project !== "object") return project;
-  if (project.patronId !== patronId) return project;
+  if (!sameId(project.patronId, patronId)) return project;
 
   return {
     ...project,
@@ -138,9 +141,9 @@ export const updatePatronRecord = (setDatabase, saveDatabase, patronId, updates 
   setDatabase((prev) => {
     const safeDb = asDatabase(prev);
     const updatedPatrons = getPatrons(safeDb).map((patron) =>
-      patron.id === patronId ? { ...patron, ...(updates || {}) } : patron
+      sameId(patron.id, patronId) ? { ...patron, ...(updates || {}) } : patron
     );
-    const updatedPatron = updatedPatrons.find((patron) => patron.id === patronId);
+    const updatedPatron = updatedPatrons.find((patron) => sameId(patron.id, patronId));
 
     const syncProject = (project) => syncLinkedProjectFromPatron(project, patronId, updatedPatron);
 
@@ -164,7 +167,7 @@ export const deletePatronRecord = (setDatabase, saveDatabase, patronId) => {
 
     const nextDb = {
       ...safeDb,
-      patrons: getPatrons(safeDb).filter((patron) => patron.id !== patronId),
+      patrons: getPatrons(safeDb).filter((patron) => !sameId(patron.id, patronId)),
       projectsPersonal: asArray(safeDb.projectsPersonal).map((project) => detachProjectFromPatron(project, patronId)),
       projectsPro: asArray(safeDb.projectsPro).map((project) => detachProjectFromPatron(project, patronId)),
     };
@@ -173,6 +176,7 @@ export const deletePatronRecord = (setDatabase, saveDatabase, patronId) => {
     return nextDb;
   });
 };
+
 
 export const updatePatronDeep = (setDatabase, saveDatabase, patronId, updater) => {
   if (typeof updater !== "function") return null;
@@ -183,7 +187,7 @@ export const updatePatronDeep = (setDatabase, saveDatabase, patronId, updater) =
     const safeDb = asDatabase(prev);
 
     const updatedPatrons = getPatrons(safeDb).map((patron) => {
-      if (patron.id !== patronId) return patron;
+      if (!sameId(patron.id, patronId)) return patron;
 
       const updated = updater(patron);
       if (!updated || typeof updated !== "object") return patron;
@@ -197,7 +201,10 @@ export const updatePatronDeep = (setDatabase, saveDatabase, patronId, updater) =
       return persistedPatron;
     });
 
-    if (!persistedPatron) return safeDb;
+    if (!persistedPatron) {
+      console.warn("[KALEIDO] updatePatronDeep: patron introuvable", patronId);
+      return safeDb;
+    }
 
     const syncProject = (project) => syncLinkedProjectFromPatron(project, patronId, persistedPatron);
 
