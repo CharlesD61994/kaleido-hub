@@ -2467,6 +2467,11 @@ export default function KaleidoHub() {
   const [database, setDatabase] = useState(() => initDatabase());
   const [mode, setMode] = useState("personal");
   const [creationMode, setCreationMode] = useState("personal");
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [pendingProject, setPendingProject] = useState(null);
+  const [pendingProjectAction, setPendingProjectAction] = useState(null);
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [exportData, setExportData] = useState('');
   const [showExportData, setShowExportData] = useState(false);
@@ -2638,6 +2643,56 @@ setDatabase(prev => {
 });
 return createdDb;
 };
+const queueProjectCreation = (project, actionAfterCreate = null) => {
+  if (creationMode === "pro") {
+    setPendingProject(project);
+    setPendingProjectAction(actionAfterCreate);
+    setShowClientModal(true);
+    return;
+  }
+
+  addProjectToDB(project);
+  if (actionAfterCreate === "patron_editor") {
+    navigateToPatronEditor(project);
+  }
+};
+const confirmClientProjectCreation = () => {
+  if (!pendingProject) return;
+
+  const finalProject = {
+    ...pendingProject,
+    client: clientName.trim(),
+    email: clientEmail.trim(),
+  };
+
+  setDatabase(prev => {
+    const nextDb = {
+      ...prev,
+      projectsPro: [...(prev.projectsPro || []), finalProject],
+      settings: { ...prev.settings, lastProjectId: finalProject.id }
+    };
+    saveToDatabase(nextDb);
+    return nextDb;
+  });
+
+  const actionAfterCreate = pendingProjectAction;
+  setShowClientModal(false);
+  setPendingProject(null);
+  setPendingProjectAction(null);
+  setClientName("");
+  setClientEmail("");
+
+  if (actionAfterCreate === "patron_editor") {
+    navigateToPatronEditor(finalProject);
+  }
+};
+const cancelClientProjectCreation = () => {
+  setShowClientModal(false);
+  setPendingProject(null);
+  setPendingProjectAction(null);
+  setClientName("");
+  setClientEmail("");
+};
 const filtered = projects.filter(p => {
 if (!p.name.toLowerCase().includes(search.toLowerCase())) return false;
 if (activeFilter === "Tous") return true;
@@ -2792,9 +2847,8 @@ const handleCreateCustom = () => {
 const newId = database.settings.lastProjectId + 1;
 const colorIdx = Math.floor(Math.random() * KALEIDOSCOPE_COLORS.length);
 const newProject = { id: newId, name: "Nouveau projet", rang: 0, total: 20, colorIdx, image: null, projectType: "custom", type: "crochet", laine: "", outil: "", notes: "", parties: [], createdAt: new Date().toISOString(), status: "en_cours" };
-addProjectToDB(newProject);
+queueProjectCreation(newProject, "patron_editor");
 setShowNewMenu(false);
-navigateToPatronEditor(newProject);
 };
 const handleMenuOpen = (project, e) => {
 const rect = e.currentTarget.getBoundingClientRect();
@@ -3385,7 +3439,7 @@ projectType: patron.projectType, patronId: patron.id, linkMode: 'mirror',
 : { pdfId: patron.pdfId, pdfParties: patron.pdfParties }),
 elapsedTime: 0, createdAt: new Date().toISOString(), status: "en_cours"
 };
-addProjectToDB(newProject);
+queueProjectCreation(newProject);
 setShowSelectPatronModal(false);
 }}
 mode="personal"
@@ -3395,6 +3449,56 @@ mode="personal"
 </div>
 </div>
 </div>
+</div>
+)}
+{/* Modale fiche client — création Pro */}
+{showClientModal && (
+<div
+  data-kaleido-modal-backdrop="true"
+  onClick={cancelClientProjectCreation}
+  style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+>
+  <div
+    data-kaleido-modal-card="true"
+    onClick={e => e.stopPropagation()}
+    style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 360, boxSizing: "border-box", boxShadow: "0 18px 50px rgba(0,0,0,0.45)" }}
+  >
+    <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 20, margin: "0 0 6px" }}>Fiche client</h3>
+    <p style={{ color: "#8B8A9A", fontSize: 13, margin: "0 0 18px", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.35 }}>Associe ce projet professionnel à un client.</p>
+
+    <label style={{ display: "block", color: "#B8B6C8", fontSize: 12, marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>Nom du client</label>
+    <input
+      value={clientName}
+      onChange={(e) => setClientName(e.target.value)}
+      placeholder="Ex. Marie Tremblay"
+      style={{ width: "100%", padding: "12px 14px", marginBottom: 12, borderRadius: 12, border: "1px solid #33334A", background: "#0D0D1A", color: "#F1F0EE", fontSize: 15, outline: "none", boxSizing: "border-box" }}
+    />
+
+    <label style={{ display: "block", color: "#B8B6C8", fontSize: 12, marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>Courriel</label>
+    <input
+      value={clientEmail}
+      onChange={(e) => setClientEmail(e.target.value)}
+      placeholder="client@email.com"
+      inputMode="email"
+      autoCapitalize="none"
+      style={{ width: "100%", padding: "12px 14px", marginBottom: 18, borderRadius: 12, border: "1px solid #33334A", background: "#0D0D1A", color: "#F1F0EE", fontSize: 15, outline: "none", boxSizing: "border-box" }}
+    />
+
+    <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
+      <button
+        onClick={cancelClientProjectCreation}
+        style={{ padding: "12px 18px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "transparent", color: "#999", cursor: "pointer", fontSize: 15 }}
+      >
+        Annuler
+      </button>
+      <button
+        onClick={confirmClientProjectCreation}
+        style={{ padding: "12px 18px", minHeight: 44, borderRadius: 12, border: "none", background: "linear-gradient(135deg, #7C3AED, #DB2777)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 15 }}
+      >
+        Créer
+      </button>
+    </div>
+  </div>
 </div>
 )}
 {/* Modale import PDF */}
@@ -3421,7 +3525,7 @@ colorIdx, image: null, projectType: "pdf", pdfId,
 pdfParties, elapsedTime: 0,
 createdAt: new Date().toISOString(), status: "en_cours"
 };
-addProjectToDB(newProject);
+queueProjectCreation(newProject);
 setShowImportModal(false);
 }} />}
 </div>
