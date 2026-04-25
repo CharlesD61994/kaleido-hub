@@ -1,9 +1,13 @@
+import { supabase, isSupabaseConfigured } from "./supabaseClient";
 // ═══════════════════════════════════════════════════════════════
 // DATABASE STORE — persistance centrale Kaleido via localStorage
 // ═══════════════════════════════════════════════════════════════
 
 const DB_KEY = "kaleido_database";
 const DB_BACKUP_KEY = "kaleido_database_backup";
+const DB_META_KEY = "kaleido_database_meta";
+const CLOUD_USER_KEY = import.meta.env.VITE_KALEIDO_USER_KEY || "owner";
+const CLOUD_TABLE = "kaleido_backups";
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -170,53 +174,211 @@ export const isValidDatabase = (data) => {
     && typeof data.settings === "object";
 };
 
-export const saveDatabase = (data) => {
-  if (!canUseStorage()) return false;
 
-  const normalized = normalizeDatabase(data);
+const nowIso = () => new Date().toISOString();
 
-  if (!isValidDatabase(normalized)) {
-    console.warn("[KALEIDO] saveDatabase ignoré: base invalide après normalisation.");
-    return false;
+const readDatabaseMeta = () => {
+  const meta = readStorageJSON(DB_META_KEY);
+  return meta && typeof meta === "object" ? meta : {};
+};
+
+const writeDatabaseMeta = (meta = {}) => {
+  return writeStorageJSON(DB_META_KEY, {
+    ...(readDatabaseMeta() || {}),
+    ...(meta && typeof meta === "object" ? meta : {}),
+  });
+};
+
+const getDatabaseTimestamp = (database) => {
+  return database?._meta?.updatedAt
+    || readDatabaseMeta()?.updatedAt
+    || null;
+};
+
+const withDatabaseMeta = (database, meta = {}) => {
+  const updatedAt = meta.updatedAt || database?._meta?.updatedAt || nowIso();
+  const version = Number(meta.version || database?._meta?.version || readDatabaseMeta()?.version || 1);
+
+  return {
+    ...(database && typeof database === "object" ? database : {}),
+    _meta: {
+      ...(database?._meta || {}),
+      updatedAt,
+      version,
+      source: meta.source || database?._meta?.source || "local",
+    },
+  };
+};
+
+const stripRuntimeMeta = (database) => {
+  if (!database || typeof database !== "object") return database;
+  const clean = { ...database };
+  delete clean._meta;
+  return clean;
+};
+
+const cloudUpsertDatabase = async (database) => {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, reason: "Supabase non configuré." };
   }
 
   try {
-    const current = readStorageJSON(DB_KEY);
-    if (current && isValidDatabase(normalizeDatabase(current))) {
-      // Sauvegarder un backup déjà nettoyé, jamais un backup lourd.
-      writeStorageJSON(DB_BACKUP_KEY, normalizeDatabase(current));
+    const normalized = normalizeDatabase(database);
+    const meta = normalized._meta || {};
+    const updatedAt = meta.updatedAt || nowIso();
+    const version = Number(meta.version || 1);
+
+    const { error } = await supabase
+      .from(CLOUD_TABLE)
+      .upsert({
+        user_key: CLOUD_USER_KEY,
+        database_json: stripRuntimeMeta(normalized),
+        version,
+        updated_at: updatedAt,
+      }, {
+        onConflict: "user_key",
+      });
+
+    if (error) {
+      console.warn("[KALEIDO] cloudUpsertDatabase error:", error);
+      return { ok: false, error };
     }
 
-    const ok = writeStorageJSON(DB_KEY, normalized);
-    if (!ok) return false;
+    writeDatabaseMeta({
+      updatedAt,
+      version,
+      lastCloudSyncAt: nowIso(),
+      lastCloudError: null,
+    });
 
-    const reread = normalizeDatabase(readStorageJSON(DB_KEY));
-    return isValidDatabase(reread);
+    return { ok: true };
   } catch (error) {
-    console.warn("[KALEIDO] saveDatabase error:", error);
-    return false;
+    console.warn("[KALEIDO] cloudUpsertDatabase exception:", error);
+    writeDatabaseMeta({
+      lastCloudError: String(error?.message || error),
+    });
+    return { ok: false, error };
   }
+};
+
+export const loadCloudDatabase = async () => {
+  if (!isSupabaseConfigured || !supabase) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from(CLOUD_TABLE)
+      .select("database_json, version, updated_at")
+      .eq("user_key", CLOUD_USER_KEY)
+      .maybeSingle();
+
+    if (error) {
+      console.warn("[KALEIDO] loadCloudDatabase error:", error);
+      return null;
+    }
+
+    if (!data?.database_json) return null;
+
+    return withDatabaseMeta(normalizeDatabase(data.database_json), {
+      updatedAt: data.updated_at,
+      version: data.version || 1,
+      source: "cloud",
+    });
+  } catch (error) {
+    console.warn("[KALEIDO] loadCloudDatabase exception:", error);
+    return null;
+  }
+};
+
+export const syncDatabaseWithCloud = async (setDatabase) => {
+  if (!isSupabaseConfigured || !supabase) {
+    return { ok: false, reason: "Supabase non configuré." };
+  }
+
+  const local = loadDatabase();
+  const cloud = await loadCloudDatabase();
+
+  if (!cloud) {
+    await cloudUpsertDatabase(local);
+    return { ok: true, source: "local-pushed" };
+  }
+
+  const localTime = Date.parse(getDatabaseTimestamp(local) || 0);
+  const cloudTime = Date.parse(getDatabaseTimestamp(cloud) || 0);
+
+  if (cloudTime > localTime) {
+    saveDatabase(cloud, { syncCloud: false, source: "cloud" });
+    if (typeof setDatabase === "function") setDatabase(cloud);
+    return { ok: true, source: "cloud-pulled" };
+  }
+
+  if (localTime >= cloudTime) {
+    await cloudUpsertDatabase(local);
+    return { ok: true, source: "local-pushed" };
+  }
+
+  return { ok: true, source: "unchanged" };
+};
+
+
+export const saveDatabase = (data, options = {}) => {
+  const { syncCloud = true, source = "local" } = options;
+
+  if (!canUseStorage()) return false;
+
+  const currentMeta = readDatabaseMeta();
+  const normalized = withDatabaseMeta(normalizeDatabase(data), {
+    updatedAt: data?._meta?.updatedAt || nowIso(),
+    version: Number(currentMeta.version || data?._meta?.version || 1) + (source === "local" ? 1 : 0),
+    source,
+  });
+
+  const current = readStorageJSON(DB_KEY);
+  if (current) {
+    writeStorageJSON(DB_BACKUP_KEY, current);
+  }
+
+  const saved = writeStorageJSON(DB_KEY, stripRuntimeMeta(normalized));
+  writeDatabaseMeta(normalized._meta);
+
+  if (saved && syncCloud) {
+    // On ne bloque jamais l'app sur Supabase. LocalStorage reste la source immédiate.
+    cloudUpsertDatabase(normalized);
+  }
+
+  return saved;
 };
 
 export const loadDatabase = () => {
   if (!canUseStorage()) return getDefaultDatabase();
 
+  const meta = readDatabaseMeta();
+
   const saved = readStorageJSON(DB_KEY);
   if (saved) {
-    const normalized = normalizeDatabase(saved);
-    if (isValidDatabase(normalized)) return normalized;
+    return withDatabaseMeta(normalizeDatabase(saved), {
+      ...meta,
+      source: "local",
+    });
   }
 
   const backup = readStorageJSON(DB_BACKUP_KEY);
   if (backup) {
-    const normalizedBackup = normalizeDatabase(backup);
-    if (isValidDatabase(normalizedBackup)) {
-      writeStorageJSON(DB_KEY, normalizedBackup);
-      return normalizedBackup;
-    }
+    return withDatabaseMeta(normalizeDatabase(backup), {
+      ...meta,
+      source: "backup",
+    });
   }
 
-  return getDefaultDatabase();
+  const defaults = withDatabaseMeta(getDefaultDatabase(), {
+    updatedAt: nowIso(),
+    version: 1,
+    source: "default",
+  });
+
+  saveDatabase(defaults, { syncCloud: false, source: "default" });
+  return defaults;
 };
 
 export const importDatabase = (data) => {
