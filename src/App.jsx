@@ -2473,6 +2473,7 @@ export default function KaleidoHub() {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientError, setClientError] = useState("");
+  const [clientEmailError, setClientEmailError] = useState("");
   const [clientModalMode, setClientModalMode] = useState("create");
   const [editingClientProjectId, setEditingClientProjectId] = useState(null);
   const clientNameInputRef = useRef(null);
@@ -2666,6 +2667,7 @@ const queueProjectCreation = (project, actionAfterCreate = null) => {
     setClientName("");
     setClientEmail("");
     setClientError("");
+    setClientEmailError("");
     setShowClientModal(true);
     return;
   }
@@ -2675,6 +2677,24 @@ const queueProjectCreation = (project, actionAfterCreate = null) => {
     navigateToPatronEditor(project);
   }
 };
+const isValidOptionalEmail = (value) => {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed);
+};
+
+const resetClientModalState = () => {
+  setShowClientModal(false);
+  setPendingProject(null);
+  setPendingProjectAction(null);
+  setClientName("");
+  setClientEmail("");
+  setClientError("");
+  setClientEmailError("");
+  setClientModalMode("create");
+  setEditingClientProjectId(null);
+};
+
 const confirmClientProjectCreation = () => {
   const trimmedClientName = clientName.trim();
   const trimmedClientEmail = clientEmail.trim();
@@ -2684,27 +2704,34 @@ const confirmClientProjectCreation = () => {
     return;
   }
 
+  if (!isValidOptionalEmail(trimmedClientEmail)) {
+    setClientEmailError("Le courriel n’est pas valide.");
+    return;
+  }
+
   if (clientModalMode === "edit" && editingClientProjectId != null) {
     updateProProject(editingClientProjectId, {
       client: trimmedClientName,
       email: trimmedClientEmail,
     });
 
-    setShowClientModal(false);
-    setPendingProject(null);
-    setPendingProjectAction(null);
-    setClientName("");
-    setClientEmail("");
-    setClientError("");
-    setClientModalMode("create");
-    setEditingClientProjectId(null);
+    resetClientModalState();
     return;
   }
 
-  if (!pendingProject) return;
+  if (!pendingProject) {
+    setClientError("Impossible de créer le projet : aucune création en attente.");
+    return;
+  }
+
+  const safeProjectId = Math.max(
+    (databaseRef.current?.settings?.lastProjectId || 0) + 1,
+    Number(pendingProject.id) || 0
+  );
 
   const finalProject = {
     ...pendingProject,
+    id: safeProjectId,
     client: trimmedClientName,
     email: trimmedClientEmail,
   };
@@ -2720,28 +2747,14 @@ const confirmClientProjectCreation = () => {
   });
 
   const actionAfterCreate = pendingProjectAction;
-  setShowClientModal(false);
-  setPendingProject(null);
-  setPendingProjectAction(null);
-  setClientName("");
-  setClientEmail("");
-  setClientError("");
-  setClientModalMode("create");
-  setEditingClientProjectId(null);
+  resetClientModalState();
 
   if (actionAfterCreate === "patron_editor") {
     navigateToPatronEditor(finalProject);
   }
 };
 const cancelClientProjectCreation = () => {
-  setShowClientModal(false);
-  setPendingProject(null);
-  setPendingProjectAction(null);
-  setClientName("");
-  setClientEmail("");
-  setClientError("");
-  setClientModalMode("create");
-  setEditingClientProjectId(null);
+  resetClientModalState();
 };
 const filtered = projects.filter(p => {
 if (!p.name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -3517,7 +3530,7 @@ mode="personal"
 {showClientModal && (
 <div
   data-kaleido-modal-backdrop="true"
-  onClick={cancelClientProjectCreation}
+  onClick={(e) => e.stopPropagation()}
   style={{
     position: "fixed",
     inset: 0,
@@ -3588,6 +3601,7 @@ mode="personal"
       value={clientName}
       onChange={(e) => { setClientName(e.target.value); if (clientError) setClientError(""); }}
       placeholder="Ex. Marie Tremblay"
+      onKeyDown={(e) => { if (e.key === "Enter") confirmClientProjectCreation(); }}
       style={{
         width: "100%",
         minHeight: 56,
@@ -3635,18 +3649,23 @@ mode="personal"
     </label>
     <input
       value={clientEmail}
-      onChange={(e) => setClientEmail(e.target.value)}
+      onChange={(e) => { setClientEmail(e.target.value); if (clientEmailError) setClientEmailError(""); }}
+      onBlur={() => {
+        const trimmed = clientEmail.trim();
+        if (trimmed && !isValidOptionalEmail(trimmed)) setClientEmailError("Le courriel n’est pas valide.");
+      }}
       placeholder="client@email.com"
       inputMode="email"
       autoCapitalize="none"
       autoCorrect="off"
+      onKeyDown={(e) => { if (e.key === "Enter") confirmClientProjectCreation(); }}
       style={{
         width: "100%",
         minHeight: 56,
         padding: "14px 16px",
-        marginBottom: 24,
+        marginBottom: clientEmailError ? 8 : 24,
         borderRadius: 15,
-        border: "1.5px solid #3A3852",
+        border: clientEmailError ? "1.5px solid #F87171" : "1.5px solid #3A3852",
         background: "#0D0D1A",
         color: "#F1F0EE",
         fontSize: 18,
@@ -3654,9 +3673,23 @@ mode="personal"
         fontWeight: 650,
         outline: "none",
         boxSizing: "border-box",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)"
+        boxShadow: clientEmailError ? "0 0 0 3px rgba(248,113,113,0.12)" : "inset 0 1px 0 rgba(255,255,255,0.03)"
       }}
     />
+    {clientEmailError && (
+      <div
+        style={{
+          color: "#F87171",
+          fontSize: 13,
+          marginBottom: 16,
+          fontFamily: "'DM Sans', sans-serif",
+          lineHeight: 1.35,
+          fontWeight: 600
+        }}
+      >
+        {clientEmailError}
+      </div>
+    )}
 
     <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", flexWrap: "wrap" }}>
       <button
@@ -3678,19 +3711,19 @@ mode="personal"
       </button>
       <button
         onClick={confirmClientProjectCreation}
-        disabled={!clientName.trim()}
+        disabled={!clientName.trim() || !!clientEmailError}
         style={{
           padding: "13px 22px",
           minHeight: 50,
           borderRadius: 15,
           border: "none",
-          background: clientName.trim() ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "#33334A",
-          color: clientName.trim() ? "#fff" : "#777",
-          cursor: clientName.trim() ? "pointer" : "not-allowed",
+          background: (clientName.trim() && !clientEmailError) ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "#33334A",
+          color: (clientName.trim() && !clientEmailError) ? "#fff" : "#777",
+          cursor: (clientName.trim() && !clientEmailError) ? "pointer" : "not-allowed",
           fontWeight: 800,
           fontSize: 16,
           fontFamily: "'DM Sans', sans-serif",
-          boxShadow: clientName.trim() ? "0 12px 28px rgba(219,39,119,0.26)" : "none"
+          boxShadow: (clientName.trim() && !clientEmailError) ? "0 12px 28px rgba(219,39,119,0.26)" : "none"
         }}
       >
         {clientModalMode === "edit" ? "Enregistrer" : "Créer"}
