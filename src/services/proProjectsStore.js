@@ -9,7 +9,7 @@ const normalizeProjectId = (project) => {
 
 export const getProProjects = (database) => asArray(database?.projectsPro);
 
-export const withCreatedProProject = (database, project) => {
+const withCreatedProProject = (database, project) => {
   const safeDb = asDatabase(database);
   const safeProject = project && typeof project === "object" ? project : {};
   const projectId = normalizeProjectId(safeProject);
@@ -25,7 +25,7 @@ export const withCreatedProProject = (database, project) => {
   };
 };
 
-export const withUpdatedProProject = (database, projectId, updates = {}) => {
+const withUpdatedProProject = (database, projectId, updates = {}) => {
   const safeDb = asDatabase(database);
 
   return {
@@ -36,7 +36,7 @@ export const withUpdatedProProject = (database, projectId, updates = {}) => {
   };
 };
 
-export const withDeletedProProject = (database, projectId) => {
+const withDeletedProProject = (database, projectId) => {
   const safeDb = asDatabase(database);
 
   return {
@@ -45,7 +45,7 @@ export const withDeletedProProject = (database, projectId) => {
   };
 };
 
-export const createProProjectInStore = (setDatabase, saveToDatabase, project) => {
+export const createProProject = (setDatabase, saveToDatabase, project) => {
   const safeProject = project && typeof project === "object" ? project : {};
   let finalProject = { ...safeProject, id: normalizeProjectId(safeProject) };
 
@@ -63,7 +63,7 @@ export const createProProjectInStore = (setDatabase, saveToDatabase, project) =>
   return finalProject;
 };
 
-export const updateProProjectInStore = (setDatabase, saveToDatabase, projectId, updates = {}) => {
+export const updateProProjectRecord = (setDatabase, saveToDatabase, projectId, updates = {}) => {
   setDatabase((prev) => {
     const nextDb = withUpdatedProProject(prev, projectId, updates);
     saveToDatabase(nextDb);
@@ -71,7 +71,7 @@ export const updateProProjectInStore = (setDatabase, saveToDatabase, projectId, 
   });
 };
 
-export const deleteProProjectInStore = (setDatabase, saveToDatabase, projectId) => {
+export const deleteProProjectRecord = (setDatabase, saveToDatabase, projectId) => {
   setDatabase((prev) => {
     const nextDb = withDeletedProProject(prev, projectId);
     saveToDatabase(nextDb);
