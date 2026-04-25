@@ -344,6 +344,25 @@ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 24px rgba(0,0,0,0.22)"
 );
 };
 
+function WorkProjectHeader({ title, subtitle, timeText, isTimerRunning, onToggleTimer, onResetTimer, onBack }) {
+return (
+<div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+<button data-kaleido-back-button="true" onClick={onBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
+<div style={{ flex: 1, minWidth: 0 }}>
+<h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif", lineHeight: 1.18, overflowWrap: "anywhere" }}>{title}</h1>
+{subtitle && <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2, letterSpacing: 0.4 }}>{subtitle}</div>}
+</div>
+<div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 16, padding: "12px 16px", boxShadow: "0 6px 20px rgba(124,58,237,0.4)", minWidth: 140, flexShrink: 0 }}>
+<div style={{ color: "#F1F0EE", fontSize: 22, fontFamily: "monospace", fontWeight: 700, textAlign: "center", marginBottom: 4, lineHeight: 1 }}>{timeText}</div>
+<div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+<button onClick={onToggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
+<button onClick={onResetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>RESET</button>
+</div>
+</div>
+</div>
+);
+}
+
 const DB_KEY = 'kaleido_database';
 const DB_BACKUP_KEY = 'kaleido_database_backup';
 const PATRON_BACKUP_KEY = 'kaleido_patron_backup';
@@ -1497,20 +1516,18 @@ return (
 ))}
 {/* Header */}
 <div style={{ position: "relative", zIndex: 10, padding: "44px 20px 0", background: "rgba(13,13,26,0.95)", backdropFilter: "blur(10px)" }}>
-<div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-<button data-kaleido-back-button="true" onClick={() => { onSaveProgress(allRangs.slice(0, Math.max(0, currentIndexRef.current) + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime); onNavigateHub(); }} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer" }}>←</button>
-<div style={{ flex: 1 }}>
-<h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 16, fontWeight: 700, fontFamily: "'Syne', sans-serif" }}>{patron.nom}</h1>
-<div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 2 }}>{patron.technique}{patron.outil ? ` • ${patron.outil}` : ""}</div>
-</div>
-<div style={{ background: "linear-gradient(135deg, #1E1E32, #2A2A3E)", border: "2px solid #7C3AED44", borderRadius: 16, padding: "12px 16px", boxShadow: "0 6px 20px rgba(124,58,237,0.4)", minWidth: 140 }}>
-<div style={{ color: "#F1F0EE", fontSize: 22, fontFamily: "monospace", fontWeight: 700, textAlign: "center", marginBottom: 4 }}>{formatTime(elapsedTime)}</div>
-<div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-<button onClick={toggleTimer} style={{ background: isTimerRunning ? "#DC2626" : "#059669", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>{isTimerRunning ? "PAUSE" : "PLAY"}</button>
-<button onClick={resetTimer} style={{ background: "#7C3AED", border: "none", borderRadius: 10, padding: "5px 11px", color: "#fff", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>RESET</button>
-</div>
-</div>
-</div>
+<WorkProjectHeader
+  title={patron.nom}
+  subtitle={`${patron.technique}${patron.outil ? ` • ${patron.outil}` : ""}`}
+  timeText={formatTime(elapsedTime)}
+  isTimerRunning={isTimerRunning}
+  onToggleTimer={toggleTimer}
+  onResetTimer={resetTimer}
+  onBack={() => {
+    onSaveProgress(allRangs.slice(0, Math.max(0, currentIndexRef.current) + 1).filter(r => !r.isNote).length, totalRangsForCount, elapsedTime);
+    onNavigateHub();
+  }}
+/>
 {/* Progression avec swipe pour ajouter compteur */}
 <ProgressionSwipeCard
 currentPartieColor={currentPartieColor}
@@ -2121,107 +2138,16 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
         backdropFilter: "blur(10px)",
         padding: "44px 20px 0"
       }}>
-        {/* Header identique au patron custom : retour + titre + timer */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, minHeight: 70 }}>
-          <button
-            data-kaleido-back-button="true"
-            onClick={handleBack}
-            style={{
-              background: "#1E1E32",
-              border: "none",
-              borderRadius: 10,
-              width: 36,
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#A78BFA",
-              fontSize: 16,
-              cursor: "pointer",
-              flexShrink: 0
-            }}
-          >
-            ←
-          </button>
-
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <h1 style={{
-              color: "#F1F0EE",
-              margin: 0,
-              fontSize: 16,
-              fontWeight: 700,
-              fontFamily: "'Syne', sans-serif",
-              lineHeight: 1.18,
-              overflowWrap: "anywhere"
-            }}>
-              {project?.name || "Projet PDF"}
-            </h1>
-            <div style={{
-              color: "#A78BFA",
-              fontSize: 11,
-              fontFamily: "monospace",
-              marginTop: 2,
-              textTransform: "uppercase",
-              letterSpacing: 0.4
-            }}>
-              PDF{currentPartie?.nom ? ` • ${currentPartie.nom}` : ""}
-            </div>
-          </div>
-
-          <div style={{
-            background: "linear-gradient(135deg, #1E1E32, #2A2A3E)",
-            border: "2px solid #7C3AED44",
-            borderRadius: 16,
-            padding: "12px 16px",
-            boxShadow: "0 6px 20px rgba(124,58,237,0.4)",
-            minWidth: 132,
-            flexShrink: 0
-          }}>
-            <div style={{
-              color: "#F1F0EE",
-              fontSize: 22,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              textAlign: "center",
-              marginBottom: 4,
-              lineHeight: 1
-            }}>
-              {formatTime(elapsedTime)}
-            </div>
-            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-              <button
-                onClick={toggleTimer}
-                style={{
-                  background: isTimerRunning ? "#DC2626" : "#059669",
-                  border: "none",
-                  borderRadius: 10,
-                  padding: "5px 11px",
-                  color: "#fff",
-                  fontSize: 11,
-                  cursor: "pointer",
-                  fontWeight: 600
-                }}
-              >
-                {isTimerRunning ? "PAUSE" : "PLAY"}
-              </button>
-              <button
-                onClick={resetTimer}
-                style={{
-                  background: "#7C3AED",
-                  border: "none",
-                  borderRadius: 10,
-                  padding: "5px 11px",
-                  color: "#fff",
-                  fontSize: 11,
-                  cursor: "pointer",
-                  fontWeight: 600
-                }}
-              >
-                RESET
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Header partagé avec les patrons custom : retour + titre + timer */}
+        <WorkProjectHeader
+          title={project?.name || "Projet PDF"}
+          subtitle={`PDF${currentPartie?.nom ? ` • ${String(currentPartie.nom).toUpperCase()}` : ""}`}
+          timeText={formatTime(elapsedTime)}
+          isTimerRunning={isTimerRunning}
+          onToggleTimer={toggleTimer}
+          onResetTimer={resetTimer}
+          onBack={handleBack}
+        />
 
         {/* Carte compteur avec swipe pour ajouter compteur secondaire */}
         <PdfCounterCard color={color} currentPartie={currentPartie} totalPartieCourante={totalPartieCourante}
