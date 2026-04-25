@@ -6,6 +6,14 @@ import {
   updateProProjectRecord,
   deleteProProjectRecord,
 } from "./services/proProjectsStore";
+import {
+  attachClientInfoToProject,
+  buildClientInfo,
+  getClientDraftFromProject,
+  getClientValidationErrors,
+  isValidOptionalClientEmail,
+  updateClientInfoRecord,
+} from "./services/clientStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -2739,12 +2747,6 @@ const queueProjectCreation = (project, actionAfterCreate = null) => {
     navigateToPatronEditor(project);
   }
 };
-const isValidOptionalEmail = (value) => {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) return true;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed);
-};
-
 const resetClientModalState = () => {
   setShowClientModal(false);
   setPendingProject(null);
@@ -2758,25 +2760,21 @@ const resetClientModalState = () => {
 };
 
 const confirmClientProjectCreation = () => {
-  const trimmedClientName = clientName.trim();
-  const trimmedClientEmail = clientEmail.trim();
+  const clientInfo = buildClientInfo({ client: clientName, email: clientEmail });
+  const validation = getClientValidationErrors(clientInfo);
 
-  if (!trimmedClientName) {
-    setClientError("Le nom du client est obligatoire.");
+  if (validation.client) {
+    setClientError(validation.client);
     return;
   }
 
-  if (!isValidOptionalEmail(trimmedClientEmail)) {
-    setClientEmailError("Le courriel n’est pas valide.");
+  if (validation.email) {
+    setClientEmailError(validation.email);
     return;
   }
 
   if (clientModalMode === "edit" && editingClientProjectId != null) {
-    updateProProject(editingClientProjectId, {
-      client: trimmedClientName,
-      email: trimmedClientEmail,
-    });
-
+    updateClientInfo(editingClientProjectId, clientInfo);
     resetClientModalState();
     return;
   }
@@ -2791,12 +2789,10 @@ const confirmClientProjectCreation = () => {
     Number(pendingProject.id) || 0
   );
 
-  const finalProject = {
-    ...pendingProject,
-    id: safeProjectId,
-    client: trimmedClientName,
-    email: trimmedClientEmail,
-  };
+  const finalProject = attachClientInfoToProject(
+    { ...pendingProject, id: safeProjectId },
+    clientInfo
+  );
 
   createProProject(setDatabase, saveToDatabase, finalProject);
 
@@ -2987,15 +2983,21 @@ const updateProProject = (projectId, updates) => {
 updateProProjectRecord(setDatabase, saveToDatabase, projectId, updates);
 setCurrentProject(prev => (prev && prev.id === projectId ? { ...prev, ...updates } : prev));
 };
+const updateClientInfo = (projectId, clientInfo) => {
+updateClientInfoRecord(setDatabase, saveToDatabase, projectId, clientInfo);
+setCurrentProject(prev => (prev && prev.id === projectId ? { ...prev, ...clientInfo } : prev));
+};
 const openClientEditor = (project) => {
   if (!project) return;
+  const clientDraft = getClientDraftFromProject(project);
   setClientModalMode("edit");
   setEditingClientProjectId(project.id);
   setPendingProject(null);
   setPendingProjectAction(null);
-  setClientName(project.client || "");
-  setClientEmail(project.email || "");
+  setClientName(clientDraft.client);
+  setClientEmail(clientDraft.email);
   setClientError("");
+  setClientEmailError("");
   setShowClientModal(true);
 };
 const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "personal") => {
@@ -3706,7 +3708,7 @@ mode="personal"
       onChange={(e) => { setClientEmail(e.target.value); if (clientEmailError) setClientEmailError(""); }}
       onBlur={() => {
         const trimmed = clientEmail.trim();
-        if (trimmed && !isValidOptionalEmail(trimmed)) setClientEmailError("Le courriel n’est pas valide.");
+        if (trimmed && !isValidOptionalClientEmail(trimmed)) setClientEmailError("Le courriel n’est pas valide.");
       }}
       placeholder="client@email.com"
       inputMode="email"
