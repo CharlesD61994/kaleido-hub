@@ -2475,6 +2475,7 @@ export default function KaleidoHub() {
   const [clientError, setClientError] = useState("");
   const [clientModalMode, setClientModalMode] = useState("create");
   const [editingClientProjectId, setEditingClientProjectId] = useState(null);
+  const clientNameInputRef = useRef(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [exportData, setExportData] = useState('');
   const [showExportData, setShowExportData] = useState(false);
@@ -2498,6 +2499,16 @@ export default function KaleidoHub() {
   const [editingPdfPatron, setEditingPdfPatron] = useState(null);
   const databaseRef = useRef(database);
   const edgeSwipeHandlersRef = useRef({ start: null, move: null, end: null });
+
+  useEffect(() => {
+    if (!showClientModal) return;
+    const timer = setTimeout(() => {
+      clientNameInputRef.current?.focus();
+      clientNameInputRef.current?.select?.();
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [showClientModal, clientModalMode]);
+
   // Projets selon le mode actif
 
   useEffect(() => {
@@ -3507,46 +3518,180 @@ mode="personal"
 <div
   data-kaleido-modal-backdrop="true"
   onClick={cancelClientProjectCreation}
-  style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+  style={{
+    position: "fixed",
+    inset: 0,
+    zIndex: 300,
+    background: "rgba(0,0,0,0.80)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px",
+    boxSizing: "border-box"
+  }}
 >
   <div
     data-kaleido-modal-card="true"
     onClick={e => e.stopPropagation()}
-    style={{ background: "#1A1A2E", borderRadius: 18, padding: 24, width: "100%", maxWidth: 360, boxSizing: "border-box", boxShadow: "0 18px 50px rgba(0,0,0,0.45)" }}
+    style={{
+      background: "#1A1A2E",
+      borderRadius: 22,
+      padding: "26px 24px 24px",
+      width: "100%",
+      maxWidth: 380,
+      boxSizing: "border-box",
+      border: "1px solid rgba(167,139,250,0.16)",
+      boxShadow: "0 22px 70px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.06)"
+    }}
   >
-    <h3 style={{ color: "#F1F0EE", fontFamily: "'Syne', sans-serif", fontSize: 20, margin: "0 0 6px" }}>{clientModalMode === "edit" ? "Modifier la fiche client" : "Fiche client"}</h3>
-    <p style={{ color: "#8B8A9A", fontSize: 13, margin: "0 0 18px", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.35 }}>{clientModalMode === "edit" ? "Mets à jour les informations du client associé à ce projet." : "Associe ce projet professionnel à un client."}</p>
+    <h3
+      style={{
+        color: "#F1F0EE",
+        fontFamily: "'Syne', sans-serif",
+        fontSize: 24,
+        lineHeight: 1.08,
+        fontWeight: 700,
+        letterSpacing: "-0.02em",
+        margin: "0 0 10px"
+      }}
+    >
+      {clientModalMode === "edit" ? "Modifier la fiche client" : "Fiche client"}
+    </h3>
 
-    <label style={{ display: "block", color: "#B8B6C8", fontSize: 12, marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>Nom du client</label>
+    <p
+      style={{
+        color: "#A8A6B8",
+        fontSize: 15,
+        margin: "0 0 24px",
+        fontFamily: "'DM Sans', sans-serif",
+        lineHeight: 1.42
+      }}
+    >
+      {clientModalMode === "edit" ? "Mets à jour les informations du client associé à ce projet." : "Associe ce projet professionnel à un client."}
+    </p>
+
+    <label
+      style={{
+        display: "block",
+        color: "#C9C6D8",
+        fontSize: 15,
+        lineHeight: 1.2,
+        marginBottom: 8,
+        fontFamily: "'DM Sans', sans-serif",
+        fontWeight: 500
+      }}
+    >
+      Nom du client
+    </label>
     <input
+      ref={clientNameInputRef}
       value={clientName}
       onChange={(e) => { setClientName(e.target.value); if (clientError) setClientError(""); }}
       placeholder="Ex. Marie Tremblay"
-      style={{ width: "100%", padding: "12px 14px", marginBottom: clientError ? 6 : 12, borderRadius: 12, border: clientError ? "1px solid #F87171" : "1px solid #33334A", background: "#0D0D1A", color: "#F1F0EE", fontSize: 15, outline: "none", boxSizing: "border-box" }}
+      style={{
+        width: "100%",
+        minHeight: 56,
+        padding: "14px 16px",
+        marginBottom: clientError ? 8 : 18,
+        borderRadius: 15,
+        border: clientError ? "1.5px solid #F87171" : "1.5px solid #3A3852",
+        background: "#0D0D1A",
+        color: "#F1F0EE",
+        fontSize: 18,
+        fontFamily: "'DM Sans', sans-serif",
+        fontWeight: 650,
+        outline: "none",
+        boxSizing: "border-box",
+        boxShadow: clientError ? "0 0 0 3px rgba(248,113,113,0.12)" : "inset 0 1px 0 rgba(255,255,255,0.03)"
+      }}
     />
-    {clientError && <div style={{ color: "#F87171", fontSize: 12, marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>{clientError}</div>}
+    {clientError && (
+      <div
+        style={{
+          color: "#F87171",
+          fontSize: 13,
+          marginBottom: 16,
+          fontFamily: "'DM Sans', sans-serif",
+          lineHeight: 1.35,
+          fontWeight: 600
+        }}
+      >
+        {clientError}
+      </div>
+    )}
 
-    <label style={{ display: "block", color: "#B8B6C8", fontSize: 12, marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>Courriel</label>
+    <label
+      style={{
+        display: "block",
+        color: "#C9C6D8",
+        fontSize: 15,
+        lineHeight: 1.2,
+        marginBottom: 8,
+        fontFamily: "'DM Sans', sans-serif",
+        fontWeight: 500
+      }}
+    >
+      Courriel
+    </label>
     <input
       value={clientEmail}
       onChange={(e) => setClientEmail(e.target.value)}
       placeholder="client@email.com"
       inputMode="email"
       autoCapitalize="none"
-      style={{ width: "100%", padding: "12px 14px", marginBottom: 18, borderRadius: 12, border: "1px solid #33334A", background: "#0D0D1A", color: "#F1F0EE", fontSize: 15, outline: "none", boxSizing: "border-box" }}
+      autoCorrect="off"
+      style={{
+        width: "100%",
+        minHeight: 56,
+        padding: "14px 16px",
+        marginBottom: 24,
+        borderRadius: 15,
+        border: "1.5px solid #3A3852",
+        background: "#0D0D1A",
+        color: "#F1F0EE",
+        fontSize: 18,
+        fontFamily: "'DM Sans', sans-serif",
+        fontWeight: 650,
+        outline: "none",
+        boxSizing: "border-box",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)"
+      }}
     />
 
-    <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", flexWrap: "wrap" }}>
       <button
         onClick={cancelClientProjectCreation}
-        style={{ padding: "12px 18px", minHeight: 44, borderRadius: 12, border: "1px solid #333", background: "transparent", color: "#999", cursor: "pointer", fontSize: 15 }}
+        style={{
+          padding: "13px 20px",
+          minHeight: 50,
+          borderRadius: 15,
+          border: "1.5px solid #343148",
+          background: "rgba(13,13,26,0.35)",
+          color: "#A8A6B8",
+          cursor: "pointer",
+          fontSize: 16,
+          fontFamily: "'DM Sans', sans-serif",
+          fontWeight: 700
+        }}
       >
         Annuler
       </button>
       <button
         onClick={confirmClientProjectCreation}
         disabled={!clientName.trim()}
-        style={{ padding: "12px 18px", minHeight: 44, borderRadius: 12, border: "none", background: clientName.trim() ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "#33334A", color: clientName.trim() ? "#fff" : "#777", cursor: clientName.trim() ? "pointer" : "not-allowed", fontWeight: 700, fontSize: 15 }}
+        style={{
+          padding: "13px 22px",
+          minHeight: 50,
+          borderRadius: 15,
+          border: "none",
+          background: clientName.trim() ? "linear-gradient(135deg, #7C3AED, #DB2777)" : "#33334A",
+          color: clientName.trim() ? "#fff" : "#777",
+          cursor: clientName.trim() ? "pointer" : "not-allowed",
+          fontWeight: 800,
+          fontSize: 16,
+          fontFamily: "'DM Sans', sans-serif",
+          boxShadow: clientName.trim() ? "0 12px 28px rgba(219,39,119,0.26)" : "none"
+        }}
       >
         {clientModalMode === "edit" ? "Enregistrer" : "Créer"}
       </button>
