@@ -796,6 +796,18 @@ const lastDist = useRef(null);
 const lastScale = useRef(1);
 const lastPos = useRef({ x: 0, y: 0 });
 const CROP_SIZE = 260;
+
+useEffect(() => {
+  let cancelled = false;
+  const imageId = existingImage?.imageId;
+  if (!imgSrc && imageId) {
+    loadImage(imageId).then((data) => {
+      if (!cancelled && data) setImgSrc(data);
+    });
+  }
+  return () => { cancelled = true; };
+}, [existingImage?.imageId]);
+
 const handleFile = (e) => {
 const file = e.target.files[0];
 if (!file) return;
@@ -2903,7 +2915,11 @@ const persistProjectImageToIndexedDB = async (projectId, imgData, scope = "perso
   const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
   if (!imagePayload) return;
   await saveImage(imageId, imagePayload);
-  const imageRef = { imageId, preview: imgData?.preview || imagePayload };
+  const imageRef = {
+    imageId,
+    pos: imgData?.pos || { x: 0, y: 0 },
+    scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
+  };
   if (scope === "pro") {
     updateProProject(projectId, { image: imageRef });
   } else {
@@ -3278,7 +3294,13 @@ if (photoTarget.context === 'project') {
   const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
   if (imagePayload) {
     await saveImage(imageId, imagePayload);
-    updatePatron(photoTarget.id, { image: { imageId, preview: imgData?.preview || imagePayload } });
+    updatePatron(photoTarget.id, {
+      image: {
+        imageId,
+        pos: imgData?.pos || { x: 0, y: 0 },
+        scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
+      }
+    });
   }
 }
 setPhotoTarget(null);
@@ -4327,7 +4349,21 @@ setShowLibraryImportModal(false);
 <PhotoCropModal
 existingImage={(database.patrons||[]).find(p => p.id === photoTarget.id)?.image}
 onClose={() => setPhotoTarget(null)}
-onConfirm={(imgData) => { updatePatron(photoTarget.id, { image: imgData }); setPhotoTarget(null); }}
+onConfirm={async (imgData) => {
+const imageId = `img_patron_${photoTarget.id}_${Date.now()}`;
+const imagePayload = imgData?.preview || imgData?.src || (typeof imgData === "string" ? imgData : null);
+if (imagePayload) {
+  await saveImage(imageId, imagePayload);
+  updatePatron(photoTarget.id, {
+    image: {
+      imageId,
+      pos: imgData?.pos || { x: 0, y: 0 },
+      scale: typeof imgData?.scale === "number" ? imgData.scale : 1,
+    }
+  });
+}
+setPhotoTarget(null);
+}}
 />
 )}
 {/* Modale édition patron PDF — dans KaleidoHub pour accès direct à database */}
