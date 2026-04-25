@@ -333,3 +333,4 @@ export default function ClientPage({ project, onBack, onEditClient }) {
     </div>
   );
 }
+
