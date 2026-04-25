@@ -1,0 +1,43 @@
+const asArray = (value) => (Array.isArray(value) ? value : []);
+
+export const getProProjects = (database) => asArray(database?.projectsPro);
+
+export const withCreatedProProject = (database, project) => {
+  const safeDb = database && typeof database === "object" ? database : {};
+  const safeProject = project && typeof project === "object" ? project : {};
+  const projectId = Number(safeProject.id) || Date.now();
+  const finalProject = { ...safeProject, id: projectId };
+
+  return {
+    ...safeDb,
+    projectsPro: [...getProProjects(safeDb), finalProject],
+    settings: {
+      ...(safeDb.settings || {}),
+      lastProjectId: Math.max(Number(safeDb.settings?.lastProjectId) || 0, projectId),
+    },
+  };
+};
+
+export const withUpdatedProProject = (database, projectId, updates = {}) => {
+  const safeDb = database && typeof database === "object" ? database : {};
+
+  return {
+    ...safeDb,
+    projectsPro: getProProjects(safeDb).map((project) =>
+      project.id === projectId ? { ...project, ...updates } : project
+    ),
+  };
+};
+
+export const withDeletedProProject = (database, projectId) => {
+  const safeDb = database && typeof database === "object" ? database : {};
+
+  return {
+    ...safeDb,
+    projectsPro: getProProjects(safeDb).filter((project) => project.id !== projectId),
+  };
+};
+
+export const findProProject = (database, projectId) => {
+  return getProProjects(database).find((project) => project.id === projectId) || null;
+};
