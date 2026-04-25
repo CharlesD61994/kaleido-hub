@@ -2122,7 +2122,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
         padding: "44px 20px 0"
       }}>
         {/* Header identique au patron custom : retour + titre + timer */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, minHeight: 70 }}>
           <button
             data-kaleido-back-button="true"
             onClick={handleBack}
@@ -2144,7 +2144,7 @@ function PdfViewerView({ project, onNavigateHub, onSaveProgress, onEditClient })
             ←
           </button>
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <h1 style={{
               color: "#F1F0EE",
               margin: 0,
