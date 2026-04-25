@@ -1,68 +1,37 @@
-const asArray = (value) => (Array.isArray(value) ? value : []);
+import { updateProProjectRecord } from "./proProjectsStore";
 
-const clampProgress = (value) => Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+export const buildClientInfo = ({ client = "", email = "" } = {}) => ({
+  client: String(client || "").trim(),
+  email: String(email || "").trim(),
+});
 
-export const computeProgress = (project) => {
-  if (!project || typeof project !== "object") return 0;
-
-  if (typeof project.rang === "number" && typeof project.total === "number" && project.total > 0) {
-    return clampProgress((project.rang / project.total) * 100);
-  }
-
-  if (typeof project.progress === "number") {
-    return clampProgress(project.progress);
-  }
-
-  return 0;
+export const isValidOptionalClientEmail = (value) => {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed);
 };
 
-const getProjectKey = (type) => (type === "pro" ? "projectsPro" : "projectsPersonal");
+export const getClientValidationErrors = (clientInfo = {}) => {
+  const info = buildClientInfo(clientInfo);
 
-const normalizeProgressData = (data = {}) => {
-  const next = { ...(data && typeof data === "object" ? data : {}) };
-
-  if (next.rang != null) {
-    const rang = Number(next.rang);
-    if (Number.isFinite(rang)) next.rang = Math.max(0, Math.round(rang));
-  }
-
-  if (next.total != null) {
-    const total = Number(next.total);
-    if (Number.isFinite(total)) next.total = Math.max(0, Math.round(total));
-  }
-
-  if (next.progress != null) {
-    next.progress = clampProgress(next.progress);
-  }
-
-  if (next.elapsedTime != null) {
-    const elapsedTime = Number(next.elapsedTime);
-    if (Number.isFinite(elapsedTime)) next.elapsedTime = Math.max(0, Math.round(elapsedTime));
-  }
-
-  return next;
+  return {
+    client: info.client ? "" : "Le nom du client est obligatoire.",
+    email: isValidOptionalClientEmail(info.email) ? "" : "Le courriel n’est pas valide.",
+  };
 };
 
-export const updateProjectProgress = (
-  setDatabase,
-  saveDatabase,
-  { type = "personal", projectId, data = {} } = {}
-) => {
-  const key = getProjectKey(type);
-  const updates = normalizeProgressData(data);
+export const getClientDraftFromProject = (project = {}) => ({
+  client: project?.client || "",
+  email: project?.email || "",
+});
 
-  setDatabase((prev) => {
-    const nextDb = {
-      ...prev,
-      [key]: asArray(prev?.[key]).map((project) =>
-        String(project.id) === String(projectId) ? { ...project, ...updates } : project
-      ),
-    };
+export const attachClientInfoToProject = (project = {}, clientInfo = {}) => ({
+  ...(project && typeof project === "object" ? project : {}),
+  ...buildClientInfo(clientInfo),
+});
 
-    saveDatabase(nextDb);
-    return nextDb;
-  });
-
+export const updateClientInfoRecord = (setDatabase, saveDatabase, projectId, clientInfo = {}) => {
+  const updates = buildClientInfo(clientInfo);
+  updateProProjectRecord(setDatabase, saveDatabase, projectId, updates);
   return updates;
 };
-
