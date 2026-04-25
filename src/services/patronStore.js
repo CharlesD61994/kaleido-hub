@@ -174,6 +174,47 @@ export const deletePatronRecord = (setDatabase, saveDatabase, patronId) => {
   });
 };
 
+export const updatePatronDeep = (setDatabase, saveDatabase, patronId, updater) => {
+  if (typeof updater !== "function") return null;
+
+  let persistedPatron = null;
+
+  setDatabase((prev) => {
+    const safeDb = asDatabase(prev);
+
+    const updatedPatrons = getPatrons(safeDb).map((patron) => {
+      if (patron.id !== patronId) return patron;
+
+      const updated = updater(patron);
+      if (!updated || typeof updated !== "object") return patron;
+
+      persistedPatron = {
+        ...patron,
+        ...updated,
+        id: patron.id,
+      };
+
+      return persistedPatron;
+    });
+
+    if (!persistedPatron) return safeDb;
+
+    const syncProject = (project) => syncLinkedProjectFromPatron(project, patronId, persistedPatron);
+
+    const nextDb = {
+      ...safeDb,
+      patrons: updatedPatrons,
+      projectsPersonal: asArray(safeDb.projectsPersonal).map(syncProject),
+      projectsPro: asArray(safeDb.projectsPro).map(syncProject),
+    };
+
+    saveDatabase(nextDb);
+    return nextDb;
+  });
+
+  return persistedPatron;
+};
+
 export const loadPatronDraft = ({ sourceId, mode } = {}) => {
   const payload = readStorageJSON(PATRON_BACKUP_KEY);
   if (!payload || typeof payload !== "object") return null;
