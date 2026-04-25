@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import AppPro from "./AppPro";
+import ClientPage from "./ClientPage";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -2512,70 +2513,6 @@ function EditPdfPatronModal({ patron, onClose, onSave }) {
     </div>
   );
 }
-function ClientPageView({ project, onBack, onEditClient }) {
-  const progress = computeProgress(project);
-  const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
-  const projectTypeLabel = project?.projectType === "pdf" ? "Patron PDF" : "Patron custom";
-  const statusLabel = project?.status === "termine" ? "Terminé" : "En cours";
-
-  return (
-    <div style={{ background: "#0D0D1A", minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", maxWidth: 430, margin: "0 auto", color: "#F1F0EE", position: "relative", overflow: "hidden" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap'); ${GLOBAL_MOTION_CSS} * { -webkit-tap-highlight-color: transparent; } input, textarea, select { font-size: 16px !important; }`}</style>
-      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 20% 10%, rgba(124,58,237,0.24), transparent 34%), radial-gradient(circle at 90% 0%, rgba(236,72,153,0.16), transparent 28%), #0D0D1A" }} />
-      <div style={{ position: "relative", zIndex: 2, padding: "44px 20px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-          <button data-kaleido-back-button="true" onClick={onBack} style={{ background: "#1E1E32", border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", color: "#A78BFA", fontSize: 16, cursor: "pointer", flexShrink: 0 }}>←</button>
-          <div style={{ minWidth: 0 }}>
-            <h1 style={{ color: "#F1F0EE", margin: 0, fontSize: 24, lineHeight: 1.05, fontWeight: 800, fontFamily: "'Syne', sans-serif", letterSpacing: "-0.02em" }}>Fiche client</h1>
-            <div style={{ color: "#A78BFA", fontSize: 11, fontFamily: "monospace", marginTop: 3, letterSpacing: 0.4 }}>{project?.name || "Projet"}</div>
-          </div>
-        </div>
-
-        <section style={{ background: "linear-gradient(135deg, rgba(30,30,50,0.98), rgba(26,26,46,0.96))", border: "1px solid rgba(167,139,250,0.18)", borderRadius: 22, padding: 18, boxShadow: "0 20px 60px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.06)", marginBottom: 14 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 42, height: 42, borderRadius: 14, background: `linear-gradient(135deg, ${color.bg}, ${color.light})`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 10px 28px ${color.bg}55`, flexShrink: 0 }}>👤</div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ color: "#F1F0EE", fontSize: 19, fontWeight: 800, fontFamily: "'Syne', sans-serif", lineHeight: 1.08, overflowWrap: "anywhere" }}>{project?.client || "Client sans nom"}</div>
-                  <div style={{ color: "#A8A6B8", fontSize: 13, marginTop: 4, overflowWrap: "anywhere" }}>{project?.email || "Aucun courriel"}</div>
-                </div>
-              </div>
-            </div>
-            <button onClick={() => onEditClient(project)} style={{ border: "none", borderRadius: 12, background: "rgba(124,58,237,0.20)", color: "#E9D5FF", padding: "10px 13px", fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>Modifier</button>
-          </div>
-        </section>
-
-        <section style={{ background: "rgba(17,17,40,0.92)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 16, marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 10 }}>
-            <div>
-              <div style={{ color: "#F1F0EE", fontSize: 15, fontWeight: 800 }}>Suivi du projet</div>
-              <div style={{ color: "#6B6A7A", fontSize: 12, marginTop: 2 }}>{projectTypeLabel} • {statusLabel}</div>
-            </div>
-            <div style={{ color: color.light, fontSize: 15, fontWeight: 800, fontFamily: "monospace" }}>{progress}%</div>
-          </div>
-          <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
-            <div style={{ width: `${progress}%`, height: "100%", borderRadius: 999, background: `linear-gradient(90deg, ${color.bg}, ${color.light})`, transition: "width 260ms cubic-bezier(0.22, 1, 0.36, 1)" }} />
-          </div>
-        </section>
-
-        <section style={{ background: "rgba(17,17,40,0.92)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-            <div>
-              <div style={{ color: "#F1F0EE", fontSize: 15, fontWeight: 800 }}>Chat client</div>
-              <div style={{ color: "#6B6A7A", fontSize: 12, marginTop: 2 }}>Espace réservé pour la prochaine étape</div>
-            </div>
-            <div style={{ background: "rgba(167,139,250,0.12)", color: "#C4B5FD", borderRadius: 999, padding: "6px 10px", fontSize: 11, fontWeight: 800 }}>Bientôt</div>
-          </div>
-          <div style={{ borderRadius: 16, background: "rgba(13,13,26,0.72)", border: "1px dashed rgba(167,139,250,0.22)", padding: "22px 16px", textAlign: "center", color: "#A8A6B8", fontSize: 13, lineHeight: 1.45 }}>
-            Le chat sera ajouté ici : historique des messages, zone d’écriture et suivi client.
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
 export default function KaleidoHub() {
   const [currentView, setCurrentView] = useState(VIEWS.HUB);
   const [prevView, setPrevView] = useState(null);
@@ -4584,7 +4521,7 @@ onOpenClientPage={() => navigateToClientPage(currentProject)}
 
 {currentView === VIEWS.CLIENT_PAGE && (
 <div data-kaleido-screen="true" style={{ ...viewWrapStyle(viewTransition), ...activeScreenInteractiveStyle }}>
-<ClientPageView
+<ClientPage
 project={currentProject}
 onBack={navigateBackFromClientPage}
 onEditClient={openClientEditor}
