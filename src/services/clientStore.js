@@ -82,3 +82,4 @@ export const deleteProProjectRecord = (setDatabase, saveDatabase, projectId) => 
 export const findProProject = (database, projectId) => {
   return getProProjects(database).find((project) => String(project.id) === String(projectId)) || null;
 };
+
