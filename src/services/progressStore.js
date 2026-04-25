@@ -65,3 +65,4 @@ export const updateProjectProgress = (
 
   return updates;
 };
+
