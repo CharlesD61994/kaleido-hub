@@ -14,6 +14,7 @@ import {
   isValidOptionalClientEmail,
   updateClientInfoRecord,
 } from "./services/clientStore";
+import { updateProjectProgress } from "./services/progressStore";
 const VIEWS = { HUB: 'hub', LIBRARY: 'library', PATRON_EDITOR: 'patron_editor', ROW_COUNTER: 'row_counter', PDF_VIEWER: 'pdf_viewer', CLIENT_PAGE: 'client_page' };
 const KALEIDOSCOPE_COLORS = [
 { bg: "#7C3AED", light: "#A78BFA" }, // violet
@@ -2702,6 +2703,13 @@ setDatabase(prev => {
   return nextDb;
 });
 };
+const saveProjectProgress = (projectId, progressData) => {
+updateProjectProgress(setDatabase, saveToDatabase, {
+  type: mode === 'pro' ? 'pro' : 'personal',
+  projectId,
+  data: progressData,
+});
+};
 const deleteProjectFromDB = (projectId) => {
 setDatabase(prev => {
   const prevProjectsKey = mode === 'pro' ? 'projectsPro' : 'projectsPersonal';
@@ -4487,7 +4495,7 @@ onSave={(updates) => { updatePatron(editingPdfPatron.id, updates); setEditingPdf
 project={currentProject}
 onNavigateHub={navigateToHub}
 onNavigateEditor={navigateToPatronEditor}
-onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })}
+onSaveProgress={(rang, total, elapsed) => saveProjectProgress(currentProject.id, { rang, total, elapsedTime: elapsed })}
 onOpenClientPage={() => navigateToClientPage(currentProject)}
 />
 </div>
@@ -4498,7 +4506,7 @@ onOpenClientPage={() => navigateToClientPage(currentProject)}
 <PdfViewerView
 project={currentProject}
 onNavigateHub={navigateToHub}
-onSaveProgress={(rang, total, elapsed) => updateProject(currentProject.id, { rang, total, elapsedTime: elapsed })}
+onSaveProgress={(rang, total, elapsed) => saveProjectProgress(currentProject.id, { rang, total, elapsedTime: elapsed })}
 onEditClient={openClientEditor}
 onOpenClientPage={() => navigateToClientPage(currentProject)}
 />
