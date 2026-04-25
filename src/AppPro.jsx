@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { loadImage } from "./services/mediaStore";
+import { loadImage, getCachedImage } from "./services/mediaStore";
 
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
@@ -11,6 +11,18 @@ const KALEIDOSCOPE_COLORS = [
   { bg: "#3B82F6", light: "#93C5FD" },
   { bg: "#EF4444", light: "#FCA5A5" },
 ];
+
+const getProjectDirectImage = (project) => (
+  project?.image?.preview
+  || project?.image?.src
+  || (typeof project?.image === "string" ? project.image : null)
+);
+
+const getProjectCachedImage = (project) => {
+  const directImage = getProjectDirectImage(project);
+  if (directImage) return directImage;
+  return getCachedImage(project?.image?.imageId) || null;
+};
 
 function computeProgress(project) {
   if (!project || typeof project !== "object") return 0;
@@ -561,41 +573,31 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   );
 }
 
-function ProBubble({ project, onOpen, onMenuOpen }) {
+const ProBubble = React.memo(function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(96px, 28vw, 110px)";
-  const initialDirectImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
-  const initialImageId = project?.image?.imageId;
-  const [resolvedImage, setResolvedImage] = useState(initialDirectImage || null);
-  const [isImageLoading, setIsImageLoading] = useState(!initialDirectImage && !!initialImageId);
+  const [resolvedImage, setResolvedImage] = useState(() => getProjectCachedImage(project));
 
   useEffect(() => {
     let cancelled = false;
-    const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+    const directImage = getProjectDirectImage(project);
     if (directImage) {
       setResolvedImage(directImage);
-      setIsImageLoading(false);
       return () => { cancelled = true; };
     }
     const imageId = project?.image?.imageId;
-    if (!imageId) {
-      setResolvedImage(null);
-      setIsImageLoading(false);
+    const cachedImage = getCachedImage(imageId);
+    if (cachedImage) {
+      setResolvedImage(cachedImage);
       return () => { cancelled = true; };
     }
-    setResolvedImage(null);
-    setIsImageLoading(true);
+    if (!imageId) {
+      setResolvedImage(null);
+      return () => { cancelled = true; };
+    }
     loadImage(imageId).then((data) => {
-      if (!cancelled) {
-        setResolvedImage(data || null);
-        setIsImageLoading(false);
-      }
-    }).catch(() => {
-      if (!cancelled) {
-        setResolvedImage(null);
-        setIsImageLoading(false);
-      }
+      if (!cancelled) setResolvedImage(data || null);
     });
     return () => { cancelled = true; };
   }, [project?.image]);
@@ -676,11 +678,9 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
                 }}
               />
             ) : (
-              isImageLoading ? null : (
-                <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <YarnGlyph />
-                </span>
-              )
+              <span style={{ color: "#F8F7FF", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <YarnGlyph />
+              </span>
             )}
           </div>
 
@@ -796,7 +796,7 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
       </button>
     </div>
   );
-}
+});
 
 export default function AppPro({
   projectsPro = [],
