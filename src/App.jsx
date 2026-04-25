@@ -20,6 +20,7 @@ import { loadDatabase, saveDatabase, importDatabase } from "./services/databaseS
 import {
   addPatronRecord,
   updatePatronRecord,
+  updatePatronDeep,
   deletePatronRecord,
   loadPatronDraft,
   savePatronDraft,
@@ -2630,6 +2631,10 @@ const updatePatron = (patronId, updates) => {
   return updatePatronRecord(setDatabase, saveDatabase, patronId, updates);
 };
 
+const updatePatronDeepRecord = (patronId, updater) => {
+  return updatePatronDeep(setDatabase, saveDatabase, patronId, updater);
+};
+
 const deletePatronFromDB = (patronId) => {
   return deletePatronRecord(setDatabase, saveDatabase, patronId);
 };
@@ -3626,7 +3631,9 @@ return;
   clearPatronDraft({ sourceId: source?.id ?? null, mode: draftMode });
 
   if (isPatronMode) {
-    updatePatron(currentPatron.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized });
+    const persistedUpdates = { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: totalRangsNormalized };
+    updatePatronDeepRecord(currentPatron.id, (existingPatron) => ({ ...existingPatron, ...persistedUpdates }));
+    setCurrentPatron(prevPatron => prevPatron && prevPatron.id === currentPatron.id ? { ...prevPatron, ...persistedUpdates } : prevPatron);
     navigateToLibrary();
   } else {
     updateProject(currentProject.id, { name: normalizedPatron.nom, laine: normalizedPatron.laine, type: normalizedPatron.technique, outil: normalizedPatron.outil, notes: normalizedPatron.notes, parties: normalizedPatron.parties, total: Math.max(totalRangsNormalized, currentProject.total || 1) });
@@ -3777,6 +3784,35 @@ const applyPatronUpdate = (label, updater) => {
       }
 
       backupPatronState(label, prev);
+
+      if (isPatronMode && currentPatron?.id != null) {
+        const totalRangsNormalized = normalizedNext.parties.reduce(
+          (s, p) => s + safeArray(p.rangs).filter(r => !r.isNote).length,
+          0
+        );
+
+        const persistedUpdates = {
+          name: normalizedNext.nom,
+          laine: normalizedNext.laine,
+          type: normalizedNext.technique,
+          outil: normalizedNext.outil,
+          notes: normalizedNext.notes,
+          parties: normalizedNext.parties,
+          total: totalRangsNormalized,
+        };
+
+        updatePatronDeepRecord(currentPatron.id, (existingPatron) => ({
+          ...existingPatron,
+          ...persistedUpdates,
+        }));
+
+        setCurrentPatron(prevPatron =>
+          prevPatron && prevPatron.id === currentPatron.id
+            ? { ...prevPatron, ...persistedUpdates }
+            : prevPatron
+        );
+      }
+
       debug(`${label}: OK`);
       return normalizedNext;
     } catch (e) {
