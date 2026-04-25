@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import { loadImage } from "./services/mediaStore";
 
 const KALEIDOSCOPE_COLORS = [
   { bg: "#7C3AED", light: "#A78BFA" },
@@ -394,6 +395,17 @@ function PhotoCropModal({ onClose, onConfirm, existingImage }) {
   const lastPos = useRef({ x: 0, y: 0 });
   const CROP_SIZE = 260;
 
+  useEffect(() => {
+    let cancelled = false;
+    const imageId = existingImage?.imageId;
+    if (!imgSrc && imageId) {
+      loadImage(imageId).then((data) => {
+        if (!cancelled && data) setImgSrc(data);
+      });
+    }
+    return () => { cancelled = true; };
+  }, [existingImage?.imageId]);
+
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -553,6 +565,27 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
   const color = KALEIDOSCOPE_COLORS[(project?.colorIdx || 0) % KALEIDOSCOPE_COLORS.length];
   const progress = computeProgress(project);
   const size = "clamp(96px, 28vw, 110px)";
+  const [resolvedImage, setResolvedImage] = useState(
+    project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null)
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    const directImage = project?.image?.preview || project?.image?.src || (typeof project?.image === "string" ? project.image : null);
+    if (directImage) {
+      setResolvedImage(directImage);
+      return () => { cancelled = true; };
+    }
+    const imageId = project?.image?.imageId;
+    if (!imageId) {
+      setResolvedImage(null);
+      return () => { cancelled = true; };
+    }
+    loadImage(imageId).then((data) => {
+      if (!cancelled) setResolvedImage(data || null);
+    });
+    return () => { cancelled = true; };
+  }, [project?.image]);
 
   const handleOpen = () => {
     if (typeof onOpen === "function") onOpen(project);
@@ -616,9 +649,9 @@ function ProBubble({ project, onOpen, onMenuOpen }) {
               zIndex: 1,
             }}
           >
-            {project?.image ? (
+            {resolvedImage ? (
               <img
-                src={project.image?.preview || project.image?.src || project.image}
+                src={resolvedImage}
                 alt={project?.name || "Projet"}
                 loading="lazy"
                 style={{
